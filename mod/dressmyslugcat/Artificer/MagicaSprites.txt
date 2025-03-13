@@ -1,0 +1,28 @@
+{"frames": {
+
+"Braid.png":
+{
+	"frame": {"x":0,"y":0,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20}
+},
+"TailPuff.png":
+{
+	"frame": {"x":20,"y":0,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "MagicaSprites.png",
+	"format": "RGBA8888",
+	"size": {"w":40,"h":20},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:fd69f129bec171256126e19b878f5ed6:8f17e1d852b6dddfe7c42ab60cd1da9a:c59364789cb9ce66804e659bf038f500$"
+}
+}

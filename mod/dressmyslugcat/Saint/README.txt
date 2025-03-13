@@ -1,0 +1,1 @@
+If you use the template I've provided to replicate my style, keep in mind you will have to keep "magica" in the spritesheet's ID to have code related stuff to work properly <3
