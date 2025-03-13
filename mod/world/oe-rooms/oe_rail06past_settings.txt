@@ -1,0 +1,6 @@
+Template: NONE
+Palette: 19
+EffectColorB: 18
+Effects: Darkness-0.7501248-22.92502-120.3948, FireFlies-0.255197-22.13437-43.47813, SunBlock-0.5026607-20-20, DarkenLights-0.3093298-256.9552-44.22917, 
+PlacedObjects: InsectGroup><306.4656><379.447><1122~-368~0~0~FireFly~0.2826087, InsectGroup><1413.692><212.3062><-108~228~0~0~FireFly~0.5, LightFixture><1476.916><-11.8884><RedLight~17.32051~-10~34, LightFixture><5649.361><22.60645><RedLight~17.32051~-10~54, LightFixture><4918.645><679.7619><RedLight~15.18616~-157.2719~14, LightFixture><3602.751><660.9434><RedLight~-58.80551~-149.4459~46, 
+FadePalette: 10, 0.5026608, 0.5026608, 0.5026608, 0.5026608, 0.5026608, 0.5026608

@@ -1,0 +1,10 @@
+Subregion: Recieving Line
+Subregion: Boiler Plate
+Subregion: Ringing Chapel
+Subregion: Untouched Escapades
+
+Room Setting Templates: Railline
+
+overseersMin: 1
+overseersMax: 3
+playerGuideOverseerSpawnChance: 1

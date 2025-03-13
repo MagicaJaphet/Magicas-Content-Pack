@@ -1,0 +1,5 @@
+Grime: 0.6288044
+Palette: 48
+EffectColorA: 2
+EffectColorB: 2
+Effects: ReplaceEffectColorB-0.3015966-0-0-Color-0-0-0, Moth-0.09279865-0-0, Contrast-0.03093289-258.3386-0,

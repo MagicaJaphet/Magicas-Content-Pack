@@ -1,0 +1,11 @@
+Template: NONE
+DangerType: Flood
+CeilingDrips: 0.2061366
+RainIntensity: 1
+Clouds: 0.7061366
+Palette: 19
+EffectColorB: 18
+Effects: Darkness-0.7578577-46.32405-12.88544, FireFlies-0.05413271-49.1698-106.0865, SunBlock-0.5026608-47.03543-62.6875, DarkenLights-0.4021281-330.9073-73.35938, 
+PlacedObjects: LightFixture><324.1749><514.3613><RedLight~319.6903~99.56454~7, 
+AmbientSounds: OMNI><SO_WAT-LilDrips.ogg><455.7836><621.4162><0.3530685><1, OMNI><AM_WIN-StrongWnd2.ogg><639.5923><621.5411><0.3530685><1, OMNI><AM_IND-SuperStructure.ogg><839.4221><619.825><0.3530678><0.7494437, 
+FadePalette: 10, 0.4949276
