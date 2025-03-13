@@ -1,0 +1,3 @@
+[MERGE]
+PlacedObjects: WhiteToken><919.5975><380.8705><-48~-77~-218~233~0~MagicaSaintchatlog~White|Yellow|Red|Rivulet|Artificer|Spear|Gourmand~0~1~0~0~0~1~0,
+[ENDMERGE]
