@@ -1,0 +1,9 @@
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\mod\newest\plugins\MagicasContentPack.dll
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\mod\newest\plugins\MagicasContentPack.pdb
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\obj\Debug\MagicasContentPack.csproj.AssemblyReference.cache
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\obj\Debug\MagicasContentPack.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\obj\Debug\MagicasContentPack.AssemblyInfoInputs.cache
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\obj\Debug\MagicasContentPack.AssemblyInfo.cs
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\obj\Debug\MagicasContentPack.csproj.CoreCompileInputs.cache
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\obj\Debug\MagicasContentPack.dll
+C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\obj\Debug\MagicasContentPack.pdb
