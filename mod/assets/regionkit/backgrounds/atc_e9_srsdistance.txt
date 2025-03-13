@@ -1,0 +1,29 @@
+Parent: AtC_Default_Vanilla
+Type: AboveCloudsView
+
+daySky: atc_skysrs
+atmosphereColor: 444252
+duskAtmosphereColor: a37979
+nightAtmosphereColor: 36517d
+
+cloudsCount: 10
+distantCloudsCount: 11
+overrideYStart: -30
+overrideYEnd: 100
+
+//FP
+DistantBuilding: AtC_FivePebbles, 700, -430, 40, -40
+DistantLightning: AtC_FivePebblesLight, 700, -350, -20, -300
+
+//SRS
+DistantBuilding: atc_structuresrs, -520, -120, 90, 50 : scale|1.7
+DistantLightning: atc_light1, -520, -100, 85, 10 : scale|1.7
+DistantBuilding: atc_spire1, -320, -330, 82, 50 : scale|1.5
+
+//OTHERS
+REMOVE_DistantBuilding: AtC_Structure1, -520, -85, 160, -20
+REMOVE_DistantLightning: AtC_Light1, -520, -119, 160, 55
+REMOVE_DistantBuilding: AtC_Structure2, 88, -37, 350, 0
+REMOVE_DistantLightning: AtC_Light2, 88, -53, 350, 250
+REMOVE_DistantBuilding: AtC_Spire1, -587, -134, 80, -60
+REMOVE_DistantBuilding: AtC_Spire2, -653, -57, 100, 10

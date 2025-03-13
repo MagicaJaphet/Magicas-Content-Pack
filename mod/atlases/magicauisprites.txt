@@ -1,0 +1,20 @@
+{"frames": {
+
+"GuidanceSRS.png":
+{
+	"frame": {"x":0,"y":0,"w":23,"h":23},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":23,"h":23},
+	"sourceSize": {"w":23,"h":23}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "magicauisprites.png",
+	"format": "RGBA8888",
+	"size": {"w":23,"h":23},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:c98babef38bd01f425ab71e287b0e06a:c2ffe6448ccdec687409665bc2dd0899:82120c7c6d6050d140430a016a99eb86$"
+}
+}

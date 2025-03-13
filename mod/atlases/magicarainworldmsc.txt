@@ -1,0 +1,1676 @@
+{"frames": {
+
+"MagicaAquapedeWing1.png":
+{
+	"frame": {"x":99,"y":224,"w":8,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":52},
+	"sourceSize": {"w":8,"h":52}
+},
+"MagicaAquapedeWing2.png":
+{
+	"frame": {"x":27,"y":371,"w":8,"h":49},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":49},
+	"sourceSize": {"w":8,"h":52}
+},
+"MagicaAquapedeWing3.png":
+{
+	"frame": {"x":109,"y":224,"w":8,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":52},
+	"sourceSize": {"w":8,"h":52}
+},
+"MagicaAquapedeWing4.png":
+{
+	"frame": {"x":119,"y":224,"w":8,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":52},
+	"sourceSize": {"w":8,"h":52}
+},
+"MagicaBioSpear1.png":
+{
+	"frame": {"x":236,"y":2,"w":7,"h":53},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":4,"w":7,"h":53},
+	"sourceSize": {"w":14,"h":61}
+},
+"MagicaBioSpear2.png":
+{
+	"frame": {"x":144,"y":51,"w":7,"h":53},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":4,"w":7,"h":53},
+	"sourceSize": {"w":14,"h":61}
+},
+"MagicaBioSpear3.png":
+{
+	"frame": {"x":129,"y":224,"w":6,"h":53},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":4,"w":6,"h":53},
+	"sourceSize": {"w":14,"h":61}
+},
+"MagicaBodyPearl.png":
+{
+	"frame": {"x":112,"y":427,"w":6,"h":6},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":6},
+	"sourceSize": {"w":6,"h":6}
+},
+"MagicaChainFrag.png":
+{
+	"frame": {"x":191,"y":46,"w":8,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":32},
+	"sourceSize": {"w":8,"h":32}
+},
+"MagicaCorruptGrad.png":
+{
+	"frame": {"x":85,"y":435,"w":16,"h":17},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":17},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaEZ0.png":
+{
+	"frame": {"x":233,"y":85,"w":10,"h":14},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":14},
+	"sourceSize": {"w":10,"h":14}
+},
+"MagicaEZ1.png":
+{
+	"frame": {"x":139,"y":214,"w":4,"h":6},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":4,"h":6},
+	"sourceSize": {"w":4,"h":6}
+},
+"MagicaFaceC0.png":
+{
+	"frame": {"x":61,"y":445,"w":12,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":3,"w":12,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC1.png":
+{
+	"frame": {"x":198,"y":429,"w":12,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":3,"w":12,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC2.png":
+{
+	"frame": {"x":234,"y":180,"w":9,"h":10},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":3,"w":9,"h":10},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC3.png":
+{
+	"frame": {"x":140,"y":125,"w":9,"h":9},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":5,"w":9,"h":9},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC4.png":
+{
+	"frame": {"x":234,"y":192,"w":9,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":5,"w":9,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC5.png":
+{
+	"frame": {"x":233,"y":113,"w":10,"h":9},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":7,"w":10,"h":9},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC6.png":
+{
+	"frame": {"x":214,"y":378,"w":9,"h":9},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":9,"h":9},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC7.png":
+{
+	"frame": {"x":203,"y":337,"w":12,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":8,"w":12,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceC8.png":
+{
+	"frame": {"x":159,"y":445,"w":12,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":9,"w":12,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD0.png":
+{
+	"frame": {"x":173,"y":445,"w":12,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":3,"w":12,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD1.png":
+{
+	"frame": {"x":229,"y":338,"w":12,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":4,"w":12,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD2.png":
+{
+	"frame": {"x":140,"y":114,"w":10,"h":9},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":4,"w":10,"h":9},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD3.png":
+{
+	"frame": {"x":152,"y":173,"w":9,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":6,"w":9,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD4.png":
+{
+	"frame": {"x":214,"y":422,"w":9,"h":6},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":6,"w":9,"h":6},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD5.png":
+{
+	"frame": {"x":233,"y":136,"w":10,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":10,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD6.png":
+{
+	"frame": {"x":233,"y":146,"w":10,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":9,"w":10,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD7.png":
+{
+	"frame": {"x":187,"y":445,"w":12,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":9,"w":12,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceD8.png":
+{
+	"frame": {"x":201,"y":445,"w":12,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":9,"w":12,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceE0.png":
+{
+	"frame": {"x":145,"y":352,"w":14,"h":11},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":3,"w":14,"h":11},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceE1.png":
+{
+	"frame": {"x":229,"y":311,"w":14,"h":12},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":3,"w":14,"h":12},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceE2.png":
+{
+	"frame": {"x":177,"y":368,"w":14,"h":15},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":2,"w":14,"h":15},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceE3.png":
+{
+	"frame": {"x":193,"y":110,"w":13,"h":14},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":4,"w":13,"h":14},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceE4.png":
+{
+	"frame": {"x":233,"y":101,"w":10,"h":10},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":5,"w":10,"h":10},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceE5.png":
+{
+	"frame": {"x":232,"y":124,"w":11,"h":10},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":7,"w":11,"h":10},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaFaceE6.png":
+{
+	"frame": {"x":182,"y":409,"w":14,"h":14},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":7,"w":14,"h":14},
+	"sourceSize": {"w":16,"h":21}
+},
+"MagicaFaceE7.png":
+{
+	"frame": {"x":229,"y":325,"w":14,"h":11},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":8,"w":14,"h":11},
+	"sourceSize": {"w":16,"h":19}
+},
+"MagicaFaceE8.png":
+{
+	"frame": {"x":193,"y":368,"w":14,"h":11},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":9,"w":14,"h":11},
+	"sourceSize": {"w":16,"h":20}
+},
+"MagicaFireBugSpear.png":
+{
+	"frame": {"x":137,"y":224,"w":6,"h":51},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":51},
+	"sourceSize": {"w":6,"h":51}
+},
+"MagicaFireBugSpearColor.png":
+{
+	"frame": {"x":120,"y":278,"w":6,"h":32},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":32},
+	"sourceSize": {"w":6,"h":51}
+},
+"MagicaHeadB0.png":
+{
+	"frame": {"x":163,"y":198,"w":22,"h":19},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":3,"w":22,"h":19},
+	"sourceSize": {"w":24,"h":25}
+},
+"MagicaHeadB1.png":
+{
+	"frame": {"x":146,"y":295,"w":22,"h":19},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":3,"w":22,"h":19},
+	"sourceSize": {"w":24,"h":25}
+},
+"MagicaHeadB2.png":
+{
+	"frame": {"x":146,"y":316,"w":22,"h":19},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":3,"w":22,"h":19},
+	"sourceSize": {"w":24,"h":25}
+},
+"MagicaHeadB3.png":
+{
+	"frame": {"x":143,"y":385,"w":22,"h":19},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":3,"w":22,"h":19},
+	"sourceSize": {"w":24,"h":25}
+},
+"MagicaHeadB4.png":
+{
+	"frame": {"x":134,"y":406,"w":22,"h":19},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":3,"w":22,"h":19},
+	"sourceSize": {"w":23,"h":25}
+},
+"MagicaHeadB5.png":
+{
+	"frame": {"x":98,"y":320,"w":20,"h":21},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":20,"h":21},
+	"sourceSize": {"w":24,"h":27}
+},
+"MagicaHeadB6.png":
+{
+	"frame": {"x":112,"y":403,"w":20,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":20,"h":22},
+	"sourceSize": {"w":24,"h":28}
+},
+"MagicaHeadB7.png":
+{
+	"frame": {"x":94,"y":343,"w":19,"h":20},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":19,"h":20},
+	"sourceSize": {"w":25,"h":26}
+},
+"MagicaHeadB8.png":
+{
+	"frame": {"x":159,"y":425,"w":19,"h":18},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":2,"w":19,"h":18},
+	"sourceSize": {"w":25,"h":23}
+},
+"MagicaHeadB9.png":
+{
+	"frame": {"x":120,"y":427,"w":20,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":1,"w":20,"h":22},
+	"sourceSize": {"w":26,"h":24}
+},
+"MagicaHeadB10.png":
+{
+	"frame": {"x":146,"y":270,"w":20,"h":23},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":0,"w":20,"h":23},
+	"sourceSize": {"w":26,"h":24}
+},
+"MagicaHeadB11.png":
+{
+	"frame": {"x":168,"y":268,"w":20,"h":23},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":0,"w":20,"h":23},
+	"sourceSize": {"w":26,"h":25}
+},
+"MagicaHeadB12.png":
+{
+	"frame": {"x":170,"y":293,"w":20,"h":23},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":0,"w":20,"h":23},
+	"sourceSize": {"w":26,"h":26}
+},
+"MagicaHeadB13.png":
+{
+	"frame": {"x":163,"y":173,"w":22,"h":23},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":1,"w":22,"h":23},
+	"sourceSize": {"w":27,"h":27}
+},
+"MagicaHeadB14.png":
+{
+	"frame": {"x":163,"y":219,"w":24,"h":21},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":1,"w":24,"h":21},
+	"sourceSize": {"w":28,"h":25}
+},
+"MagicaHeadB15.png":
+{
+	"frame": {"x":170,"y":318,"w":26,"h":18},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":2,"w":26,"h":18},
+	"sourceSize": {"w":32,"h":23}
+},
+"MagicaHeadB16.png":
+{
+	"frame": {"x":103,"y":365,"w":26,"h":18},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":2,"w":26,"h":18},
+	"sourceSize": {"w":32,"h":23}
+},
+"MagicaHeadB17.png":
+{
+	"frame": {"x":131,"y":365,"w":26,"h":18},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":26,"h":18},
+	"sourceSize": {"w":32,"h":24}
+},
+"MagicaHeadC0.png":
+{
+	"frame": {"x":133,"y":136,"w":16,"h":15},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+	"sourceSize": {"w":16,"h":15}
+},
+"MagicaHeadC1.png":
+{
+	"frame": {"x":128,"y":306,"w":16,"h":15},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+	"sourceSize": {"w":16,"h":15}
+},
+"MagicaHeadC2.png":
+{
+	"frame": {"x":159,"y":368,"w":16,"h":15},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+	"sourceSize": {"w":16,"h":15}
+},
+"MagicaHeadC3.png":
+{
+	"frame": {"x":222,"y":201,"w":16,"h":15},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+	"sourceSize": {"w":16,"h":15}
+},
+"MagicaHeadC4.png":
+{
+	"frame": {"x":220,"y":237,"w":15,"h":15},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
+	"sourceSize": {"w":15,"h":15}
+},
+"MagicaHeadC5.png":
+{
+	"frame": {"x":220,"y":218,"w":14,"h":17},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":14,"h":17},
+	"sourceSize": {"w":14,"h":17}
+},
+"MagicaHeadC6.png":
+{
+	"frame": {"x":103,"y":435,"w":15,"h":17},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":17},
+	"sourceSize": {"w":15,"h":17}
+},
+"MagicaHeadC7.png":
+{
+	"frame": {"x":187,"y":126,"w":15,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":16},
+	"sourceSize": {"w":15,"h":16}
+},
+"MagicaHeadC8.png":
+{
+	"frame": {"x":220,"y":254,"w":15,"h":15},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
+	"sourceSize": {"w":15,"h":15}
+},
+"MagicaHeadC9.png":
+{
+	"frame": {"x":220,"y":271,"w":16,"h":14},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":14},
+	"sourceSize": {"w":16,"h":14}
+},
+"MagicaHeadC10.png":
+{
+	"frame": {"x":204,"y":201,"w":16,"h":14},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":14},
+	"sourceSize": {"w":16,"h":14}
+},
+"MagicaHeadC11.png":
+{
+	"frame": {"x":125,"y":385,"w":16,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16}
+},
+"MagicaHeadC12.png":
+{
+	"frame": {"x":187,"y":197,"w":15,"h":18},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":18},
+	"sourceSize": {"w":15,"h":18}
+},
+"MagicaHeadC13.png":
+{
+	"frame": {"x":180,"y":425,"w":16,"h":18},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":18},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaHeadC14.png":
+{
+	"frame": {"x":103,"y":385,"w":20,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":16},
+	"sourceSize": {"w":20,"h":16}
+},
+"MagicaHeadC15.png":
+{
+	"frame": {"x":158,"y":409,"w":22,"h":14},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":14},
+	"sourceSize": {"w":22,"h":14}
+},
+"MagicaHeadC16.png":
+{
+	"frame": {"x":208,"y":124,"w":22,"h":12},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":12},
+	"sourceSize": {"w":22,"h":12}
+},
+"MagicaHeadC17.png":
+{
+	"frame": {"x":210,"y":186,"w":22,"h":13},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":13},
+	"sourceSize": {"w":22,"h":13}
+},
+"MagicaHornedMask0.png":
+{
+	"frame": {"x":65,"y":158,"w":23,"h":36},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":19,"y":11,"w":23,"h":36},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask1.png":
+{
+	"frame": {"x":58,"y":196,"w":31,"h":36},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":19,"y":12,"w":31,"h":36},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask2.png":
+{
+	"frame": {"x":20,"y":195,"w":36,"h":36},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":10,"w":36,"h":36},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask3.png":
+{
+	"frame": {"x":153,"y":46,"w":36,"h":33},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":13,"y":10,"w":36,"h":33},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask4.png":
+{
+	"frame": {"x":2,"y":422,"w":36,"h":30},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":13,"w":36,"h":30},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask5.png":
+{
+	"frame": {"x":86,"y":136,"w":45,"h":15},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":17,"w":45,"h":15},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask6.png":
+{
+	"frame": {"x":152,"y":110,"w":39,"h":14},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":16,"w":39,"h":14},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask7.png":
+{
+	"frame": {"x":201,"y":91,"w":30,"h":16},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":14,"w":30,"h":16},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaHornedMask8.png":
+{
+	"frame": {"x":208,"y":109,"w":23,"h":13},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":19,"y":13,"w":23,"h":13},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask0.png":
+{
+	"frame": {"x":91,"y":2,"w":58,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":0,"w":58,"h":47},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask1.png":
+{
+	"frame": {"x":17,"y":70,"w":47,"h":44},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":1,"w":47,"h":44},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask2.png":
+{
+	"frame": {"x":194,"y":2,"w":40,"h":41},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":18,"y":2,"w":40,"h":41},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask3.png":
+{
+	"frame": {"x":151,"y":2,"w":41,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":13,"y":0,"w":41,"h":42},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask4.png":
+{
+	"frame": {"x":20,"y":158,"w":43,"h":35},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":13,"y":7,"w":43,"h":35},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask5.png":
+{
+	"frame": {"x":91,"y":51,"w":51,"h":31},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":10,"w":51,"h":31},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask6.png":
+{
+	"frame": {"x":91,"y":84,"w":51,"h":28},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":15,"w":51,"h":28},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask7.png":
+{
+	"frame": {"x":153,"y":81,"w":46,"h":27},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":1,"w":46,"h":27},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaKingMask8.png":
+{
+	"frame": {"x":91,"y":114,"w":47,"h":20},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":9,"w":47,"h":20},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaLizardHead0.3.png":
+{
+	"frame": {"x":98,"y":278,"w":20,"h":40},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":0,"w":20,"h":40},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHead0.4.png":
+{
+	"frame": {"x":61,"y":407,"w":22,"h":36},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":0,"w":22,"h":36},
+	"sourceSize": {"w":28,"h":40}
+},
+"MagicaLizardHead0.5.png":
+{
+	"frame": {"x":66,"y":70,"w":23,"h":44},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":0,"w":23,"h":44},
+	"sourceSize": {"w":34,"h":50}
+},
+"MagicaLizardHead0.6.png":
+{
+	"frame": {"x":47,"y":278,"w":25,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":4,"w":25,"h":42},
+	"sourceSize": {"w":34,"h":50}
+},
+"MagicaLizardHead0.7.png":
+{
+	"frame": {"x":20,"y":233,"w":29,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":4,"w":29,"h":42},
+	"sourceSize": {"w":34,"h":50}
+},
+"MagicaLizardHead1.3.png":
+{
+	"frame": {"x":62,"y":116,"w":22,"h":40},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":0,"w":22,"h":40},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHead1.4.png":
+{
+	"frame": {"x":58,"y":367,"w":22,"h":38},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":0,"w":22,"h":38},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHead1.5.png":
+{
+	"frame": {"x":2,"y":374,"w":23,"h":46},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":0,"w":23,"h":46},
+	"sourceSize": {"w":32,"h":52}
+},
+"MagicaLizardHead1.6.png":
+{
+	"frame": {"x":20,"y":277,"w":25,"h":43},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":3,"w":25,"h":43},
+	"sourceSize": {"w":32,"h":52}
+},
+"MagicaLizardHead1.7.png":
+{
+	"frame": {"x":51,"y":234,"w":26,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":4,"w":26,"h":42},
+	"sourceSize": {"w":32,"h":52}
+},
+"MagicaLizardHead2.3.png":
+{
+	"frame": {"x":116,"y":183,"w":21,"h":39},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":0,"w":21,"h":39},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHead2.4.png":
+{
+	"frame": {"x":40,"y":417,"w":19,"h":35},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":0,"w":19,"h":35},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHead2.5.png":
+{
+	"frame": {"x":2,"y":325,"w":20,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":0,"w":20,"h":47},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHead2.6.png":
+{
+	"frame": {"x":79,"y":234,"w":18,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":4,"w":18,"h":42},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHead2.7.png":
+{
+	"frame": {"x":74,"y":278,"w":22,"h":43},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":5,"w":22,"h":43},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHead3.3.png":
+{
+	"frame": {"x":70,"y":323,"w":22,"h":40},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":40},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHead3.4.png":
+{
+	"frame": {"x":82,"y":365,"w":19,"h":36},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":0,"w":19,"h":36},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHead3.5.png":
+{
+	"frame": {"x":24,"y":322,"w":19,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":0,"w":19,"h":47},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHead3.6.png":
+{
+	"frame": {"x":37,"y":371,"w":19,"h":44},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":4,"w":19,"h":44},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHead3.7.png":
+{
+	"frame": {"x":45,"y":322,"w":23,"h":43},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":5,"w":23,"h":43},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHeadMarksA0.0.png":
+{
+	"frame": {"x":187,"y":173,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":10,"y":1,"w":6,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA0.1.png":
+{
+	"frame": {"x":225,"y":138,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":0,"w":6,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA0.2.png":
+{
+	"frame": {"x":225,"y":162,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":2,"w":6,"h":22},
+	"sourceSize": {"w":30,"h":60}
+},
+"MagicaLizardHeadMarksA0.3.png":
+{
+	"frame": {"x":233,"y":156,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":0,"w":6,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA0.4.png":
+{
+	"frame": {"x":207,"y":289,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":0,"w":6,"h":22},
+	"sourceSize": {"w":28,"h":40}
+},
+"MagicaLizardHeadMarksA0.5.png":
+{
+	"frame": {"x":215,"y":289,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":16,"y":5,"w":6,"h":22},
+	"sourceSize": {"w":34,"h":50}
+},
+"MagicaLizardHeadMarksA0.6.png":
+{
+	"frame": {"x":213,"y":313,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":15,"y":5,"w":6,"h":22},
+	"sourceSize": {"w":34,"h":50}
+},
+"MagicaLizardHeadMarksA0.7.png":
+{
+	"frame": {"x":237,"y":218,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":16,"y":6,"w":6,"h":22},
+	"sourceSize": {"w":34,"h":50}
+},
+"MagicaLizardHeadMarksA1.0.png":
+{
+	"frame": {"x":237,"y":242,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":0,"w":6,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA1.1.png":
+{
+	"frame": {"x":223,"y":287,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":2,"w":6,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA1.2.png":
+{
+	"frame": {"x":231,"y":287,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":7,"w":6,"h":22},
+	"sourceSize": {"w":30,"h":60}
+},
+"MagicaLizardHeadMarksA1.3.png":
+{
+	"frame": {"x":221,"y":313,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":2,"w":6,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA1.4.png":
+{
+	"frame": {"x":198,"y":381,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":2,"w":6,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA1.5.png":
+{
+	"frame": {"x":198,"y":405,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":7,"w":6,"h":22},
+	"sourceSize": {"w":32,"h":52}
+},
+"MagicaLizardHeadMarksA1.6.png":
+{
+	"frame": {"x":206,"y":381,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":7,"w":6,"h":22},
+	"sourceSize": {"w":32,"h":52}
+},
+"MagicaLizardHeadMarksA1.7.png":
+{
+	"frame": {"x":206,"y":405,"w":6,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":8,"w":6,"h":22},
+	"sourceSize": {"w":32,"h":52}
+},
+"MagicaLizardHeadMarksA2.0.png":
+{
+	"frame": {"x":142,"y":427,"w":15,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":3,"w":15,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA2.1.png":
+{
+	"frame": {"x":194,"y":144,"w":14,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":2,"w":14,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA2.2.png":
+{
+	"frame": {"x":231,"y":61,"w":12,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":11,"y":5,"w":12,"h":22},
+	"sourceSize": {"w":30,"h":60}
+},
+"MagicaLizardHeadMarksA2.3.png":
+{
+	"frame": {"x":195,"y":168,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":2,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA2.4.png":
+{
+	"frame": {"x":167,"y":385,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":2,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA2.5.png":
+{
+	"frame": {"x":182,"y":385,"w":14,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":9,"w":14,"h":22},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHeadMarksA2.6.png":
+{
+	"frame": {"x":189,"y":217,"w":14,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":9,"w":14,"h":22},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHeadMarksA2.7.png":
+{
+	"frame": {"x":189,"y":241,"w":14,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":9,"w":14,"h":22},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHeadMarksA3.0.png":
+{
+	"frame": {"x":190,"y":265,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA3.1.png":
+{
+	"frame": {"x":192,"y":289,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":1,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA3.2.png":
+{
+	"frame": {"x":198,"y":313,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":6,"w":13,"h":22},
+	"sourceSize": {"w":30,"h":60}
+},
+"MagicaLizardHeadMarksA3.3.png":
+{
+	"frame": {"x":210,"y":138,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":2,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA3.4.png":
+{
+	"frame": {"x":210,"y":162,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":2,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":40}
+},
+"MagicaLizardHeadMarksA3.5.png":
+{
+	"frame": {"x":205,"y":217,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHeadMarksA3.6.png":
+{
+	"frame": {"x":205,"y":241,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaLizardHeadMarksA3.7.png":
+{
+	"frame": {"x":205,"y":265,"w":13,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":13,"h":22},
+	"sourceSize": {"w":24,"h":52}
+},
+"MagicaMiniSatellite.png":
+{
+	"frame": {"x":151,"y":337,"w":11,"h":13},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":11,"h":13},
+	"sourceSize": {"w":11,"h":13}
+},
+"MagicaMirosClaw.png":
+{
+	"frame": {"x":91,"y":183,"w":23,"h":39},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":23,"h":39},
+	"sourceSize": {"w":23,"h":39}
+},
+"MagicaMirosWingColor.png":
+{
+	"frame": {"x":2,"y":230,"w":16,"h":93},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":93},
+	"sourceSize": {"w":16,"h":94}
+},
+"MagicaMirosWingSolid.png":
+{
+	"frame": {"x":2,"y":134,"w":16,"h":94},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":94},
+	"sourceSize": {"w":16,"h":94}
+},
+"MagicaMoonCloakTex.png":
+{
+	"frame": {"x":20,"y":116,"w":40,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
+	"sourceSize": {"w":40,"h":40}
+},
+"MagicaMoonSigil.png":
+{
+	"frame": {"x":17,"y":2,"w":72,"h":66},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":72,"h":66},
+	"sourceSize": {"w":72,"h":66}
+},
+"MagicaOralArm.png":
+{
+	"frame": {"x":2,"y":2,"w":13,"h":130},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":130},
+	"sourceSize": {"w":13,"h":130}
+},
+"MagicaPFaceA0.png":
+{
+	"frame": {"x":216,"y":347,"w":11,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":3,"w":11,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA1.png":
+{
+	"frame": {"x":229,"y":348,"w":11,"h":9},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":3,"w":11,"h":9},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA2.png":
+{
+	"frame": {"x":214,"y":389,"w":9,"h":9},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":3,"w":9,"h":9},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA3.png":
+{
+	"frame": {"x":235,"y":359,"w":8,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":6,"w":8,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA4.png":
+{
+	"frame": {"x":215,"y":445,"w":9,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":5,"w":9,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA5.png":
+{
+	"frame": {"x":217,"y":337,"w":10,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":10,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA6.png":
+{
+	"frame": {"x":220,"y":367,"w":9,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":8,"w":9,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA7.png":
+{
+	"frame": {"x":209,"y":356,"w":11,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":7,"w":11,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceA8.png":
+{
+	"frame": {"x":212,"y":430,"w":11,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":8,"w":11,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB0.png":
+{
+	"frame": {"x":198,"y":439,"w":11,"h":4},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":7,"w":11,"h":4},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB1.png":
+{
+	"frame": {"x":222,"y":359,"w":11,"h":6},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":5,"w":11,"h":6},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB2.png":
+{
+	"frame": {"x":214,"y":400,"w":9,"h":9},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":4,"w":9,"h":9},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB3.png":
+{
+	"frame": {"x":225,"y":387,"w":9,"h":7},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":7,"w":9,"h":7},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB4.png":
+{
+	"frame": {"x":225,"y":396,"w":9,"h":5},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":7,"y":7,"w":9,"h":5},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB5.png":
+{
+	"frame": {"x":231,"y":369,"w":10,"h":6},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":9,"w":10,"h":6},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB6.png":
+{
+	"frame": {"x":225,"y":377,"w":9,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":9,"h":8},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB7.png":
+{
+	"frame": {"x":203,"y":347,"w":11,"h":5},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":4,"y":10,"w":11,"h":5},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaPFaceB8.png":
+{
+	"frame": {"x":211,"y":439,"w":11,"h":4},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":11,"w":11,"h":4},
+	"sourceSize": {"w":16,"h":18}
+},
+"MagicaSadMask0.png":
+{
+	"frame": {"x":152,"y":144,"w":19,"h":27},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":21,"y":20,"w":19,"h":27},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask1.png":
+{
+	"frame": {"x":173,"y":144,"w":19,"h":27},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":19,"y":21,"w":19,"h":27},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask2.png":
+{
+	"frame": {"x":145,"y":242,"w":19,"h":26},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":18,"y":19,"w":19,"h":26},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask3.png":
+{
+	"frame": {"x":128,"y":279,"w":16,"h":25},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":18,"y":18,"w":16,"h":25},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask4.png":
+{
+	"frame": {"x":145,"y":214,"w":16,"h":26},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":16,"y":17,"w":16,"h":26},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask5.png":
+{
+	"frame": {"x":164,"y":338,"w":26,"h":14},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":10,"y":17,"w":26,"h":14},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask6.png":
+{
+	"frame": {"x":115,"y":352,"w":28,"h":11},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":16,"w":28,"h":11},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask7.png":
+{
+	"frame": {"x":120,"y":323,"w":24,"h":12},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":14,"w":24,"h":12},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSadMask8.png":
+{
+	"frame": {"x":188,"y":354,"w":19,"h":12},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":21,"y":15,"w":19,"h":12},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaShortcutDoubleArrow.png":
+{
+	"frame": {"x":192,"y":338,"w":9,"h":10},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":10},
+	"sourceSize": {"w":9,"h":10}
+},
+"MagicaShortcutShelterSmall.png":
+{
+	"frame": {"x":214,"y":411,"w":9,"h":9},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
+	"sourceSize": {"w":9,"h":9}
+},
+"MagicaShortcutTransportArrow.png":
+{
+	"frame": {"x":209,"y":366,"w":9,"h":10},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":10},
+	"sourceSize": {"w":9,"h":10}
+},
+"MagicaSpikeMask0.png":
+{
+	"frame": {"x":90,"y":153,"w":35,"h":28},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":13,"y":19,"w":35,"h":28},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask1.png":
+{
+	"frame": {"x":85,"y":403,"w":25,"h":30},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":19,"y":18,"w":25,"h":30},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask2.png":
+{
+	"frame": {"x":127,"y":153,"w":23,"h":28},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":18,"w":23,"h":28},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask3.png":
+{
+	"frame": {"x":201,"y":61,"w":28,"h":28},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":13,"y":15,"w":28,"h":28},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask4.png":
+{
+	"frame": {"x":139,"y":183,"w":22,"h":29},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":14,"w":22,"h":29},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask5.png":
+{
+	"frame": {"x":151,"y":126,"w":34,"h":16},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":17,"w":34,"h":16},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask6.png":
+{
+	"frame": {"x":201,"y":45,"w":33,"h":14},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":16,"w":33,"h":14},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask7.png":
+{
+	"frame": {"x":120,"y":337,"w":29,"h":13},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":14,"w":29,"h":13},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaSpikeMask8.png":
+{
+	"frame": {"x":161,"y":354,"w":25,"h":12},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":18,"y":14,"w":25,"h":12},
+	"sourceSize": {"w":61,"h":61}
+},
+"MagicaTinyGlyph0.png":
+{
+	"frame": {"x":144,"y":106,"w":6,"h":6},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":6},
+	"sourceSize": {"w":6,"h":6}
+},
+"MagicaTinyGlyph1.png":
+{
+	"frame": {"x":91,"y":224,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph2.png":
+{
+	"frame": {"x":225,"y":421,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph3.png":
+{
+	"frame": {"x":225,"y":430,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph4.png":
+{
+	"frame": {"x":233,"y":404,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph5.png":
+{
+	"frame": {"x":236,"y":377,"w":7,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":7,"h":7},
+	"sourceSize": {"w":7,"h":7}
+},
+"MagicaTinyGlyph6.png":
+{
+	"frame": {"x":236,"y":386,"w":7,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":7,"h":7},
+	"sourceSize": {"w":7,"h":7}
+},
+"MagicaTinyGlyph7.png":
+{
+	"frame": {"x":233,"y":413,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph8.png":
+{
+	"frame": {"x":233,"y":422,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph9.png":
+{
+	"frame": {"x":236,"y":395,"w":7,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":7,"h":7},
+	"sourceSize": {"w":7,"h":7}
+},
+"MagicaTinyGlyph10.png":
+{
+	"frame": {"x":75,"y":445,"w":7,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":7,"h":7},
+	"sourceSize": {"w":7,"h":7}
+},
+"MagicaTinyGlyph11.png":
+{
+	"frame": {"x":120,"y":312,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph12.png":
+{
+	"frame": {"x":225,"y":403,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTinyGlyph13.png":
+{
+	"frame": {"x":225,"y":412,"w":6,"h":7},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":7},
+	"sourceSize": {"w":6,"h":7}
+},
+"MagicaTrapHook.png":
+{
+	"frame": {"x":166,"y":242,"w":21,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":21,"h":24},
+	"sourceSize": {"w":21,"h":24}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "rainWorldMSC.png",
+	"format": "RGBA8888",
+	"size": {"w":245,"h":454},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:9971acd1a5acf6b62b80180c55ef5d4c:da97bfa106d6572b1c08517dad3a8ab8:17089872352cfbc58b4047c005c9e351$"
+}
+}
