@@ -1,0 +1,14 @@
+0-chatlog_si1
+[INCOMING REQUEST] COMMUNICATIONS MANIFEST
+
+[[FILTER]] Message Archived - All incoming sources are currently set to automatically archive.
+
+[REFLECTED MESSAGE]
+
+NSH: Five Pebbles, you have to stop. This is not a matter of enlightenment, this is a matter of siblicide.
+
+NSH: You’re going to ignore us, but. When you eventually break out of this phase, you’re going to deeply regret this.
+
+NSH: Look back on this message and know we did all we could.
+
+NSH: We were your friends, too.  By the time you remember that, our ability to communicate will be gone.

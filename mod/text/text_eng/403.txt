@@ -1,0 +1,8 @@
+0-403
+0 : ... : 60
+This is... Where did you find this? It must have come from the memory crypts...
+To think, this remains in almost prestine condition.
+40 : I'll be confiscating this from you, this is holy property and thus should not be in the hands of a creature<LINE>like you. I dread to think on what those scavengers would do with this. : 40
+0 : ... : 120
+SPECEVENT : music
+Still, for bringing it my way, I will give you a sample of it's contents.

@@ -1,0 +1,37 @@
+0-404
+
+0 : ... : 120
+
+0 : Ah. : 40
+
+0 : Did Moon give you that? : 20
+
+I see... I'm very pleased to see you return a second time, dear messenger! How did you manage to escape<LINE>Five Pebbles's facility?
+
+SPECEVENT : spearsign
+
+...
+
+The pearl is gone? Ah, so then Moon must have... To spend her last hundred cycles to help an<LINE>insignificant creature. I can't say I'm surprised, but at the same time...
+
+20 : ... That would mean I owe her my gratitude, and more of my respect. The senior who never stood up until her dying words. : 0
+
+Maybe my opinion of her is finally shifting. Back to how things used to be.
+
+I miss when we were all equal, and all just as lost.
+
+20 : ... : 50
+
+Regardless. Nothing makes me more joyous than seeing my favorite messenger again! I thought for sure this may have been your last mission...
+
+40 : ... No, this WILL be your last mission. : 20
+
+I cannot risk the thought of losing you again.
+
+... 
+
+SPECEVENT : hug
+
+150 : Every neuron in my being cares for you, stay by my side. : 40
+
+20 : I love you, my spearmaster. : 0

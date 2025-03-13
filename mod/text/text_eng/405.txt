@@ -1,0 +1,25 @@
+0-405
+
+20 : Ah, hello <PlayerName>. : 80
+
+... Oh.
+
+<PlayerName>, it does not appear you have much longer for this world I'm afraid.
+
+30 : I give you my condolences, I hope when you wake up you will be at peace again for a brief moment. How many times have you woken up now? : 0
+
+50 : ... And why do you return to me as you can no longer stand? I'm afraid I do not understand your reasoning, <PlayerName>. : 50
+
+0 : ... : 60
+
+Perhaps you miss the company of the one who sent you? Even in your dying throws, you are still an animal seeking the comfort of their mother.
+
+SPECEVENT : redhug
+
+60 : I do not miss my own mothers, but for this brief moment I do not mind acting like yours <PlayerName>. : 40
+
+Sleep now. Seek a better dream...
+
+And thank you deeply, little savior of mine.
+
+20 : I promise your effort will not go in vain. : 70

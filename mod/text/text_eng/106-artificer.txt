@@ -1,0 +1,9 @@
+0-106
+This one contains an encoded hymn. Where did you find this? It must have been buried deep within the memory crypts, this pearl is considered holy property.
+... I've not seen one of these since my inhabitants departed, and to find it in such quality! Fascinating... A little creature like you could not comprehend<LINE>the complex symbolism hidden in the pitched disonance within this crystaline prison, but it served an important purpose to my citizens.
+This hymn in particular served as a piece proposing the idea that music could be used as a way ease oneself on their journey to abate themselves of their<LINE>natural urges.
+It was made in a way to highlight the ebbing and flowing of the cycle as the sky falls and the earth rises. Steady, slowly sinking as it approaches oblivion,<LINE>but written in such a way that it was calming. This is not the only one I recall, but this is the first that has come into my possession since they took<LINE>their leave.
+0 : I suppose I should thank you for that. : 40
+0 : ... : 70
+0 : Perhaps this may resonate with the purposed organism within your cells that you descended from, little ruffian. : 30
+SPECEVENT : music

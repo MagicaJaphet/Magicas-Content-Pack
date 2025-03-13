@@ -1,0 +1,25 @@
+0-410
+
+20 : ... : 50
+
+... It'd appear you've reached a state of mind our kind only hoped to find.
+
+By what means does a small creature of your kind learn to do such a thing?
+
+And more importantly... where do you hail from? This is a moment I can not pry myself<LINE>from my curiosities.
+
+Is it still possible there is more to the great cycle itself that is only now making itself known?
+
+0 : ... I don't imagine even a vessel such as yours can travel for too long in this harrowing snow. : 40
+
+Then why is it, you come to me?
+
+20 : ... : 60
+
+You can understand me, yet for once I cannot fathom a being like you.
+
+Our kind would surely envy you if the majority of them were still around.
+
+It brings me a small bit of relief.
+
+Go on, I'm sure our cycle will meet again.

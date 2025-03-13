@@ -1,0 +1,9 @@
+0-402
+0 : ... : 60
+Do you feel it, little ruffian? The waves of the song flowing through you?
+0 : . . . : 80
+I cannot tell by that look.
+Regardless...
+I hope you gained something from this, little beast. I did.
+Thank you.
+SPECEVENT : endmusic

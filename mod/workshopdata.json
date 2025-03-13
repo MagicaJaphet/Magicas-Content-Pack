@@ -1,0 +1,17 @@
+{
+  "Title": "Magica\u0027s Content Pack",
+  "Description": "[h1]Check out the mod\u0027s [url=https://discord.gg/JWKVr79VXu] discord server [/url] to submit direct feedback and check to see what\u0027s upcoming![/h1]\r\n\r\nThis mod pertains to my personal reinterpretation of Downpour, including base game slugcats. At the moment there are little major gameplay changes, but there is a lot of new art to rediscover!\r\n\r\n[h1] Content in this mod includes: [/h1]\r\n[list][*] New DMS skins (\u002B a template)\r\n[*] New cutscenes / menu art\r\n[*] Options to enable / disable certain aspects of the mod\r\n[*] Revamped story points[/list]\r\n\r\n[h2] Acknowledgements for patch 1.1.0: [/h2]\r\n[list][*] Arti\u0027s custom scar sprites cannot be interchanged like the normal scar, instead it is separated into it\u0027s own category for future support.\r\n[*] Spearmaster\u0027s graphics are not fully completed, some physics scenarios may not be accounted for and may change in the future.\r\n[*] Half of the art was made half a year ago, and may not reflect the quality standard I now have in mind, but the general emotional tone remains the same.\r\n[*] I did all of this by myself, with outside advice only for figuring out how to code in the first place.[/list]",
+  "ID": "magicaanthro.skins",
+  "Version": "1.1.0",
+  "TargetGameVersion": "v1.9.15",
+  "Requirements": "dressmyslugcat,moreslugcats,crs,slime-cubed.slugbase",
+  "RequirementNames": "Dress My Slugcat,More Slugcats Expansion,Custom Region Support,SlugBase",
+  "Authors": "MagicaJaphet",
+  "Visibility": "Public",
+  "Tags": [
+    "Cosmetics"
+  ],
+  "WorkshopID": 3122868912,
+  "UploadFilesOnly": true,
+  "UploadThumbnail": false
+}

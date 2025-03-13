@@ -1,0 +1,25 @@
+0-411
+
+I am sorry, strange friend. There isn't much left on any of these.
+
+A pearl can only take so much exposure to the environment before the data inside is burned<LINE>away. All that is left now is a pale white image. I can only make out single pieces of it.
+
+You could give these to the scavengers... though now I wonder the utility of its vessel.
+
+Perhaps, strange creature... I do not understand what mission you are on...
+
+I should cut to the point, would it be too much to ask an enlightened one for a favor?<LINE>There is someone who used to stand next to me, you've likely crossed paths already at this point.
+
+I had the brief train of thought that I could utilize what is now practically useless.<LINE>I'd like to... rewrite whatever is left of the contents on this pearl to convey a simple message.
+
+I do not even know if they are in a state to be able to read it. However... I still...
+
+If you could...
+
+SPECEVENT : MoonRewritesSaintPearl
+
+Take this with you, I have never attempted to ask anyone for such a thing. If we were all<LINE>still in contact with our communication lines, you'd surely understand I would not ask you to do this.
+
+This cycle will move on regardless of your action. This is merely my method to make peace.
+
+Do what you wish.
