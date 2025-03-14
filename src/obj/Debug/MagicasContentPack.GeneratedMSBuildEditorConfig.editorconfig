@@ -1,5 +1,8 @@
 is_global = true
 build_property.RootNamespace = MagicasContentPack
-build_property.ProjectDir = C:\Users\linda\OneDrive\Documents\Rain Mods\MagicasContentPack\MagicasContentPack\src\
+build_property.ProjectDir = C:\Users\linda\OneDrive\Documents\Magicas-Content-Pack\src\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 
