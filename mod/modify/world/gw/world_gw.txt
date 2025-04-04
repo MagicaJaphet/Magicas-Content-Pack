@@ -1,0 +1,50 @@
+[FINDLINE]GW_A25 : DISCONNECTED, GW_A24, GW_EDGE04 : PERFHEAVY
+[REPLACE]GW_A25 : GW_A24, GW_EDGE04 : PERFHEAVY
+[FINDLINE](Saint)GW_A25 : 3-Lantern Mouse-3
+[REPLACE](Saint)GW_A25 : 1-Lantern Mouse-3
+[FINDLINE]GW_EDGE04 : GW_EDGE02, GW_EDGE05, GW_A25
+[REPLACE]GW_EDGE04 : GW_EDGE05, GW_A25
+[FINDLINE](Rivulet)GW_EDGE04 : 3-Big Spider-3
+[REPLACE](Rivulet)GW_EDGE04 : 0-Big Spider-3
+[FINDLINE]GW_EDGE03 : GW_EDGE01, GW_EDGE05, GW_EDGE02
+[REPLACE]GW_EDGE03 : GW_EDGE01, GW_EDGE05 : SCAVOUTPOST
+[FINDLINE](X-Yellow,Rivulet,Red,Artificer,Spear,Saint)GW_EDGE03 : 14-Scavenger-4, 17-Leech-5, 18-Leech-8, 7-CicadaB-2, 8-CicadaA-3, 17-Salamander-{PreCycle}, 18-Salamander-{PreCycle}
+[REPLACE](X-Artificer,Spear)GW_EDGE03 : 7-Scavenger-4, 17-Leech-5, 18-Leech-8, 7-CicadaB-2, 8-CicadaA-3, 17-Salamander-{PreCycle}, 18-Salamander-{PreCycle}
+[FINDLINE](Yellow,Rivulet)GW_EDGE03 : 17-Leech-5, 18-Leech-8, 7-CicadaB-3, 8-CicadaA-4, 17-Salamander-{PreCycle}, 18-Salamander-{PreCycle}
+[REPLACE](Yellow,Rivulet)GW_EDGE03 : 7-Scavenger-4, 12-Leech-5, 11-Leech-8, 7-CicadaB-3, 8-CicadaA-4, 11-Salamander-{PreCycle}, 10-Salamander-{PreCycle}
+[FINDLINE](Red)GW_EDGE03 : 17-Leech-9, 18-Leech-12, 7-CicadaB-1, 8-CicadaA-2, 17-Salamander-{PreCycle}, 18-Salamander-{PreCycle}
+[REPLACE](Red)GW_EDGE03 : 7-Scavenger-4, 12-Leech-9, 11-Leech-12, 7-CicadaB-1, 8-CicadaA-2, 12-Salamander-{PreCycle}, 10-Salamander-{PreCycle}
+[FINDLINE](Saint)GW_EDGE03 : 7-Lantern Mouse-5, 13-Big Spider-3-{Winter}, 17-Salamander-{PreCycle}, 18-Salamander-{PreCycle}
+[REPLACE](Saint)GW_EDGE03 : 7-Scavenger-4, 7-Lantern Mouse-5, 11-Big Spider-3-{Winter}, 12-Salamander-{PreCycle}, 10-Salamander-{PreCycle}
+[MERGE]
+CONDITIONAL LINKS
+Artificer,Spear : REPLACEROOM : GW_A25 : GW_A25_past
+Artificer,Spear : EXCLUSIVEROOM : GW_A25_past
+Artificer,Spear : HIDEROOM : GW_A25
+
+Artificer,Spear : REPLACEROOM : GW_EDGE04 : GW_EDGE04_past
+Artificer,Spear : EXCLUSIVEROOM : GW_EDGE04_past
+Artificer,Spear : HIDEROOM : GW_EDGE04
+
+Artificer,Spear : REPLACEROOM : GW_EDGE05 : GW_EDGE05_past
+Artificer,Spear : EXCLUSIVEROOM : GW_EDGE05_past
+Artificer,Spear : HIDEROOM : GW_EDGE05
+
+Artificer,Spear : REPLACEROOM : GW_EDGE03 : GW_EDGE03_past
+Artificer,Spear : EXCLUSIVEROOM : GW_EDGE03_past
+Artificer,Spear : HIDEROOM : GW_EDGE03
+END CONDITIONAL LINKS
+
+ROOMS
+GW_A25_past : DISCONNECTED, GW_A24, GW_EDGE04_past : PERFHEAVY
+GW_EDGE04_past : GW_EDGE02, GW_EDGE05_past, GW_A25_past
+GW_EDGE05_past : GW_EDGE03, GW_EDGE04_past
+GW_EDGE03_past : GW_EDGE01, GW_EDGE05, GW_EDGE02
+END ROOMS
+
+CREATURES
+(X-Yellow,Rivulet,Red,Saint)GW_EDGE03 : 7-Scavenger-4, 12-Leech-5, 11-Leech-8, 7-CicadaB-2, 8-CicadaA-3, 12-Salamander-{PreCycle}, 10-Salamander-{PreCycle}
+(Artificer)GW_EDGE03_past : 17-Leech-9, 18-Leech-12, 7-CicadaB-1, 8-CicadaA-2, 17-Salamander-{PreCycle}, 18-Salamander-{PreCycle}
+(Spear)GW_EDGE03_past : 17-Leech-9, 18-Leech-12, 5-DropBug-2, 7-CicadaB-1, 8-CicadaA-2, 17-Salamander-{PreCycle}, 18-Salamander-{PreCycle}
+END CREATURES
+[ENDMERGE]

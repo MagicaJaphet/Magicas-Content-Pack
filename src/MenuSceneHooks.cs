@@ -7,6 +7,7 @@ using SlugBase.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -84,10 +85,11 @@ namespace MagicasContentPack
 		{
 			try
 			{
+				int stLoc = 4;
 				ILCursor cursor = new(il);
 
 				bool sooceed = cursor.TryGotoNext(
-					x => x.MatchStloc(3)
+					x => x.MatchStloc(stLoc)
 					);
 
 				if (!sooceed)
@@ -98,14 +100,32 @@ namespace MagicasContentPack
 
 				static string[] AddToArray(string[] names)
 				{
-					return names = [.. names, "red"];
+					if (!string.IsNullOrEmpty(Plugin.modPath) && Directory.Exists(Plugin.modPath + Path.DirectorySeparatorChar + "illustrations"))
+					{
+						List<string> namesToAdd = [];
+						string[] files = Directory.GetFiles(Plugin.modPath + Path.DirectorySeparatorChar + "illustrations").Where(x => x.Contains("intro_roll_c_")).ToArray();
+						foreach (string slugRoll in files)
+						{
+							string subStringName = Path.GetFileNameWithoutExtension(slugRoll).Substring("intro_roll_c_".Length);
+							if (!names.Contains(subStringName))
+							{
+								Plugin.DebugLog($"{subStringName} found in illustrations!");
+								namesToAdd.Add(subStringName);
+							}
+						}
+						if (namesToAdd.Count > 0)
+						{
+							return names.Concat(namesToAdd.ToArray()).ToArray();
+						}
+					}
+					return names;
 				}
 				cursor.EmitDelegate(AddToArray);
 
 
 				if (Plugin.debugState)
 				{
-					cursor.GotoNext(MoveType.After, x => x.MatchLdloc(3));
+					cursor.GotoNext(MoveType.After, x => x.MatchLdloc(stLoc));
 					cursor.EmitDelegate((string[] array) =>
 					{
 						if (!array.Any(x => string.IsNullOrEmpty(x)))

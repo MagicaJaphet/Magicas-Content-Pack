@@ -619,11 +619,11 @@ namespace MagicasContentPack
 				float rottedAmount = 0.6f;
 				if (rCam.game.IsStorySession)
 				{
-					SlugcatStats.Name[] timeLine = SlugcatStats.SlugcatTimelineOrder().ToArray();
+					SlugcatStats.Timeline[] timeLine = SlugcatStats.SlugcatTimelineOrder().ToArray();
 
-					rottedAmount = Mathf.Lerp(0.2f, 0.75f, (float)timeLine.IndexOf(rCam.game.StoryCharacter) / (float)timeLine.Length);
+					rottedAmount = Mathf.Lerp(0.2f, 0.75f, (float)timeLine.IndexOf(rCam.game.TimelinePoint) / (float)timeLine.Length);
 
-					if (timeLine.IndexOf(MoreSlugcatsEnums.SlugcatStatsName.Spear) != 0 && timeLine.IndexOf(rCam.game.StoryCharacter) < timeLine.IndexOf(MoreSlugcatsEnums.SlugcatStatsName.Spear))
+					if (timeLine.IndexOf(SlugcatStats.Timeline.Spear) != 0 && timeLine.IndexOf(rCam.game.TimelinePoint) < timeLine.IndexOf(SlugcatStats.Timeline.Spear))
 					{
 						rottedAmount = 0f;
 					}
@@ -663,7 +663,7 @@ namespace MagicasContentPack
 					sLeaser.sprites[self.PhoneSprite(k, 2)].color = earPhoneColor;
 
 					sLeaser.sprites[self.HandSprite(k, 0)].color = bodyColor;
-					if (self.gown == null)
+					if (self.gowns == null)
 					{
 						sLeaser.sprites[self.HandSprite(k, 1)].color = bodyColor;
 					}
@@ -1118,7 +1118,7 @@ namespace MagicasContentPack
 							continue;
 						}
 
-						if (self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear || !ModOptions.CustomInGameCutscenes.Value || string.IsNullOrEmpty(WinOrSaveHooks.WhoShowedFPThePearl) || CheckIfWhoTookThePearlIsBeforeCurrent(self.room.game.StoryCharacter))
+						if (self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear || !ModOptions.CustomInGameCutscenes.Value || string.IsNullOrEmpty(WinOrSaveHooks.WhoShowedFPThePearl) || CheckIfWhoTookThePearlIsBeforeCurrent(self.room.game.TimelinePoint))
 						{
 							Plugin.DebugLog("Invalid Halcyon found, removing... " + pearl.abstractPhysicalObject.ID);
 							if (self.oracleBehavior is SSOracleBehavior behav && behav.readDataPearlOrbits.Contains(pearl.abstractPhysicalObject))
@@ -1149,10 +1149,10 @@ namespace MagicasContentPack
 			allowFpToCheckHisPearl = true;
 		}
 
-		internal static bool CheckIfWhoTookThePearlIsBeforeCurrent(SlugcatStats.Name currentSlug)
+		internal static bool CheckIfWhoTookThePearlIsBeforeCurrent(SlugcatStats.Timeline currentSlug)
 		{
-			SlugcatStats.Name[] names = SlugcatStats.SlugcatTimelineOrder().ToArray();
-			return !string.IsNullOrEmpty(WinOrSaveHooks.WhoShowedFPThePearl) && SlugcatStats.Name.TryParse(typeof(SlugcatStats.Name), WinOrSaveHooks.WhoShowedFPThePearl, true, out var slug) && slug is SlugcatStats.Name whoTookItSlug && names.Contains(whoTookItSlug) && names.Contains(currentSlug) && names.IndexOf(whoTookItSlug) < names.IndexOf(currentSlug) && Plugin.DebugLog(whoTookItSlug.value + " is " + (names.IndexOf(whoTookItSlug) < names.IndexOf(currentSlug) ? "sooner than " : "later than ") + currentSlug.value);
+			SlugcatStats.Timeline[] names = SlugcatStats.SlugcatTimelineOrder().ToArray();
+			return !string.IsNullOrEmpty(WinOrSaveHooks.WhoShowedFPThePearl) && SlugcatStats.Timeline.TryParse(typeof(SlugcatStats.Timeline), WinOrSaveHooks.WhoShowedFPThePearl, true, out var slug) && slug is SlugcatStats.Timeline whoTookItSlug && names.Contains(whoTookItSlug) && names.Contains(currentSlug) && names.IndexOf(whoTookItSlug) < names.IndexOf(currentSlug) && Plugin.DebugLog(whoTookItSlug.value + " is " + (names.IndexOf(whoTookItSlug) < names.IndexOf(currentSlug) ? "sooner than " : "later than ") + currentSlug.value);
 		}
 
 		public static bool IsIntroAction(SSOracleBehavior owner)

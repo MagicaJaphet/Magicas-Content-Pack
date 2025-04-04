@@ -1245,8 +1245,8 @@ namespace MagicasContentPack
 					CreatureTemplate.Type type = creature.abstractCreature.creatureTemplate.type;
 					karma = GetKarmaOfSpecificCreature(creature, type);
 					player.saintTargetIsKarmaLocked = ApexPredatorsIncludes(type);
-					player.karmaCycling = type == CreatureTemplate.Type.DaddyLongLegs || type == CreatureTemplate.Type.BrotherLongLegs || type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs;
-					player.karmaCycleTimer = type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs ? 5f : type == CreatureTemplate.Type.DaddyLongLegs ? 10f : 20f;
+					player.karmaCycling = type == CreatureTemplate.Type.DaddyLongLegs || type == CreatureTemplate.Type.BrotherLongLegs || type == DLCSharedEnums.CreatureTemplateType.TerrorLongLegs;
+					player.karmaCycleTimer = type == DLCSharedEnums.CreatureTemplateType.TerrorLongLegs ? 5f : type == CreatureTemplate.Type.DaddyLongLegs ? 10f : 20f;
 				}
 
 				if (entity is Oracle oracle)
@@ -1277,7 +1277,7 @@ namespace MagicasContentPack
 
 		private static bool ApexPredatorsIncludes(CreatureTemplate.Type type)
 		{
-			return type == CreatureTemplate.Type.RedLizard || type == CreatureTemplate.Type.KingVulture || type == CreatureTemplate.Type.RedCentipede || type == MoreSlugcatsEnums.CreatureTemplateType.MirosVulture;
+			return type == CreatureTemplate.Type.RedLizard || type == CreatureTemplate.Type.KingVulture || type == CreatureTemplate.Type.RedCentipede || type == DLCSharedEnums.CreatureTemplateType.MirosVulture;
 		}
 
 		private static int GetKarmaOfSpecificCreature(Creature creature, CreatureTemplate.Type type)
@@ -1287,12 +1287,12 @@ namespace MagicasContentPack
 				return creatureKarma[type];
 			}
 
-			if (type == CreatureTemplate.Type.Scavenger || type == MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite || type == MoreSlugcatsEnums.CreatureTemplateType.ScavengerKing)
+			if (type == CreatureTemplate.Type.Scavenger || type == DLCSharedEnums.CreatureTemplateType.ScavengerElite || type == MoreSlugcatsEnums.CreatureTemplateType.ScavengerKing)
 			{
 				return creature.abstractCreature.karmicPotential;
 			}
 
-			if (type == CreatureTemplate.Type.DaddyLongLegs || type == CreatureTemplate.Type.BrotherLongLegs || type == MoreSlugcatsEnums.CreatureTemplateType.TerrorLongLegs)
+			if (type == CreatureTemplate.Type.DaddyLongLegs || type == CreatureTemplate.Type.BrotherLongLegs || type == DLCSharedEnums.CreatureTemplateType.TerrorLongLegs)
 			{
 				return UnityEngine.Random.Range(0, 9 - (type == CreatureTemplate.Type.DaddyLongLegs ? 4 : type == CreatureTemplate.Type.BrotherLongLegs ? 7 : 0));
 			}
@@ -1345,18 +1345,18 @@ namespace MagicasContentPack
 			{ CreatureTemplate.Type.DropBug, 3 },
 			{ CreatureTemplate.Type.KingVulture, 0 },
 			{ CreatureTemplate.Type.Hazer, 4 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, 0 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.SpitLizard, 3 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.EelLizard, 0 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.MotherSpider, 1 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.AquaCenti, 0 },
+			{ DLCSharedEnums.CreatureTemplateType.MirosVulture, 0 },
+			{ DLCSharedEnums.CreatureTemplateType.SpitLizard, 3 },
+			{ DLCSharedEnums.CreatureTemplateType.EelLizard, 0 },
+			{ DLCSharedEnums.CreatureTemplateType.MotherSpider, 1 },
+			{ DLCSharedEnums.CreatureTemplateType.AquaCenti, 0 },
+			{ DLCSharedEnums.CreatureTemplateType.StowawayBug, 3 },
+			{ DLCSharedEnums.CreatureTemplateType.Inspector, 4 },
+			{ DLCSharedEnums.CreatureTemplateType.Yeek, 4 },
+			{ DLCSharedEnums.CreatureTemplateType.BigJelly, 3 },
+			{ DLCSharedEnums.CreatureTemplateType.JungleLeech, 1 },
+			{ DLCSharedEnums.CreatureTemplateType.ZoopLizard, 4 },
 			{ MoreSlugcatsEnums.CreatureTemplateType.FireBug, 8 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.StowawayBug, 3 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.Inspector, 4 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.Yeek, 4 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.BigJelly, 3 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.JungleLeech, 1 },
-			{ MoreSlugcatsEnums.CreatureTemplateType.ZoopLizard, 4 },
 			{ MoreSlugcatsEnums.CreatureTemplateType.TrainLizard, 0 },
 		};
 

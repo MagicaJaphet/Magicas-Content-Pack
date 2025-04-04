@@ -301,7 +301,7 @@ namespace MagicasContentPack
 				room.AddObject(new SevenRedSunsMuralRoom(room));
 			}
 
-			if (name == "SH_E01" && !ModOptions.CustomInGameCutscenes.Value || (room.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Spear && OracleHooks.CheckIfWhoTookThePearlIsBeforeCurrent(room.game.StoryCharacter)))
+			if (name == "SH_E01" && !ModOptions.CustomInGameCutscenes.Value || (room.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Spear && OracleHooks.CheckIfWhoTookThePearlIsBeforeCurrent(room.game.TimelinePoint)))
 			{
 				for (int i = 0; i < room.updateList.Count; i++)
 				{

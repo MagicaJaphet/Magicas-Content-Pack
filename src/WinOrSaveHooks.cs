@@ -290,7 +290,7 @@ namespace MagicasContentPack
 			orig(self, saveStateNumber, progression);
 		}
 
-		private static void SpearDreams(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+		private static void SpearDreams(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished, bool fromWarpPoint)
 		{
 			if (ModOptions.CustomDreams.Value)
 			{
@@ -307,7 +307,7 @@ namespace MagicasContentPack
 				}
 			}
 
-			orig(self, malnourished);
+			orig(self, malnourished, fromWarpPoint);
 		}
 
 		private static void ArtiDreamEndSlideshow(On.RainWorldGame.orig_ArtificerDreamEnd orig, RainWorldGame self)
@@ -579,7 +579,6 @@ namespace MagicasContentPack
 						roomName = "7S_AI";
 					}
 
-					game.GetStorySession.saveState.justBeatGame = true;
 					game.GetStorySession.saveState.progression.SaveWorldStateAndProgression(false);
 
 					AbstractCreature abstractCreature = game.FirstAlivePlayer;

@@ -25,7 +25,7 @@ public class Plugin : BaseUnityPlugin
 {
 	// Update this and the modinfo for new workshop upload
 	public const string MOD_ID = "magicaanthro.skins";
-
+	public static string modPath;
 	public static string MOD_NAME = "";
 	public static string VERSION = "";
 	public static string AUTHORS = "";
@@ -72,10 +72,9 @@ public class Plugin : BaseUnityPlugin
 
 			Logger = base.Logger;
 
-
 			// TODO: ORGANIZE CODE!!!
 
-			On.Menu.Remix.ConfigMenuTab.ButtonManager.SignalSave += ButtonManager_SignalSave; ;
+			On.Menu.Remix.ConfigMenuTab.ButtonManager.SignalSave += ButtonManager_SignalSave;
 
 			GraphicsHooks.Init();
 			ObjectHooks.Init();
@@ -93,6 +92,7 @@ public class Plugin : BaseUnityPlugin
 
 			var mod = ModManager.ActiveMods.FirstOrDefault(mod => mod.id == MOD_ID);
 
+			modPath = mod.path;
 			MOD_NAME = mod.name;
 			VERSION = mod.version;
 			AUTHORS = mod.authors;
