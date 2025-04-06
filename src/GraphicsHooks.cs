@@ -1,6 +1,4 @@
-﻿using DressMySlugcat;
-using DressMySlugcat.Hooks;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MoreSlugcats;
@@ -24,6 +22,7 @@ namespace MagicasContentPack
 		private static FLabel debugLabel;
 		private static FSprite[] debugSprites;
 		internal static float saintGlowTimerMax = 30f;
+		public static List<string> debugElementsNotChanged = [];
 
 		public static Dictionary<CustomColorValues, Color> customColorDict = new()
 		{
@@ -63,9 +62,10 @@ namespace MagicasContentPack
 				On.TailSegment.Update += TailSegment_Update;
 				On.PlayerGraphics.CosmeticPearl.InitiateSprites += CosmeticPearl_InitiateSprites;
 			}
-			catch
+			catch (Exception ex)
 			{
 				Plugin.Log(Plugin.LogStates.HookFail, nameof(GraphicsHooks));
+				Plugin.Logger.LogError(ex);
 			}
 		}
 
@@ -74,124 +74,16 @@ namespace MagicasContentPack
 			try
 			{
 				if (Plugin.isDMSEnabled)
-					ApplyDMSHooks();
+					DMSHooks.ApplyDMSHooks();
 
 				Plugin.Log(Plugin.LogStates.HooksSucceeded, nameof(GraphicsHooks) + " post");
 			}
 			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(GraphicsHooks));
+				Plugin.Log(Plugin.LogStates.HookFail, nameof(GraphicsHooks) + " post");
 				Plugin.Logger.LogError(ex);
 			}
 		}
-
-		// This is in a method in case the dependancy isn't enabled, so the assembly doesn't shit itself
-		private static void ApplyDMSHooks()
-		{
-			_ = new Hook(typeof(PlayerGraphicsDummy).GetMethod("UpdateSprites", BindingFlags.NonPublic | BindingFlags.Instance), (Action<PlayerGraphicsDummy> orig, PlayerGraphicsDummy dummy) =>
-			{
-				orig(dummy);
-
-				dummy?.UpdateSpritePositions();
-			});
-
-			_ = new Hook(typeof(PlayerGraphicsDummy).GetMethod(nameof(PlayerGraphicsDummy.UpdateSpritePositions), BindingFlags.Public | BindingFlags.Instance), (Action<PlayerGraphicsDummy> orig, PlayerGraphicsDummy dummy) =>
-			{
-				orig(dummy);
-
-				if (dummy != null)
-				{
-					FancyMenu owner = (FancyMenu)typeof(PlayerGraphicsDummy).GetField("owner", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dummy);
-
-					if (owner != null && Customization.For(owner.selectedSlugcat, owner.selectedPlayerIndex, true) != null)
-					{
-						CustomSprite customSprite = Customization.For(owner.selectedSlugcat, owner.selectedPlayerIndex, true).CustomSprite("HEAD", false);
-
-						if (customSprite != null && MagicaSprites.GetKey(customSprite.SpriteSheetID) != null && MagicaSprites.GetKey(customSprite.SpriteSheetID).faceLift)
-						{
-							dummy.Sprites[9].y = 3f + dummy.Sprites[0].y;
-						}
-					}
-				}
-			});
-
-			_ = new Hook(typeof(AtlasHooks).GetMethod(nameof(AtlasHooks.LoadAtlasesInternal), BindingFlags.Public | BindingFlags.Static), (Action<string> orig, string directory = "dressmyslugcat") =>
-			{
-				orig(directory);
-
-				List<string> source = Utils.ListDirectory(directory, false, true).Distinct<string>().ToList<string>();
-				string text = source.FirstOrDefault((string f) => "metadata.json".Equals(Path.GetFileName(f), StringComparison.InvariantCultureIgnoreCase));
-				if (!string.IsNullOrEmpty(text))
-				{
-					try
-					{
-						Dictionary<string, object> json = File.ReadAllText(text).dictionaryFromJson();
-
-						if (json != null && json.TryGetValue("id", out object idObj))
-						{
-							string id = idObj.ToString();
-
-							if (json != null && json.TryGetValue("taller", out object faceLift) && MagicaSprites.GetKey(id) != null)
-							{
-								string face = faceLift.ToString();
-								MagicaSprites.GetKey(id).faceLift = bool.TryParse(face, out _);
-								Plugin.DebugLog("taller found for " + id + ", adding: " + bool.TryParse(face, out _).ToString());
-							}
-						}
-					}
-					catch (Exception e)
-					{
-						Plugin.Logger.LogError(e);
-					}
-				}
-			});
-
-			// CODE DOESNT WORK BECAUSE IT BREAKS THE ASSEMBLY FOR SYSTEM COLLECTIONS APPARENTLY? IDK LOL
-			//ILHook loadDMSAtlasHook = new(typeof(AtlasHooks).GetMethod(nameof(AtlasHooks.LoadAtlasesInternal), BindingFlags.Public | BindingFlags.Static), (ILContext il) =>
-			//{
-			//	try
-			//	{
-			//		ILCursor cursor = new(il);
-
-			//		bool success = cursor.TryGotoNext(
-			//			MoveType.After,
-			//			x => x.MatchLdstr("author")
-			//			);
-
-			//		if (!success)
-			//		{
-			//			Plugin.Log(Plugin.LogStates.FailILMatch, nameof(loadDMSAtlasHook));
-			//		}
-
-			//		cursor.Emit(OpCodes.Nop);
-			//		cursor.Emit(OpCodes.Ldloc_3);
-			//		cursor.Emit(OpCodes.Ldloc, 5);
-			//		static void AddExtraHeadAnchorCheck(SpriteSheet spriteSheet, Dictionary<string, object> json)
-			//		{
-			//			if (spriteSheet != null && !string.IsNullOrEmpty(spriteSheet.ID) && (json != null && json.TryGetValue("id", out object idObj)))
-			//			{
-			//				string id = string.IsNullOrEmpty(spriteSheet.ID) ? idObj.ToString() : spriteSheet.ID;
-
-			//				if (json != null && json.TryGetValue("taller", out object faceLift))
-			//				{
-			//					string face = faceLift.ToString();
-			//					MagicaSprites.qualifiedForChange.Add(id, bool.TryParse(face, out _));
-			//					Plugin.DebugLog(MagicaSprites.qualifiedForChange.TryGetValue(id, out _).ToString());
-			//				}
-			//			}
-
-			//		}
-			//		cursor.EmitDelegate(AddExtraHeadAnchorCheck);
-			//	}
-			//	catch (Exception ex)
-			//	{
-			//		Plugin.Log(Plugin.LogStates.FailILInsert, ex);
-			//	}
-
-			//	Plugin.Log(Plugin.LogStates.ILSuccess, nameof(loadDMSAtlasHook));
-			//});
-		}
-
 		private static void PlayerGraphics_ColoredBodyPartList(ILContext il)
 		{
 			ILCursor cursor = new(il);
@@ -276,7 +168,7 @@ namespace MagicasContentPack
 				cursor.Emit(OpCodes.Ldarg_0);
 				static void FixVultureMaskPosition(VultureMask self)
 				{
-					if (self.grabbedBy.Count > 0 && self.grabbedBy[0].grabber is Player && self.grabbedBy[0].grabber.graphicsModule is PlayerGraphics pGraphics && CheckForDMS(pGraphics, "HEAD", DMSCheck.FaceLift))
+					if (self.grabbedBy.Count > 0 && self.grabbedBy[0].grabber is Player && self.grabbedBy[0].grabber.graphicsModule is PlayerGraphics pGraphics && DMSHooks.CheckForDMS(pGraphics, "HEAD", DMSHooks.DMSCheck.FaceLift))
 					{
 						self.maskGfx.overrideDrawVector += new Vector2(0f, 4f);
 					}
@@ -317,9 +209,9 @@ namespace MagicasContentPack
 		{
 			orig(self, ow);
 
+			var magicaCWT = MagicaSprites.magicaCWT.GetOrCreateValue(self);
 			if (ModOptions.CustomGraphics.Value)
 			{
-				var magicaCWT = MagicaSprites.magicaCWT.GetOrCreateValue(self);
 				if (magicaCWT != null)
 				{
 					List<Braids> braids = [];
@@ -380,7 +272,7 @@ namespace MagicasContentPack
 		{
 			orig(self, sLeaser, rCam);
 
-			if (ModOptions.CustomGraphics.Value && MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT))
+			if (MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT))
 			{
 				magicaCWT.bodySprite = sLeaser.sprites[0];
 				magicaCWT.hipSprite = sLeaser.sprites[1];
@@ -389,100 +281,117 @@ namespace MagicasContentPack
 				magicaCWT.legSprite = sLeaser.sprites[4];
 				magicaCWT.faceSprite = sLeaser.sprites[9];
 
-				if (magicaCWT.braids != null && magicaCWT.braids.Length > 0)
+				if (ModOptions.CustomMechanics.Value)
 				{
-					magicaCWT.braidStartSprite = sLeaser.sprites.Length;
-					Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + magicaCWT.braids.Length);
-					for (int i = magicaCWT.braidStartSprite; i < sLeaser.sprites.Length; i++)
+					if (ModManager.MSC)
 					{
-						sLeaser.sprites[i] = new("Braid")
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
 						{
-							scaleX = 0.8f
-						};
+							magicaCWT.ascensionStartSprite = sLeaser.sprites.Length;
+
+							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 6);
+							for (int i = 0; i < 4; i++)
+							{
+								sLeaser.sprites[magicaCWT.ascensionStartSprite + i] = new("pixel") { isVisible = false, anchorY = 0f };
+							}
+							sLeaser.sprites[magicaCWT.ascensionStartSprite + 4] = new("SaintKarmaRing") { scale = 0.5f, isVisible = false };
+							sLeaser.sprites[magicaCWT.ascensionStartSprite + 5] = new("SaintKarmaRing0") { scale = 0.5f, isVisible = false };
+
+							magicaCWT.saintAcensionLines = [
+								sLeaser.sprites[magicaCWT.ascensionStartSprite],
+								sLeaser.sprites[magicaCWT.ascensionStartSprite + 1],
+								sLeaser.sprites[magicaCWT.ascensionStartSprite + 2],
+								sLeaser.sprites[magicaCWT.ascensionStartSprite + 3]
+								];
+							magicaCWT.saintCreatureCircle = sLeaser.sprites[magicaCWT.ascensionStartSprite + 4];
+							magicaCWT.saintCreatureKarma = sLeaser.sprites[magicaCWT.ascensionStartSprite + 5];
+						}
 					}
 				}
 
-				if (ModManager.MSC)
+				if (ModOptions.CustomGraphics.Value)
 				{
-					if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+					if (magicaCWT.braids != null && magicaCWT.braids.Length > 0)
 					{
-						magicaCWT.artiStartSprite = sLeaser.sprites.Length;
-
-						if (self.player.DreamState)
+						magicaCWT.braidStartSprite = sLeaser.sprites.Length;
+						Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + magicaCWT.braids.Length);
+						for (int i = magicaCWT.braidStartSprite; i < sLeaser.sprites.Length; i++)
 						{
-							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 1);
-							sLeaser.sprites[magicaCWT.artiStartSprite] = new("TailPuff");
-
-							magicaCWT.artiTailSprite = sLeaser.sprites[magicaCWT.artiStartSprite];
-						}
-						else
-						{
-							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 3);
-							sLeaser.sprites[magicaCWT.artiStartSprite] = new("ScarHeadA0");
-							sLeaser.sprites[magicaCWT.artiStartSprite + 1] = new("ScarLegsA0");
-							sLeaser.sprites[magicaCWT.artiStartSprite + 2] = new("TailPuff");
-
-							magicaCWT.artiScarSprite = sLeaser.sprites[magicaCWT.artiStartSprite];
-							magicaCWT.artiLegSprite = sLeaser.sprites[magicaCWT.artiStartSprite + 1];
-							magicaCWT.artiTailSprite = sLeaser.sprites[magicaCWT.artiStartSprite + 2];
+							sLeaser.sprites[i] = new("Braid")
+							{
+								scaleX = 0.8f
+							};
 						}
 					}
 
-					if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+					if (ModManager.MSC)
 					{
-						magicaCWT.saintStartSprite = sLeaser.sprites.Length;
-
-						Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 8);
-						sLeaser.sprites[magicaCWT.saintStartSprite] = new("SaintFaceB0");
-						sLeaser.sprites[magicaCWT.saintStartSprite + 1] = new("FatiqueSaintFaceB0");
-						for (int i = 0; i < 4; i++)
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
 						{
-							sLeaser.sprites[magicaCWT.saintStartSprite + i + 2] = new("pixel") { isVisible = false, anchorY = 0f };
-						}
-						sLeaser.sprites[magicaCWT.saintStartSprite + 6] = new("SaintKarmaRing") { scale = 0.5f, isVisible = false };
-						sLeaser.sprites[magicaCWT.saintStartSprite + 7] = new("SaintKarmaRing0") { scale = 0.5f, isVisible = false };
+							magicaCWT.artiStartSprite = sLeaser.sprites.Length;
 
-						magicaCWT.saintScarSprite = sLeaser.sprites[magicaCWT.saintStartSprite];
-						magicaCWT.saintFatiqueSprite = sLeaser.sprites[magicaCWT.saintStartSprite + 1];
-						magicaCWT.saintAcensionLines = [
-							sLeaser.sprites[magicaCWT.saintStartSprite + 2],
-							sLeaser.sprites[magicaCWT.saintStartSprite + 3],
-							sLeaser.sprites[magicaCWT.saintStartSprite + 4],
-							sLeaser.sprites[magicaCWT.saintStartSprite + 5]
-							];
-						magicaCWT.saintCreatureCircle = sLeaser.sprites[magicaCWT.saintStartSprite + 6];
-						magicaCWT.saintCreatureKarma = sLeaser.sprites[magicaCWT.saintStartSprite + 7];
+							if (self.player.DreamState)
+							{
+								Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 1);
+								sLeaser.sprites[magicaCWT.artiStartSprite] = new("TailPuff");
+
+								magicaCWT.artiTailSprite = sLeaser.sprites[magicaCWT.artiStartSprite];
+							}
+							else
+							{
+								Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 3);
+								sLeaser.sprites[magicaCWT.artiStartSprite] = new("ScarHeadA0");
+								sLeaser.sprites[magicaCWT.artiStartSprite + 1] = new("ScarLegsA0");
+								sLeaser.sprites[magicaCWT.artiStartSprite + 2] = new("TailPuff");
+
+								magicaCWT.artiScarSprite = sLeaser.sprites[magicaCWT.artiStartSprite];
+								magicaCWT.artiLegSprite = sLeaser.sprites[magicaCWT.artiStartSprite + 1];
+								magicaCWT.artiTailSprite = sLeaser.sprites[magicaCWT.artiStartSprite + 2];
+							}
+						}
+
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+						{
+							magicaCWT.saintStartSprite = sLeaser.sprites.Length;
+
+							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 2);
+							sLeaser.sprites[magicaCWT.saintStartSprite] = new("SaintScarFaceB0");
+							sLeaser.sprites[magicaCWT.saintStartSprite + 1] = new("FatiqueSaintScarFaceB0");
+
+							magicaCWT.saintScarSprite = sLeaser.sprites[magicaCWT.saintStartSprite];
+							magicaCWT.saintFatiqueSprite = sLeaser.sprites[magicaCWT.saintStartSprite + 1];
+						}
 					}
+
+					if (self.player.SlugCatClass == SlugcatStats.Name.Red)
+					{
+						if (rCam.room != null && rCam.room.game != null && rCam.room.game.IsArenaSession)
+						{
+							WinOrSaveHooks.HunterScarProgression = 3;
+						}
+						float scarAlpha = 1f - (((float)(WinOrSaveHooks.HunterScarProgression + 1) / 4f) * 0.6f);
+
+						magicaCWT.hunterStartSprite = sLeaser.sprites.Length;
+
+						Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 6);
+
+						sLeaser.sprites[magicaCWT.hunterStartSprite] = new("HunterFaceScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 1] = new("HunterHipScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 2] = new("HunterLegScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 3] = new("HunterBodyScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 4] = new("HunterTailScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 5] = new("HunterTipScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+
+						magicaCWT.hunterFaceSprite = sLeaser.sprites[magicaCWT.hunterStartSprite];
+						magicaCWT.hunterHipSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 1];
+						magicaCWT.hunterLegSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 2];
+						magicaCWT.hunterBodySprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 3];
+						magicaCWT.hunterTailSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 4];
+						magicaCWT.hunterTailTipSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 5];
+					}
+
+					self.AddToContainer(sLeaser, rCam, null);
 				}
-
-				if (self.player.SlugCatClass == SlugcatStats.Name.Red)
-				{
-					if (rCam.room != null && rCam.room.game != null && rCam.room.game.IsArenaSession)
-					{
-						WinOrSaveHooks.HunterScarProgression = 3;
-					}
-					float scarAlpha = 1f - (((float)(WinOrSaveHooks.HunterScarProgression + 1) / 4f) * 0.6f);
-
-					magicaCWT.hunterStartSprite = sLeaser.sprites.Length;
-
-					Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 6);
-
-					sLeaser.sprites[magicaCWT.hunterStartSprite] = new("HunterFace" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-					sLeaser.sprites[magicaCWT.hunterStartSprite + 1] = new("HunterHip" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-					sLeaser.sprites[magicaCWT.hunterStartSprite + 2] = new("HunterLeg" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-					sLeaser.sprites[magicaCWT.hunterStartSprite + 3] = new("HunterBody" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-					sLeaser.sprites[magicaCWT.hunterStartSprite + 4] = new("HunterTail" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-					sLeaser.sprites[magicaCWT.hunterStartSprite + 5] = new("HunterTip" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-
-					magicaCWT.hunterFaceSprite = sLeaser.sprites[magicaCWT.hunterStartSprite];
-					magicaCWT.hunterHipSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 1];
-					magicaCWT.hunterLegSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 2];
-					magicaCWT.hunterBodySprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 3];
-					magicaCWT.hunterTailSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 4];
-					magicaCWT.hunterTailTipSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 5];
-				}
-
-				self.AddToContainer(sLeaser, rCam, null);
 			}
 		}
 
@@ -491,120 +400,133 @@ namespace MagicasContentPack
 		{
 			orig(self, sLeaser, rCam, newContatiner);
 
-			if (ModOptions.CustomGraphics.Value && MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT))
+			if (MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT))
 			{
 				newContatiner ??= rCam.ReturnFContainer("Midground");
 
-				if (magicaCWT.braids != null && sLeaser.sprites.Length > magicaCWT.braidStartSprite)
+				if (ModOptions.CustomMechanics.Value)
 				{
-					for (int i = magicaCWT.braidStartSprite; i < sLeaser.sprites.Length; i++)
+					if (ModManager.MSC)
 					{
-						if (sLeaser.sprites[i] != null)
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.ascensionStartSprite)
 						{
-							sLeaser.sprites[i].RemoveFromContainer();
-							newContatiner.AddChild(sLeaser.sprites[i]);
-							sLeaser.sprites[i].MoveBehindOtherNode(sLeaser.sprites[0]);
+							if (magicaCWT.saintAcensionLines != null)
+							{
+								foreach (var sprite in magicaCWT.saintAcensionLines)
+								{
+									sprite.RemoveFromContainer();
+									rCam.ReturnFContainer("HUD2").AddChild(sprite);
+								}
+							}
+							if (magicaCWT.saintCreatureCircle != null)
+							{
+								magicaCWT.saintCreatureCircle.RemoveFromContainer();
+								rCam.ReturnFContainer("HUD2").AddChild(magicaCWT.saintCreatureCircle);
+							}
+							if (magicaCWT.saintCreatureKarma != null)
+							{
+								magicaCWT.saintCreatureKarma.RemoveFromContainer();
+								rCam.ReturnFContainer("HUD2").AddChild(magicaCWT.saintCreatureKarma);
+								magicaCWT.saintCreatureKarma.MoveBehindOtherNode(magicaCWT.saintCreatureCircle);
+							}
 						}
 					}
 				}
 
-				if (ModManager.MSC)
+				if (ModOptions.CustomGraphics.Value)
 				{
-					if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer && sLeaser.sprites.Length > magicaCWT.artiStartSprite)
+					if (magicaCWT.braids != null && sLeaser.sprites.Length > magicaCWT.braidStartSprite)
 					{
-						if (magicaCWT.artiScarSprite != null)
+						for (int i = magicaCWT.braidStartSprite; i < sLeaser.sprites.Length; i++)
 						{
-							magicaCWT.artiScarSprite.RemoveFromContainer();
-							newContatiner.AddChild(magicaCWT.artiScarSprite);
-							magicaCWT.artiScarSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
-						}
-						if (magicaCWT.artiLegSprite != null)
-						{
-							magicaCWT.artiLegSprite.RemoveFromContainer();
-							newContatiner.AddChild(magicaCWT.artiLegSprite);
-							magicaCWT.artiLegSprite.MoveBehindOtherNode(sLeaser.sprites[5]);
-						}
-						if (magicaCWT.artiTailSprite != null)
-						{
-							magicaCWT.artiTailSprite.RemoveFromContainer();
-							newContatiner.AddChild(magicaCWT.artiTailSprite);
-							magicaCWT.artiTailSprite.MoveBehindOtherNode(sLeaser.sprites[2]);
+							if (sLeaser.sprites[i] != null)
+							{
+								sLeaser.sprites[i].RemoveFromContainer();
+								newContatiner.AddChild(sLeaser.sprites[i]);
+								sLeaser.sprites[i].MoveBehindOtherNode(sLeaser.sprites[0]);
+							}
 						}
 					}
-				}
 
-				if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.saintStartSprite)
-				{
-					if (magicaCWT.saintScarSprite != null)
+					if (ModManager.MSC)
 					{
-						magicaCWT.saintScarSprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.saintScarSprite);
-						magicaCWT.saintScarSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
-					}
-					if (magicaCWT.saintFatiqueSprite != null)
-					{
-						magicaCWT.saintFatiqueSprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.saintFatiqueSprite);
-						magicaCWT.saintFatiqueSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
-					}
-					if (magicaCWT.saintAcensionLines != null)
-					{
-						foreach (var sprite in magicaCWT.saintAcensionLines)
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer && sLeaser.sprites.Length > magicaCWT.artiStartSprite)
 						{
-							sprite.RemoveFromContainer();
-							rCam.ReturnFContainer("HUD2").AddChild(sprite);
+							if (magicaCWT.artiScarSprite != null)
+							{
+								magicaCWT.artiScarSprite.RemoveFromContainer();
+								newContatiner.AddChild(magicaCWT.artiScarSprite);
+								magicaCWT.artiScarSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
+							}
+							if (magicaCWT.artiLegSprite != null)
+							{
+								magicaCWT.artiLegSprite.RemoveFromContainer();
+								newContatiner.AddChild(magicaCWT.artiLegSprite);
+								magicaCWT.artiLegSprite.MoveBehindOtherNode(sLeaser.sprites[5]);
+							}
+							if (magicaCWT.artiTailSprite != null)
+							{
+								magicaCWT.artiTailSprite.RemoveFromContainer();
+								newContatiner.AddChild(magicaCWT.artiTailSprite);
+								magicaCWT.artiTailSprite.MoveBehindOtherNode(sLeaser.sprites[2]);
+							}
+						}
+
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.saintStartSprite)
+						{
+							if (magicaCWT.saintScarSprite != null)
+							{
+								magicaCWT.saintScarSprite.RemoveFromContainer();
+								newContatiner.AddChild(magicaCWT.saintScarSprite);
+								magicaCWT.saintScarSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
+							}
+							if (magicaCWT.saintFatiqueSprite != null)
+							{
+								magicaCWT.saintFatiqueSprite.RemoveFromContainer();
+								newContatiner.AddChild(magicaCWT.saintFatiqueSprite);
+								magicaCWT.saintFatiqueSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
+							}
 						}
 					}
-					if (magicaCWT.saintCreatureCircle != null)
-					{
-						magicaCWT.saintCreatureCircle.RemoveFromContainer();
-						rCam.ReturnFContainer("HUD2").AddChild(magicaCWT.saintCreatureCircle);
-					}
-					if (magicaCWT.saintCreatureKarma != null)
-					{
-						magicaCWT.saintCreatureKarma.RemoveFromContainer();
-						rCam.ReturnFContainer("HUD2").AddChild(magicaCWT.saintCreatureKarma);
-						magicaCWT.saintCreatureKarma.MoveBehindOtherNode(magicaCWT.saintCreatureCircle);
-					}
-				}
 
-				if (self.player.SlugCatClass == SlugcatStats.Name.Red && sLeaser.sprites.Length > magicaCWT.hunterStartSprite)
-				{
-					if (magicaCWT.hunterFaceSprite != null)
+					if (self.player.SlugCatClass == SlugcatStats.Name.Red && sLeaser.sprites.Length > magicaCWT.hunterStartSprite)
 					{
-						magicaCWT.hunterFaceSprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.hunterFaceSprite);
-						magicaCWT.hunterFaceSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
-					}
-					if (magicaCWT.hunterHipSprite != null)
-					{
-						magicaCWT.hunterHipSprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.hunterHipSprite);
-						magicaCWT.hunterHipSprite.MoveBehindOtherNode(sLeaser.sprites[3]);
-					}
-					if (magicaCWT.hunterLegSprite != null)
-					{
-						magicaCWT.hunterLegSprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.hunterLegSprite);
-						magicaCWT.hunterLegSprite.MoveBehindOtherNode(sLeaser.sprites[5]);
-					}
-					if (magicaCWT.hunterBodySprite != null)
-					{
-						magicaCWT.hunterBodySprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.hunterBodySprite);
-						magicaCWT.hunterBodySprite.MoveBehindOtherNode(sLeaser.sprites[3]);
-					}
-					if (magicaCWT.hunterTailSprite != null)
-					{
-						magicaCWT.hunterTailSprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.hunterTailSprite);
-						magicaCWT.hunterTailSprite.MoveBehindOtherNode(sLeaser.sprites[1]);
-					}
-					if (magicaCWT.hunterTailTipSprite != null)
-					{
-						magicaCWT.hunterTailTipSprite.RemoveFromContainer();
-						newContatiner.AddChild(magicaCWT.hunterTailTipSprite);
-						magicaCWT.hunterTailTipSprite.MoveBehindOtherNode(sLeaser.sprites[1]);
+						if (magicaCWT.hunterFaceSprite != null)
+						{
+							magicaCWT.hunterFaceSprite.RemoveFromContainer();
+							newContatiner.AddChild(magicaCWT.hunterFaceSprite);
+							magicaCWT.hunterFaceSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
+						}
+						if (magicaCWT.hunterHipSprite != null)
+						{
+							magicaCWT.hunterHipSprite.RemoveFromContainer();
+							newContatiner.AddChild(magicaCWT.hunterHipSprite);
+							magicaCWT.hunterHipSprite.MoveBehindOtherNode(sLeaser.sprites[3]);
+						}
+						if (magicaCWT.hunterLegSprite != null)
+						{
+							magicaCWT.hunterLegSprite.RemoveFromContainer();
+							newContatiner.AddChild(magicaCWT.hunterLegSprite);
+							magicaCWT.hunterLegSprite.MoveBehindOtherNode(sLeaser.sprites[5]);
+						}
+						if (magicaCWT.hunterBodySprite != null)
+						{
+							magicaCWT.hunterBodySprite.RemoveFromContainer();
+							newContatiner.AddChild(magicaCWT.hunterBodySprite);
+							magicaCWT.hunterBodySprite.MoveBehindOtherNode(sLeaser.sprites[3]);
+						}
+						if (magicaCWT.hunterTailSprite != null)
+						{
+							magicaCWT.hunterTailSprite.RemoveFromContainer();
+							newContatiner.AddChild(magicaCWT.hunterTailSprite);
+							magicaCWT.hunterTailSprite.MoveBehindOtherNode(sLeaser.sprites[1]);
+						}
+						if (magicaCWT.hunterTailTipSprite != null)
+						{
+							magicaCWT.hunterTailTipSprite.RemoveFromContainer();
+							newContatiner.AddChild(magicaCWT.hunterTailTipSprite);
+							magicaCWT.hunterTailTipSprite.MoveBehindOtherNode(sLeaser.sprites[1]);
+						}
 					}
 				}
 			}
@@ -817,7 +739,7 @@ namespace MagicasContentPack
 			string spriteFace;
 			int spriteScale;
 
-			if (CheckForDMS(self, "HEAD", DMSCheck.FaceLift))
+			if (DMSHooks.CheckForDMS(self, "HEAD", DMSHooks.DMSCheck.FaceLift))
 			{
 				sLeaser.sprites[9].anchorY = 0.43f;
 			}
@@ -846,328 +768,440 @@ namespace MagicasContentPack
 				spriteScale = 1;
 			}
 
-			if (ModOptions.CustomGraphics.Value && MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT))
+			if (ModOptions.CustomGraphics.Value && !Plugin.isDMSEnabled)
 			{
-				magicaCWT.headSpritePos = sLeaser.sprites[3].GetPosition() + rCam.pos;
-				magicaCWT.faceSpritePos = sLeaser.sprites[9].GetPosition() + rCam.pos;
+				Dictionary<FSprite, bool> spriteSymmetry = CheckForSpriteSymmetry(self.player.SlugCatClass, sLeaser);
 
-				if (ModManager.MSC)
+				foreach (var sprite in spriteSymmetry.Keys.ToArray())
 				{
-					if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer && sLeaser.sprites.Length > magicaCWT.artiStartSprite)
+					if (!sprite.element.name.ToLowerInvariant().Contains(self.player.SlugCatClass.value.ToLowerInvariant()))
 					{
-						if (magicaCWT.artiScarSprite != null && magicaCWT.headSprite != null)
+						if (spriteSymmetry[sprite] && Futile.atlasManager.DoesContainElementWithName(self.player.SlugCatClass.value + spriteFace + sprite.element.name))
 						{
-							if ((!magicaCWT.artiScarSprite.element.name.Contains(magicaCWT.headSprite.element.name) || !magicaCWT.artiScarSprite.element.name.Contains(spriteFace)) && magicaCWT.headSprite.element.name.Length == 6)
-							{
-								magicaCWT.artiScarSprite.SetElementByName(spriteFace + "Scar" + magicaCWT.headSprite.element.name);
-							}
-							CopyOverSpriteAttributes(magicaCWT.artiScarSprite, magicaCWT.headSprite);
-							magicaCWT.artiScarSprite.scaleX = spriteScale;
+							sprite.SetElementByName(self.player.SlugCatClass.value + spriteFace + sprite.element.name);
 						}
-
-						if (magicaCWT.artiLegSprite != null && magicaCWT.legSprite != null)
+						else if (Futile.atlasManager.DoesContainElementWithName(self.player.SlugCatClass.value + sprite.element.name))
 						{
-							if (!magicaCWT.artiLegSprite.element.name.Contains(magicaCWT.legSprite.element.name) || !magicaCWT.artiLegSprite.element.name.Contains(self.player.flipDirection == 1 ? "Right" : "Left"))
-							{
-								magicaCWT.artiLegSprite.SetElementByName((self.player.flipDirection == 1 ? "Right" : "Left") + "Scar" + magicaCWT.legSprite.element.name);
-							}
-							CopyOverSpriteAttributes(magicaCWT.artiLegSprite, magicaCWT.legSprite);
+							sprite.SetElementByName(self.player.SlugCatClass.value + sprite.element.name);
 						}
-
-						if (magicaCWT.artiTailSprite != null && magicaCWT.tailSprite != null)
+						else if (!debugElementsNotChanged.Contains(self.player.SlugCatClass + sprite.element.name))
 						{
-							Color baseColor = magicaCWT.tailSprite.color;
-
-							magicaCWT.artiTailSprite.SetPosition(self.tail[3].pos - camPos);
-
-							if (magicaCWT.tailSprite is TriangleMesh tailMesh)
-							{
-								magicaCWT.tailSprite.MoveBehindOtherNode(sLeaser.sprites[1]);
-								tailMesh.customColor = true;
-								if (tailMesh.verticeColors == null || tailMesh.verticeColors.Length != tailMesh.vertices.Length)
-								{
-									tailMesh.verticeColors = new Color[tailMesh.vertices.Length];
-								}
-
-								for (int j = tailMesh.verticeColors.Length - 1; j >= 0; j--)
-								{
-									if (j < (self.player.DreamState ? 12 : 9))
-									{
-										tailMesh.verticeColors[j] = baseColor;
-									}
-									else if (magicaCWT.colorTimer > 0f)
-									{
-										tailMesh.verticeColors[j] = Color.LerpUnclamped(magicaCWT.scarColor, Color.white, magicaCWT.colorTimer / magicaCWT.colorTimerMax);
-									}
-									else
-									{
-										tailMesh.verticeColors[j] = magicaCWT.scarColor;
-									}
-								}
-								tailMesh.Refresh();
-
-								magicaCWT.artiTailSprite.SetPosition(tailMesh.vertices[tailMesh.vertices.Length - 1]);
-							}
-
-							if (self.player.pyroJumpped && !magicaCWT.flashSet)
-							{
-								magicaCWT.colorTimer = magicaCWT.colorTimerMax;
-								magicaCWT.flashSet = true;
-							}
-							if (magicaCWT.colorTimer == 0f && !self.player.pyroJumpped)
-							{
-								magicaCWT.flashSet = false;
-								sLeaser.sprites[sLeaser.sprites.Length - 1].color = magicaCWT.scarColor;
-							}
-							if (magicaCWT.colorTimer > 0f)
-							{
-								magicaCWT.colorTimer--;
-								if (!self.player.DreamState)
-								{
-									magicaCWT.artiTailSprite.color = Color.LerpUnclamped(magicaCWT.scarColor, Color.white, magicaCWT.colorTimer / magicaCWT.colorTimerMax);
-								}
-							}
-						}
-					}
-
-					if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.saintStartSprite && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(self.player, out var player))
-					{
-						if (!magicaCWT.saintScarSprite.element.name.Contains(magicaCWT.faceSprite.element.name))
-						{
-							magicaCWT.saintScarSprite.SetElementByName("Saint" + magicaCWT.faceSprite.element.name);
-						}
-						if (!magicaCWT.saintFatiqueSprite.element.name.Contains(magicaCWT.faceSprite.element.name))
-						{
-							magicaCWT.saintFatiqueSprite.SetElementByName("FatiqueSaint" + magicaCWT.faceSprite.element.name);
-						}
-						CopyOverSpriteAttributes(magicaCWT.saintScarSprite, magicaCWT.faceSprite);
-						CopyOverSpriteAttributes(magicaCWT.saintFatiqueSprite, magicaCWT.faceSprite);
-
-						if (magicaCWT.saintScarSprite != null)
-						{
-							magicaCWT.saintScarSprite.isVisible = true;
-
-							magicaCWT.saintCreatureCircle.isVisible = ModOptions.CustomMechanics.Value && player.magicaSaintAscension && player.saintTarget != null;
-							magicaCWT.saintCreatureKarma.isVisible = magicaCWT.saintCreatureCircle.isVisible;
-							foreach (var line in magicaCWT.saintAcensionLines)
-							{
-								line.isVisible = magicaCWT.saintCreatureCircle.isVisible;
-							}
-
-							if ((ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension)
-							{
-								if (magicaCWT.saintGlowTimer == 0)
-								{
-									magicaCWT.originalColors = [
-										sLeaser.sprites[0].color,
-										sLeaser.sprites[1].color,
-										sLeaser.sprites[2].color,
-										sLeaser.sprites[3].color,
-										sLeaser.sprites[4].color,
-										sLeaser.sprites[5].color
-										];
-								}
-
-								if (magicaCWT.saintGlowTimer < saintGlowTimerMax)
-								{
-									magicaCWT.saintGlowTimer++;
-								}
-								ChangeSaintBodyColors(sLeaser.sprites, magicaCWT.originalColors, self, magicaCWT);
-
-								if (magicaCWT.faceSprite != null)
-								{
-									if (player.zoneInToAscend)
-									{
-										magicaCWT.faceSprite.color = Color.white;
-									}
-									else
-									{
-										magicaCWT.faceSprite.color = UnityEngine.Random.value > 0.3f ? RainWorld.SaturatedGold : Color.cyan;
-									}
-
-									if (ModOptions.CustomMechanics.Value && player.ascensionBuffer > 0f)
-									{
-										magicaCWT.saintScarSprite.color = Color.Lerp(RainWorld.SaturatedGold, Color.red, player.ascensionBuffer / PlayerHooks.maxAscensionBuffer);
-									}
-									else
-									{
-										magicaCWT.saintScarSprite.color = Color.Lerp(RainWorld.SaturatedGold, Color.cyan, ModOptions.CustomMechanics.Value ? player.ascendTimer / 1f : self.player.killFac / 1f);
-									}
-
-									if (!ModOptions.CustomMechanics.Value)
-									{
-										sLeaser.sprites[14].color = magicaCWT.saintScarSprite.color;
-
-										for (int m = 0; m < self.numGodPips; m++)
-										{
-											if (self.player.karmaCharging > 0)
-											{
-												sLeaser.sprites[15 + m].color = magicaCWT.faceSprite.color;
-											}
-											else
-											{
-												sLeaser.sprites[15 + m].color = PlayerGraphics.SlugcatColor(self.CharacterForColor);
-											}
-										}
-									}
-									else
-									{
-										magicaCWT.saintCreatureCircle.scale = Custom.LerpCircEaseOut(0.5f, 0.7f, player.ascendTimer / 1f);
-										magicaCWT.saintCreatureKarma.scale = Custom.LerpCircEaseOut(0.5f, 0.55f, player.ascendTimer / 1f);
-
-										if (player.changingTarget > 0f)
-										{
-											player.changingTarget = Mathf.Max(player.changingTarget - 1f, 0f);
-										}
-
-										if (player.saintTarget != null)
-										{
-											if (player.karmaCycleTimer > 0f)
-											{
-												player.karmaCycleTimer = Mathf.Max (player.karmaCycleTimer - 1f, 0f);
-											}
-											if (!player.karmaCycling || (player.karmaCycling && player.karmaCycleTimer <= 0f) || player.ascendTimer > 0f)
-											{
-												magicaCWT.saintCreatureKarma.SetElementByName(GetCreatureKarma(player.saintTarget, player, self.player.room.game.IsStorySession && self.player.room.world.name == "HR"));
-											}
-
-											float alphaLerp = Custom.LerpExpEaseInOut(0f, 1f, (PlayerHooks.saintRadius - Custom.Dist(self.player.firstChunk.pos, player.saintTargetPos)) / PlayerHooks.saintRadius);
-											magicaCWT.saintCreatureCircle.alpha = (magicaCWT.saintGlowTimer < saintGlowTimerMax) ? alphaLerp * Custom.LerpBackEaseIn(0f, 1f, magicaCWT.saintGlowTimer / saintGlowTimerMax) : player.changingTarget > 0f ? alphaLerp * Custom.LerpBackEaseIn(0f, 1f, player.changingTarget / 20f) : alphaLerp;
-											magicaCWT.saintCreatureKarma.alpha = magicaCWT.saintCreatureCircle.alpha;
-											magicaCWT.saintCreatureCircle.SetPosition(player.saintTargetPos - rCam.pos);
-											magicaCWT.saintCreatureKarma.SetPosition(magicaCWT.saintCreatureCircle.GetPosition());
-										}
-
-										magicaCWT.saintCreatureCircle.color = magicaCWT.saintScarSprite.color;
-										magicaCWT.saintCreatureKarma.color = player.saintTargetIsKarmaLocked ? Color.Lerp(Color.white, Color.red, Mathf.Sin(player.activationTimer / 5f) - (player.ascendTimer / 1f)) : Color.white;
-										for (int i = 0; i < magicaCWT.saintAcensionLines.Length; i++)
-										{
-											FSprite line = magicaCWT.saintAcensionLines[i];
-
-											line.color = magicaCWT.saintScarSprite.color;
-											line.alpha = magicaCWT.saintCreatureCircle.alpha;
-
-											//float numOfRotations = 5f;
-											float rotationLerp = (player.activationTimer % 50f) / 50f;
-											Vector2 facePos = GetFacePos(magicaCWT.saintScarSprite, i);
-											Vector2 circlePos = Custom.RotateAroundVector(magicaCWT.saintCreatureCircle.GetPosition() + (new Vector2(magicaCWT.saintCreatureCircle.width, 0f) / 2f), magicaCWT.saintCreatureCircle.GetPosition(), Mathf.Lerp(0, 360f, (float)(i + 1) / 4f) + Mathf.Lerp(-45f, 315f, rotationLerp));
-
-											line.SetPosition(facePos);
-											line.scaleY = Custom.Dist(facePos, circlePos);
-											line.rotation = Custom.AimFromOneVectorToAnother(facePos, circlePos);
-										}
-									}
-								}
-							}
-							else
-							{
-								if (magicaCWT.saintGlowTimer > 0)
-								{
-									magicaCWT.saintGlowTimer--;
-									ChangeSaintBodyColors(sLeaser.sprites, magicaCWT.originalColors, self, magicaCWT);
-								}
-
-								if (rCam.ghostMode > 0f)
-								{
-									magicaCWT.saintScarSprite.color = Color.Lerp(magicaCWT.scarColor, RainWorld.SaturatedGold, rCam.ghostMode);
-								}
-								else if (player.ascensionFatique > 0f)
-								{
-									magicaCWT.saintScarSprite.color = Color.Lerp(magicaCWT.scarColor, Color.red, player.ascensionFatique / PlayerHooks.ascensionFatique);
-									magicaCWT.saintFatiqueSprite.color = magicaCWT.saintScarSprite.color;
-									magicaCWT.saintFatiqueSprite.alpha = Mathf.Lerp(0f, 1f, player.ascensionFatique / PlayerHooks.ascensionFatique);
-								}
-								else
-								{
-									magicaCWT.saintScarSprite.color = magicaCWT.scarColor;
-									magicaCWT.saintFatiqueSprite.alpha = 0f;
-								}
-							}
-						}
-					}
-				}
-
-				if (self.player.SlugCatClass == SlugcatStats.Name.Red && sLeaser.sprites.Length > magicaCWT.hunterStartSprite)
-				{
-					if (magicaCWT.hunterFaceSprite != null && magicaCWT.faceSprite != null)
-					{
-						CopyOverSpriteAttributes(magicaCWT.hunterFaceSprite, magicaCWT.faceSprite);
-					}
-					if (magicaCWT.hunterHipSprite != null && magicaCWT.hipSprite != null)
-					{
-						CopyOverSpriteAttributes(magicaCWT.hunterHipSprite, magicaCWT.hipSprite);
-					}
-					if (magicaCWT.hunterLegSprite != null && magicaCWT.legSprite != null)
-					{
-						CopyOverSpriteAttributes(magicaCWT.hunterLegSprite, magicaCWT.legSprite);
-					}
-					if (magicaCWT.hunterBodySprite != null && magicaCWT.bodySprite != null)
-					{
-						CopyOverSpriteAttributes(magicaCWT.hunterBodySprite, magicaCWT.bodySprite);
-					}
-					if (magicaCWT.hunterTailSprite != null && magicaCWT.hunterTailTipSprite != null && magicaCWT.tailSprite != null)
-					{
-						if (sLeaser.sprites[2] is TriangleMesh tailMesh)
-						{
-							if (spriteFace == "Left")
-							{
-								magicaCWT.hunterTailSprite.scaleX = -1f;
-							}
-							else
-							{
-								magicaCWT.hunterTailSprite.scaleX = 1f;
-							}
-
-							float rotatte = Custom.AimFromOneVectorToAnother(new(tailMesh.vertices[tailMesh.vertices.Length - 1].x, tailMesh.vertices[tailMesh.vertices.Length - 1].y), new(tailMesh.vertices[0].x, tailMesh.vertices[0].y));
-							magicaCWT.hunterTailSprite.x = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length / 2].x, sLeaser.sprites[1].x, 0.5f);
-							magicaCWT.hunterTailSprite.y = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length / 2].y, sLeaser.sprites[1].y, 0.5f);
-							magicaCWT.hunterTailSprite.rotation = rotatte;
-
-							magicaCWT.hunterTailTipSprite.x = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length - 4].x, sLeaser.sprites[1].x, 0.2f);
-							magicaCWT.hunterTailTipSprite.y = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length - 4].y, sLeaser.sprites[1].y, 0.2f);
-							magicaCWT.hunterTailTipSprite.rotation = rotatte + 90f;
-						}
-					}
-				}
-
-				if (magicaCWT.braids != null && magicaCWT.braids.Length > 0 && sLeaser.sprites.Length > magicaCWT.braidStartSprite)
-				{
-					for (int i = 0; i < magicaCWT.braids.Length; i++)
-					{
-						FSprite braid = sLeaser.sprites[magicaCWT.braidStartSprite + i];
-						int lengthOfRow = magicaCWT.braids.Length / magicaCWT.braidRows;
-						float lerp = 1f - ((((float)(i - magicaCWT.braids.IndexOf(magicaCWT.headBraids[magicaCWT.braids[i].row])) / (float)lengthOfRow) + 0.2f) * 0.8f);
-
-						braid.SetPosition(Vector2.Lerp(magicaCWT.lastBraidPos[i], Vector2.Lerp(magicaCWT.braids[i].pos - camPos, magicaCWT.headSprite.GetPosition(), lerp), 0.8f));
-						magicaCWT.lastBraidPos[i] = braid.GetPosition();
-
-						if (i % (magicaCWT.braids.Length / magicaCWT.braidRows) == 0)
-						{
-							braid.rotation = Custom.AimFromOneVectorToAnother(braid.GetPosition(), magicaCWT.headSprite.GetPosition());
-						}
-						else
-						{
-							braid.rotation = Custom.AimFromOneVectorToAnother(braid.GetPosition(), sLeaser.sprites[magicaCWT.braidStartSprite + i - 1].GetPosition());
-							braid.scaleY = Mathf.Lerp(1f, 2.2f, magicaCWT.braids[i].vel.magnitude / 6.5f);
-						}
-
-						bool flipped = self.player.flipDirection == -1f;
-						float lerpAgain = GetBraidLerp(magicaCWT, (float)magicaCWT.braids[i].row, flipped);
-						braid.color = Color.Lerp(magicaCWT.braidColor, rCam.currentPalette.blackColor, lerpAgain);
-
-						braid.MoveBehindOtherNode(sLeaser.sprites[0]);
-						if (flipped && i != 0)
-						{
-							braid.MoveBehindOtherNode(sLeaser.sprites[magicaCWT.braidStartSprite + i - 1]);
-						}
-
-						if (ModManager.MSC && rCam.game.IsStorySession && rCam.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && magicaCWT.headSprite != null)
-						{
-							magicaCWT.braidColor = magicaCWT.headSprite.color;
+							debugElementsNotChanged.Add(self.player.SlugCatClass + sprite.element.name);
 						}
 					}
 				}
 			}
+
+			if (self.player != null && MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT) && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(self.player, out var player))
+			{
+				// For altering custom mechanics or vanilla sprites
+				if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.ascensionStartSprite)
+				{
+					if ((ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension)
+					{
+						magicaCWT.saintCreatureCircle.isVisible = ModOptions.CustomMechanics.Value && player.magicaSaintAscension && player.saintTarget != null;
+						magicaCWT.saintCreatureKarma.isVisible = magicaCWT.saintCreatureCircle.isVisible;
+						foreach (var line in magicaCWT.saintAcensionLines)
+						{
+							line.isVisible = magicaCWT.saintCreatureCircle.isVisible;
+						}
+
+						if (magicaCWT.saintGlowTimer == 0)
+						{
+							magicaCWT.originalColors = [
+								sLeaser.sprites[0].color,
+								sLeaser.sprites[1].color,
+								sLeaser.sprites[2].color,
+								sLeaser.sprites[3].color,
+								sLeaser.sprites[4].color,
+								sLeaser.sprites[5].color
+								];
+						}
+
+						if (magicaCWT.saintGlowTimer < saintGlowTimerMax)
+						{
+							magicaCWT.saintGlowTimer++;
+						}
+						ChangeSaintBodyColors(sLeaser.sprites, magicaCWT.originalColors, self, magicaCWT);
+
+						if (magicaCWT.faceSprite != null)
+						{
+							magicaCWT.faceSprite.color = Color.Lerp(UnityEngine.Random.value > 0.3f ? RainWorld.SaturatedGold : Color.cyan, Color.white, player.ascendTimer / 1f);
+
+							Color ascensionColor = new(1f, 1f, 1f);
+							if (ModOptions.CustomMechanics.Value && player.ascensionBuffer > 0f)
+							{
+								ascensionColor = Color.Lerp(RainWorld.SaturatedGold, RainWorld.RippleGold, player.ascensionBuffer / PlayerHooks.maxAscensionBuffer);
+							}
+							else
+							{
+								ascensionColor = Color.Lerp(RainWorld.SaturatedGold, Color.cyan, ModOptions.CustomMechanics.Value ? player.ascendTimer / 1f : self.player.killFac / 1f);
+							}
+
+							if (magicaCWT.saintScarSprite != null)
+							{
+								magicaCWT.saintScarSprite.color = ascensionColor;
+							}
+
+							if (!ModOptions.CustomMechanics.Value)
+							{
+								sLeaser.sprites[14].color = ascensionColor;
+
+								for (int m = 0; m < self.numGodPips; m++)
+								{
+									if (self.player.karmaCharging > 0)
+									{
+										sLeaser.sprites[15 + m].color = magicaCWT.faceSprite.color;
+									}
+									else
+									{
+										sLeaser.sprites[15 + m].color = PlayerGraphics.SlugcatColor(self.CharacterForColor);
+									}
+								}
+							}
+							else
+							{
+								magicaCWT.saintCreatureCircle.scale = Custom.LerpCircEaseOut(0.5f, 0.7f, player.ascendTimer / 1f);
+								magicaCWT.saintCreatureKarma.scale = Custom.LerpCircEaseOut(0.5f, 0.55f, player.ascendTimer / 1f);
+
+								if (player.changingTarget > 0f)
+								{
+									player.changingTarget = Mathf.Max(player.changingTarget - 1f, 0f);
+								}
+
+								if (player.saintTarget != null)
+								{
+									if (player.karmaCycleTimer > 0f)
+									{
+										player.karmaCycleTimer = Mathf.Max(player.karmaCycleTimer - 1f, 0f);
+									}
+									if (!player.karmaCycling || (player.karmaCycling && player.karmaCycleTimer <= 0f) || player.ascendTimer > 0f)
+									{
+										magicaCWT.saintCreatureKarma.SetElementByName(GetCreatureKarma(player.saintTarget, player, self.player.room != null && self.player.room.game.IsStorySession && self.player.room.world.name == "HR"));
+									}
+
+									float alphaLerp = Custom.LerpExpEaseInOut(0f, 1f, (PlayerHooks.saintRadius - Custom.Dist(self.player.firstChunk.pos, player.saintTargetPos)) / PlayerHooks.saintRadius);
+									magicaCWT.saintCreatureCircle.alpha = (magicaCWT.saintGlowTimer < saintGlowTimerMax) ? alphaLerp * Custom.LerpBackEaseIn(0f, 1f, magicaCWT.saintGlowTimer / saintGlowTimerMax) : player.changingTarget > 0f ? alphaLerp * Custom.LerpBackEaseIn(0f, 1f, player.changingTarget / 20f) : alphaLerp;
+									magicaCWT.saintCreatureKarma.alpha = magicaCWT.saintCreatureCircle.alpha;
+									magicaCWT.saintCreatureCircle.SetPosition(player.saintTargetPos - rCam.pos);
+									magicaCWT.saintCreatureKarma.SetPosition(magicaCWT.saintCreatureCircle.GetPosition());
+								}
+
+								magicaCWT.saintCreatureCircle.color = ascensionColor;
+								magicaCWT.saintCreatureKarma.color = player.saintTargetIsKarmaLocked ? Color.Lerp(Color.white, Color.red, Mathf.Sin(player.activationTimer / 5f) - (player.ascendTimer / 1f)) : Color.white;
+								for (int i = 0; i < magicaCWT.saintAcensionLines.Length; i++)
+								{
+									FSprite line = magicaCWT.saintAcensionLines[i];
+
+									line.color = ascensionColor;
+									line.alpha = magicaCWT.saintCreatureCircle.alpha;
+
+									//float numOfRotations = 5f;
+									float rotationLerp = (player.activationTimer % 50f) / 50f;
+									Vector2 facePos = GetFacePos(magicaCWT.saintScarSprite ?? magicaCWT.faceSprite, i);
+									Vector2 circlePos = Custom.RotateAroundVector(magicaCWT.saintCreatureCircle.GetPosition() + (new Vector2(magicaCWT.saintCreatureCircle.width, 0f) / 2f), magicaCWT.saintCreatureCircle.GetPosition(), Mathf.Lerp(0, 360f, (float)(i + 1) / 4f) + Mathf.Lerp(-45f, 315f, rotationLerp));
+
+									line.SetPosition(facePos);
+									line.scaleY = Custom.Dist(facePos, circlePos);
+									line.rotation = Custom.AimFromOneVectorToAnother(facePos, circlePos);
+								}
+							}
+						}
+					}
+					else
+					{
+						if (magicaCWT.saintGlowTimer > 0)
+						{
+							magicaCWT.saintGlowTimer--;
+							ChangeSaintBodyColors(sLeaser.sprites, magicaCWT.originalColors, self, magicaCWT);
+						}
+
+						if (magicaCWT.saintScarSprite != null)
+						{
+							if (rCam.ghostMode > 0f)
+							{
+								magicaCWT.saintScarSprite.color = Color.Lerp(magicaCWT.scarColor, RainWorld.SaturatedGold, rCam.ghostMode);
+							}
+							else if (player.ascensionFatique > 0f)
+							{
+								magicaCWT.saintScarSprite.color = Color.Lerp(magicaCWT.scarColor, Color.red, player.ascensionFatique / PlayerHooks.ascensionFatique);
+								magicaCWT.saintFatiqueSprite.color = magicaCWT.saintScarSprite.color;
+								magicaCWT.saintFatiqueSprite.alpha = Mathf.Lerp(0f, 1f, player.ascensionFatique / PlayerHooks.ascensionFatique);
+							}
+							else
+							{
+								magicaCWT.saintScarSprite.color = magicaCWT.scarColor;
+								magicaCWT.saintFatiqueSprite.alpha = 0f;
+							}
+						}
+					}
+				}
+
+				if (ModOptions.CustomGraphics.Value)
+				{
+					magicaCWT.headSpritePos = sLeaser.sprites[3].GetPosition() + rCam.pos;
+					magicaCWT.faceSpritePos = sLeaser.sprites[9].GetPosition() + rCam.pos;
+
+					if (ModManager.MSC)
+					{
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer && sLeaser.sprites.Length > magicaCWT.artiStartSprite)
+						{
+							if (magicaCWT.faceSprite != null)
+							{
+								magicaCWT.faceSprite.scaleX = magicaCWT.faceSprite.element.name.Contains("FaceD") || magicaCWT.faceSprite.element.name.Contains("FaceB") ? -1f : 1f;
+							}
+
+							if (magicaCWT.artiScarSprite != null && magicaCWT.headSprite != null)
+							{
+								if ((!magicaCWT.artiScarSprite.element.name.Contains(magicaCWT.headSprite.element.name) || !magicaCWT.artiScarSprite.element.name.Contains(spriteFace)))
+								{
+									string headSprite = magicaCWT.headSprite.element.name.Contains("Artificer") ? magicaCWT.headSprite.element.name.Substring("Artificer".Length) : magicaCWT.headSprite.element.name;
+									magicaCWT.artiScarSprite.SetElementByName(spriteFace + "Scar" + headSprite);
+								}
+								CopyOverSpriteAttributes(magicaCWT.artiScarSprite, magicaCWT.headSprite);
+								magicaCWT.artiScarSprite.scaleX = spriteScale;
+							}
+
+							if (magicaCWT.artiLegSprite != null && magicaCWT.legSprite != null)
+							{
+								if (!magicaCWT.artiLegSprite.element.name.Contains(magicaCWT.legSprite.element.name) || !magicaCWT.artiLegSprite.element.name.Contains(self.player.flipDirection == 1 ? "Right" : "Left"))
+								{
+									string legSprite = magicaCWT.legSprite.element.name.Contains("Artificer") ? magicaCWT.legSprite.element.name.Substring("Artificer".Length) : magicaCWT.legSprite.element.name;
+									magicaCWT.artiLegSprite.SetElementByName((self.player.flipDirection == 1 ? "Right" : "Left") + "Scar" + legSprite);
+								}
+								CopyOverSpriteAttributes(magicaCWT.artiLegSprite, magicaCWT.legSprite);
+							}
+
+							if (magicaCWT.artiTailSprite != null && magicaCWT.tailSprite != null)
+							{
+								Color baseColor = magicaCWT.tailSprite.color;
+
+								magicaCWT.artiTailSprite.SetPosition(self.tail[3].pos - camPos);
+
+								if (magicaCWT.tailSprite is TriangleMesh tailMesh)
+								{
+									magicaCWT.tailSprite.MoveBehindOtherNode(sLeaser.sprites[1]);
+									tailMesh.customColor = true;
+									if (tailMesh.verticeColors == null || tailMesh.verticeColors.Length != tailMesh.vertices.Length)
+									{
+										tailMesh.verticeColors = new Color[tailMesh.vertices.Length];
+									}
+
+									for (int j = tailMesh.verticeColors.Length - 1; j >= 0; j--)
+									{
+										if (j < (self.player.DreamState ? 12 : 9))
+										{
+											tailMesh.verticeColors[j] = baseColor;
+										}
+										else if (magicaCWT.colorTimer > 0f)
+										{
+											tailMesh.verticeColors[j] = Color.LerpUnclamped(magicaCWT.scarColor, Color.white, magicaCWT.colorTimer / magicaCWT.colorTimerMax);
+										}
+										else
+										{
+											tailMesh.verticeColors[j] = magicaCWT.scarColor;
+										}
+									}
+									tailMesh.Refresh();
+
+									magicaCWT.artiTailSprite.SetPosition(tailMesh.vertices[tailMesh.vertices.Length - 1]);
+								}
+
+								if (self.player.pyroJumpped && !magicaCWT.flashSet)
+								{
+									magicaCWT.colorTimer = magicaCWT.colorTimerMax;
+									magicaCWT.flashSet = true;
+								}
+								if (magicaCWT.colorTimer == 0f && !self.player.pyroJumpped)
+								{
+									magicaCWT.flashSet = false;
+									sLeaser.sprites[sLeaser.sprites.Length - 1].color = magicaCWT.scarColor;
+								}
+								if (magicaCWT.colorTimer > 0f)
+								{
+									magicaCWT.colorTimer--;
+									if (!self.player.DreamState)
+									{
+										magicaCWT.artiTailSprite.color = Color.LerpUnclamped(magicaCWT.scarColor, Color.white, magicaCWT.colorTimer / magicaCWT.colorTimerMax);
+									}
+								}
+							}
+						}
+
+						if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.saintStartSprite)
+						{
+							string faceSprite = magicaCWT.faceSprite.element.name.Contains("Saint") ? magicaCWT.faceSprite.element.name.Substring("Saint".Length) : magicaCWT.faceSprite.element.name;
+							if (!magicaCWT.saintScarSprite.element.name.Contains(magicaCWT.faceSprite.element.name))
+							{
+								magicaCWT.saintScarSprite.SetElementByName("SaintScar" + faceSprite);
+							}
+							if (!magicaCWT.saintFatiqueSprite.element.name.Contains(magicaCWT.faceSprite.element.name))
+							{
+								magicaCWT.saintFatiqueSprite.SetElementByName("FatiqueSaintScar" + faceSprite);
+							}
+							CopyOverSpriteAttributes(magicaCWT.saintScarSprite, magicaCWT.faceSprite);
+							CopyOverSpriteAttributes(magicaCWT.saintFatiqueSprite, magicaCWT.faceSprite);
+
+							if (magicaCWT.saintScarSprite != null)
+							{
+								magicaCWT.saintScarSprite.isVisible = true;
+							}
+						}
+					}
+
+					if (self.player.SlugCatClass == SlugcatStats.Name.Red && sLeaser.sprites.Length > magicaCWT.hunterStartSprite)
+					{
+						if (magicaCWT.hunterFaceSprite != null && magicaCWT.faceSprite != null)
+						{
+							CopyOverSpriteAttributes(magicaCWT.hunterFaceSprite, magicaCWT.faceSprite);
+						}
+						if (magicaCWT.hunterHipSprite != null && magicaCWT.hipSprite != null)
+						{
+							CopyOverSpriteAttributes(magicaCWT.hunterHipSprite, magicaCWT.hipSprite);
+						}
+						if (magicaCWT.hunterLegSprite != null && magicaCWT.legSprite != null)
+						{
+							CopyOverSpriteAttributes(magicaCWT.hunterLegSprite, magicaCWT.legSprite);
+						}
+						if (magicaCWT.hunterBodySprite != null && magicaCWT.bodySprite != null)
+						{
+							CopyOverSpriteAttributes(magicaCWT.hunterBodySprite, magicaCWT.bodySprite);
+						}
+						if (magicaCWT.hunterTailSprite != null && magicaCWT.hunterTailTipSprite != null && magicaCWT.tailSprite != null)
+						{
+							if (sLeaser.sprites[2] is TriangleMesh tailMesh)
+							{
+								if (spriteFace == "Left")
+								{
+									magicaCWT.hunterTailSprite.scaleX = -1f;
+								}
+								else
+								{
+									magicaCWT.hunterTailSprite.scaleX = 1f;
+								}
+
+								float rotatte = Custom.AimFromOneVectorToAnother(new(tailMesh.vertices[tailMesh.vertices.Length - 1].x, tailMesh.vertices[tailMesh.vertices.Length - 1].y), new(tailMesh.vertices[0].x, tailMesh.vertices[0].y));
+								magicaCWT.hunterTailSprite.x = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length / 2].x, sLeaser.sprites[1].x, 0.5f);
+								magicaCWT.hunterTailSprite.y = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length / 2].y, sLeaser.sprites[1].y, 0.5f);
+								magicaCWT.hunterTailSprite.rotation = rotatte;
+
+								magicaCWT.hunterTailTipSprite.x = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length - 4].x, sLeaser.sprites[1].x, 0.2f);
+								magicaCWT.hunterTailTipSprite.y = Mathf.Lerp(tailMesh.vertices[tailMesh.vertices.Length - 4].y, sLeaser.sprites[1].y, 0.2f);
+								magicaCWT.hunterTailTipSprite.rotation = rotatte + 90f;
+							}
+						}
+
+						if (spriteScale == 1)
+						{
+							sLeaser.sprites[6].MoveBehindOtherNode(sLeaser.sprites[0]);
+						}
+						else
+						{
+							sLeaser.sprites[6].MoveInFrontOfOtherNode(sLeaser.sprites[9]);
+						}
+					}
+
+					if (magicaCWT.braids != null && magicaCWT.braids.Length > 0 && sLeaser.sprites.Length > magicaCWT.braidStartSprite)
+					{
+						for (int i = 0; i < magicaCWT.braids.Length; i++)
+						{
+							FSprite braid = sLeaser.sprites[magicaCWT.braidStartSprite + i];
+							int lengthOfRow = magicaCWT.braids.Length / magicaCWT.braidRows;
+							float lerp = 1f - ((((float)(i - magicaCWT.braids.IndexOf(magicaCWT.headBraids[magicaCWT.braids[i].row])) / (float)lengthOfRow) + 0.2f) * 0.8f);
+
+							braid.SetPosition(Vector2.Lerp(magicaCWT.lastBraidPos[i], Vector2.Lerp(magicaCWT.braids[i].pos - camPos, magicaCWT.headSprite.GetPosition(), lerp), 0.8f));
+							magicaCWT.lastBraidPos[i] = braid.GetPosition();
+
+							if (i % (magicaCWT.braids.Length / magicaCWT.braidRows) == 0)
+							{
+								braid.rotation = Custom.AimFromOneVectorToAnother(braid.GetPosition(), magicaCWT.headSprite.GetPosition());
+							}
+							else
+							{
+								braid.rotation = Custom.AimFromOneVectorToAnother(braid.GetPosition(), sLeaser.sprites[magicaCWT.braidStartSprite + i - 1].GetPosition());
+								braid.scaleY = Mathf.Lerp(1f, 2.2f, magicaCWT.braids[i].vel.magnitude / 6.5f);
+							}
+
+							bool flipped = self.player.flipDirection == -1f;
+							float lerpAgain = GetBraidLerp(magicaCWT, (float)magicaCWT.braids[i].row, flipped);
+							braid.color = Color.Lerp(magicaCWT.braidColor, rCam.currentPalette.blackColor, lerpAgain);
+
+							braid.MoveBehindOtherNode(sLeaser.sprites[0]);
+							if (flipped && i != 0)
+							{
+								braid.MoveBehindOtherNode(sLeaser.sprites[magicaCWT.braidStartSprite + i - 1]);
+							}
+
+							if (ModManager.MSC && rCam.game.IsStorySession && rCam.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && magicaCWT.headSprite != null)
+							{
+								magicaCWT.braidColor = magicaCWT.headSprite.color;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private static Dictionary<FSprite, bool> CheckForSpriteSymmetry(SlugcatStats.Name slug, RoomCamera.SpriteLeaser sLeaser)
+		{
+			Dictionary<FSprite, bool> hasSymmetry = [];
+
+			if (ModManager.MSC)
+			{
+				if (slug == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+				{
+					hasSymmetry.Add(sLeaser.sprites[0], false);  // body
+					hasSymmetry.Add(sLeaser.sprites[1], false); // hips
+					hasSymmetry.Add(sLeaser.sprites[3], false); // head
+					hasSymmetry.Add(sLeaser.sprites[4], false); // legs
+					hasSymmetry.Add(sLeaser.sprites[5], false); // arm (left)
+					hasSymmetry.Add(sLeaser.sprites[6], false); // arm (right)
+					hasSymmetry.Add(sLeaser.sprites[7], false); // hand (right)
+					hasSymmetry.Add(sLeaser.sprites[8], false); // hand (left)
+					hasSymmetry.Add(sLeaser.sprites[9], false); // face
+				}
+
+				if (slug == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+				{
+					hasSymmetry.Add(sLeaser.sprites[0], true);  // body
+					hasSymmetry.Add(sLeaser.sprites[1], false); // hips
+					hasSymmetry.Add(sLeaser.sprites[3], false); // head
+					hasSymmetry.Add(sLeaser.sprites[4], false); // legs
+					hasSymmetry.Add(sLeaser.sprites[5], false); // arm (left)
+					hasSymmetry.Add(sLeaser.sprites[6], false); // arm (right)
+					hasSymmetry.Add(sLeaser.sprites[7], false); // hand (right)
+					hasSymmetry.Add(sLeaser.sprites[8], false); // hand (left)
+					hasSymmetry.Add(sLeaser.sprites[9], false); // face
+				}
+
+				if (slug == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+				{
+					hasSymmetry.Add(sLeaser.sprites[0], true);  // body
+					hasSymmetry.Add(sLeaser.sprites[1], false); // hips
+					hasSymmetry.Add(sLeaser.sprites[3], false); // head
+					hasSymmetry.Add(sLeaser.sprites[4], false); // legs
+					hasSymmetry.Add(sLeaser.sprites[5], false); // arm (left)
+					hasSymmetry.Add(sLeaser.sprites[6], false); // arm (right)
+					hasSymmetry.Add(sLeaser.sprites[7], false); // hand (right)
+					hasSymmetry.Add(sLeaser.sprites[8], false); // hand (left)
+					hasSymmetry.Add(sLeaser.sprites[9], false); // face
+				}
+			}
+
+			if (slug == SlugcatStats.Name.Red)
+			{
+				hasSymmetry.Add(sLeaser.sprites[0], false);  // body
+				hasSymmetry.Add(sLeaser.sprites[1], false); // hips
+				hasSymmetry.Add(sLeaser.sprites[3], false); // head
+				hasSymmetry.Add(sLeaser.sprites[4], false); // legs
+				hasSymmetry.Add(sLeaser.sprites[5], true); // arm (left)
+				hasSymmetry.Add(sLeaser.sprites[6], true); // arm (right)
+				hasSymmetry.Add(sLeaser.sprites[7], true); // hand (right)
+				hasSymmetry.Add(sLeaser.sprites[8], true); // hand (left)
+				hasSymmetry.Add(sLeaser.sprites[9], false); // face
+			}
+
+			return hasSymmetry;
 		}
 
 		private static float GetBraidLerp(MagicaSprites magicaCWT, float row, bool flipped)
@@ -1478,7 +1512,7 @@ namespace MagicasContentPack
 				{
 					for (int i = 0; i < 6; i++)
 					{
-						sLeaser.sprites[magicaCWT.hunterStartSprite + i].color = Color.Lerp(Color.white, sLeaser.sprites[3].color, 0.5f);
+						sLeaser.sprites[magicaCWT.hunterStartSprite + i].color = sLeaser.sprites[3].color;
 					}
 					Color baseColor = customColorDict[CustomColorValues.HunterArm];
 
@@ -1554,47 +1588,15 @@ namespace MagicasContentPack
 
 		private static bool TryGetDMSColor(PlayerGraphics self, string v, out Color color)
 		{
-			if (Customization.For(self.player) != null && Customization.For(self.player).CustomSprite(v) != null && Customization.For(self.player).CustomSprite(v).Color != default)
-			{
-				color = Customization.For(self.player).CustomSprite(v).Color;
-				return true;
-			}
-			color = PlayerGraphics.SlugcatColor(self.CharacterForColor);
-			return false;
+			color = new(1f, 1f, 1f);
+			return Plugin.isDMSEnabled && DMSHooks.TryGetDMSColor(self, v, out color);
 		}
 
-		public enum DMSCheck
-		{
-			IsNotEmpty,
-			FaceLift
-		}
-
-		private static bool CheckForDMS(PlayerGraphics self, string spriteName, DMSCheck check)
-		{
-			if (!Plugin.isDMSEnabled && ModOptions.CustomGraphics.Value)
-			{
-				return true;
-			}
-			if (self != null && Plugin.isDMSEnabled)
-			{
-				return CautionDMSCheck(self, spriteName, check);
-			}
-			return false;
-		}
-
-		private static bool CautionDMSCheck(PlayerGraphics self, string spriteName, DMSCheck check)
-		{
-			return check switch
-			{
-				DMSCheck.IsNotEmpty => Customization.For(self.player, true) != null && Customization.For(self.player, true).CustomSprite(spriteName) != null && !Customization.For(self.player, true).CustomSprite(spriteName).SpriteSheetID.ToLowerInvariant().Contains("empty"),
-				DMSCheck.FaceLift => Customization.For(self.player, true) != null && Customization.For(self.player, true).CustomSprite(spriteName) != null && MagicaSprites.GetKey(Customization.For(self.player, true).CustomSprite(spriteName).SpriteSheetID) != null && MagicaSprites.GetKey(Customization.For(self.player, true).CustomSprite(spriteName).SpriteSheetID).faceLift,
-				_ => false,
-			};
-		}
+		
 
 		private static void TailSegment_Update(On.TailSegment.orig_Update orig, TailSegment self)
 		{
-			if (ModOptions.CustomGraphics.Value && self.owner is PlayerGraphics pGraphics && self.connectedSegment == null && Plugin.IsVanillaSlugcat((self.owner as PlayerGraphics).player.SlugCatClass) && CheckForDMS(pGraphics, "HEAD", DMSCheck.FaceLift))
+			if (ModOptions.CustomGraphics.Value && self.owner is PlayerGraphics pGraphics && self.connectedSegment == null && Plugin.IsVanillaSlugcat((self.owner as PlayerGraphics).player.SlugCatClass) && DMSHooks.CheckForDMS(pGraphics, "HEAD", DMSHooks.DMSCheck.FaceLift))
 			{
 				self.connectedPoint = Vector2.Lerp(pGraphics.drawPositions[1, 0], pGraphics.drawPositions[0, 0], .3f);
 			}
@@ -1606,7 +1608,7 @@ namespace MagicasContentPack
 		{
 			orig(self, sLeaser, rCam);
 
-			if (CheckForDMS(self.pGraphics, "HEAD", DMSCheck.FaceLift))
+			if (DMSHooks.CheckForDMS(self.pGraphics, "HEAD", DMSHooks.DMSCheck.FaceLift))
 			{
 				sLeaser.sprites[self.startSprite].anchorY = -0.6f;
 			}
@@ -1633,7 +1635,6 @@ namespace MagicasContentPack
 		public bool flashSet;
 		public Braids[] braids;
 
-		public static Dictionary<string, MagicaDMSThings> qualifiedForChange = [];
 		internal int braidRows;
 		internal int braidStartSprite;
 		internal Braids[] headBraids;
@@ -1667,35 +1668,7 @@ namespace MagicasContentPack
 		internal FSprite saintFatiqueSprite;
 		internal FSprite saintCreatureKarma;
 		internal Vector2[] lastBraidPos;
-
-		public class MagicaDMSThings
-		{
-			public bool faceLift;
-
-			public MagicaDMSThings() { }
-		}
-
-		public static MagicaDMSThings GetKey(string key)
-		{
-			if (qualifiedForChange != null && qualifiedForChange.Count > 0)
-			{
-				if (qualifiedForChange.ContainsKey(key))
-				{
-					return qualifiedForChange[key];
-				}
-				else
-				{
-					qualifiedForChange.Add(key, new());
-					return GetKey(key);
-				}
-			}
-			else
-			{
-				qualifiedForChange = [];
-				qualifiedForChange.Add(key, new());
-				return qualifiedForChange[key];
-			}
-		}
+		internal int ascensionStartSprite;
 	}
 
 	public class Braids : BodyPart

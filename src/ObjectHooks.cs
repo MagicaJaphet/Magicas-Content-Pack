@@ -457,7 +457,7 @@ namespace MagicasContentPack
 
 				if (!success)
 				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(Room_Loaded));
+					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(Room_Loaded) + " broadcasts");
 					return;
 				}
 
@@ -470,6 +470,40 @@ namespace MagicasContentPack
 					return self.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Saint;
 				}
 				cursor.EmitDelegate(IsSaint);
+			}
+			catch (Exception ex)
+			{
+				Debug.LogException(ex);
+			}
+
+			try
+			{
+				// For removing karma flowers for Artificer and Spearmaster
+				ILCursor cursor = new(il);
+				for (int i = 0; i < 3; i++)
+				{
+					bool success = cursor.TryGotoNext(
+						MoveType.After,
+						x => x.MatchLdsfld<SlugcatStats.Name>(nameof(SlugcatStats.Name.Red)),
+						x => x.MatchCall(out _)
+						);
+
+					if (!success)
+					{
+						Plugin.Log(Plugin.LogStates.FailILMatch, nameof(Room_Loaded) + $" karma flowers #{i}");
+						return;
+					}
+
+					ILLabel jump = (ILLabel)cursor.Next.Operand;
+
+					cursor.Emit(OpCodes.Brfalse, jump);
+					cursor.Emit(OpCodes.Ldarg_0);
+					static bool IsArtiOrSpear(Room self)
+					{
+						return self.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Spear && self.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Artificer;
+					}
+					cursor.EmitDelegate(IsArtiOrSpear);
+				}
 			}
 			catch (Exception ex)
 			{

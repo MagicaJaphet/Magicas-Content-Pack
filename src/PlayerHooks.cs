@@ -19,10 +19,20 @@ namespace MagicasContentPack
 		public static readonly float ascensionFatique = 50f;
 		public static readonly float saintRadius = 500f;
 
+		public static Dictionary<AbstractPhysicalObject.AbstractObjectType, int> artiCraftables = [];
+		public static AbstractPhysicalObject.AbstractObjectType[,] artiResults;
+
 		internal static void Init()
 		{
 			try
 			{
+				// Custom arti mechanics
+				SetUpArtiCrafts();
+				IL.Player.SwallowObject += Player_SwallowObject;
+				On.Player.SpitUpCraftedObject += Player_SpitUpCraftedObject;
+				On.Player.CraftingResults += Player_CraftingResults;
+				On.PlayerSessionRecord.AddKill += PlayerSessionRecord_AddKill;
+
 				// Custom saint mechanics
 				IL.Player.MovementUpdate += AnotherGrabCustomMechanicFix;
 				IL.Player.UpdateBodyMode += BodyModeCustomMechanicFix;
@@ -37,6 +47,200 @@ namespace MagicasContentPack
 			catch
 			{
 				Plugin.Log(Plugin.LogStates.HookFail, nameof(PlayerHooks));
+			}
+		}
+
+		private static void Player_SwallowObject(ILContext il)
+		{
+			try
+			{
+				static bool MechanicCheck(Player self)
+				{
+					return !ModOptions.CustomMechanics.Value;
+				}
+
+				ILCursor cursor = new(il);
+
+				for (int i = 0; i < 4; i++)
+				{
+					bool cood = cursor.TryGotoNext(
+							MoveType.After,
+							x => x.MatchLdfld<AbstractPhysicalObject>(nameof(AbstractPhysicalObject.type)),
+							x => x.MatchLdsfld(out _),
+							x => x.MatchCall(out _)
+						);
+
+					if (!cood)
+					{
+						Plugin.Log(Plugin.LogStates.FailILMatch, $"{nameof(Player_SwallowObject)} #{i}");
+					}
+
+					if (i != 2)
+					{
+						ILLabel jump = (ILLabel)cursor.Next.Operand;
+
+						cursor.Emit(OpCodes.Brfalse, jump);
+						cursor.Emit(OpCodes.Ldarg_0);
+						cursor.EmitDelegate(MechanicCheck);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Plugin.Log(Plugin.LogStates.FailILInsert, e);
+			}
+		}
+
+		private static void SetUpArtiCrafts()
+		{
+			try
+			{
+				artiCraftables.Clear();
+
+				int index = 1;
+				foreach (var type in AbstractPhysicalObject.AbstractObjectType.values.entries)
+				{
+					AbstractPhysicalObject.AbstractObjectType actualType = (AbstractPhysicalObject.AbstractObjectType)ExtEnumBase.Parse(typeof(AbstractPhysicalObject.AbstractObjectType), type, false);
+					if (CanBeCrafted(actualType))
+					{
+						artiCraftables.Add(actualType, index);
+						index++;
+					}
+				}
+
+				artiResults = new AbstractPhysicalObject.AbstractObjectType[artiCraftables.Count, artiCraftables.Count];
+
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.Spear], artiCraftables[AbstractPhysicalObject.AbstractObjectType.Rock]] = AbstractPhysicalObject.AbstractObjectType.Spear;
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.Spear], artiCraftables[AbstractPhysicalObject.AbstractObjectType.FirecrackerPlant]] = AbstractPhysicalObject.AbstractObjectType.Spear;
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.Rock], artiCraftables[AbstractPhysicalObject.AbstractObjectType.FirecrackerPlant]] = AbstractPhysicalObject.AbstractObjectType.ScavengerBomb;
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.DangleFruit], artiCraftables[AbstractPhysicalObject.AbstractObjectType.SlimeMold]] = AbstractPhysicalObject.AbstractObjectType.Lantern;
+
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.Rock], artiCraftables[AbstractPhysicalObject.AbstractObjectType.Spear]] = AbstractPhysicalObject.AbstractObjectType.Spear;
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.FirecrackerPlant], artiCraftables[AbstractPhysicalObject.AbstractObjectType.Spear]] = AbstractPhysicalObject.AbstractObjectType.Spear;
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.FirecrackerPlant], artiCraftables[AbstractPhysicalObject.AbstractObjectType.Rock]] = AbstractPhysicalObject.AbstractObjectType.ScavengerBomb;
+				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.SlimeMold], artiCraftables[AbstractPhysicalObject.AbstractObjectType.DangleFruit]] = AbstractPhysicalObject.AbstractObjectType.Lantern;
+
+			}
+			catch (Exception e)
+			{
+				Plugin.Log(Plugin.LogStates.HookFail, nameof(SetUpArtiCrafts) + e);
+			}
+		}
+
+		private static bool CanBeCrafted(AbstractPhysicalObject.AbstractObjectType match)
+		{
+			return
+				match == AbstractPhysicalObject.AbstractObjectType.Spear ||
+				match == AbstractPhysicalObject.AbstractObjectType.DangleFruit ||
+				match == AbstractPhysicalObject.AbstractObjectType.SlimeMold ||
+				match == AbstractPhysicalObject.AbstractObjectType.Rock ||
+				match == AbstractPhysicalObject.AbstractObjectType.FirecrackerPlant;
+		}
+		private static void Player_SpitUpCraftedObject(On.Player.orig_SpitUpCraftedObject orig, Player self)
+		{
+			if (ModOptions.CustomMechanics.Value && self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+			{
+				AbstractPhysicalObject.AbstractObjectType craftResult = self.CraftingResults();
+				if (craftResult != null)
+				{
+					AbstractPhysicalObject craftedItem = null;
+					if (craftResult == AbstractPhysicalObject.AbstractObjectType.Spear)
+					{
+						bool electric = self.grasps[0].grabbed is Rock || self.grasps[1].grabbed is Rock;
+						craftedItem = new AbstractSpear(self.room.world, null, self.abstractPhysicalObject.pos, self.room.game.GetNewID(), !electric);
+						if (craftedItem is AbstractSpear spear)
+						{
+							spear.electric = electric;
+							spear.electricCharge = 0;
+						}
+					}
+					else
+					{
+						craftedItem = new(self.room.world, craftResult, null, self.abstractPhysicalObject.pos, self.room.game.GetNewID());
+					}
+					self.room.abstractRoom.AddEntity(craftedItem);
+					craftedItem.RealizeInRoom();
+
+					for (int i = 0; i < self.grasps.Length; i++)
+					{
+						AbstractPhysicalObject recipeItem = self.grasps[i].grabbed.abstractPhysicalObject;
+						if (self.room.game.session is StoryGameSession session)
+						{
+							session.RemovePersistentTracker(recipeItem);
+						}
+						self.ReleaseGrasp(i);
+						for (int k = recipeItem.stuckObjects.Count - 1; k >= 0; k--)
+						{
+							if (recipeItem.stuckObjects[k] is AbstractPhysicalObject.AbstractSpearStick && recipeItem.stuckObjects[k].A.type == AbstractPhysicalObject.AbstractObjectType.Spear && recipeItem.stuckObjects[k].A.realizedObject != null)
+							{
+								(recipeItem.stuckObjects[k].A.realizedObject as Spear).ChangeMode(Weapon.Mode.Free);
+							}
+						}
+						recipeItem.LoseAllStuckObjects();
+						recipeItem.realizedObject.RemoveFromRoom();
+						self.room.abstractRoom.RemoveEntity(recipeItem);
+						if (self.FreeHand() != -1)
+						{
+							self.SlugcatGrab(craftedItem.realizedObject, self.FreeHand());
+						}
+					}
+				}
+				return;
+			}
+
+			orig(self);
+		}
+
+		private static AbstractPhysicalObject.AbstractObjectType Player_CraftingResults(On.Player.orig_CraftingResults orig, Player self)
+		{
+			var result = orig(self);
+
+			if (ModOptions.CustomMechanics.Value && self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+			{
+				return ArtiCraftingRecipes(self.grasps[0], self.grasps[1]);
+			}
+
+			return result;
+		}
+
+		private static AbstractPhysicalObject.AbstractObjectType ArtiCraftingRecipes(Creature.Grasp left, Creature.Grasp right)
+		{
+			if (artiResults != null && left != null && right != null)
+			{
+				AbstractPhysicalObject.AbstractObjectType leftType = left.grabbed.abstractPhysicalObject.type;
+				AbstractPhysicalObject.AbstractObjectType rightType = right.grabbed.abstractPhysicalObject.type;
+
+				if (artiCraftables.ContainsKey(leftType) && artiCraftables.ContainsKey(rightType))
+				{
+					return artiResults[artiCraftables[leftType], artiCraftables[rightType]];
+				}
+			}
+			return null;
+		}
+
+
+		private static void PlayerSessionRecord_AddKill(On.PlayerSessionRecord.orig_AddKill orig, PlayerSessionRecord self, Creature victim)
+		{
+			orig(self, victim);
+
+			if (victim is Scavenger && Custom.rainWorld.processManager?.currentMainLoop is RainWorldGame game && game != null && game.IsStorySession && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+			{
+				WinOrSaveHooks.scavsKilledThisCycle++;
+				Plugin.DebugLog($"Arti killed scavenger!: {WinOrSaveHooks.scavsKilledThisCycle}");
+
+				GhostWorldPresence.GhostID ghostID = GhostWorldPresence.GetGhostID(game.world.region.name);
+				if (ghostID != GhostWorldPresence.GhostID.NoGhost && game.GetStorySession.saveState.deathPersistentSaveData.ghostsTalkedTo.ContainsKey(ghostID))
+				{
+					game.GetStorySession.saveState.deathPersistentSaveData.ghostsTalkedTo[ghostID] = 0;
+					if (game.FirstAlivePlayer != null && game.FirstAlivePlayer.realizedCreature is Player player)
+					{
+						player.Stun(10);
+						player.airInLungs = 0f;
+						player.exhausted = true;
+						player.drown = 0.8f;
+						WorldHooks.shouldFadeGhostMode = true;
+					}
+				}
 			}
 		}
 

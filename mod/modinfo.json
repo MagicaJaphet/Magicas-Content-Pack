@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"authors": "MagicaJaphet",
 	"description": "Includes DMS skins based on my renditions of the slugcats, and all new scenes/artwork for the currently implemented slugcats!",
-	"requirements": ["dressmyslugcat", "moreslugcats","crs", "slime-cubed.slugbase", "regionkit"],
-	"requirements_names": ["Dress My Slugcat", "More Slugcats Expansion", "Custom Region Support", "SlugBase", "RegionKit"],
+	"requirements": ["moreslugcats","crs", "slime-cubed.slugbase", "regionkit"],
+	"requirements_names": ["More Slugcats Expansion", "Custom Region Support", "SlugBase", "RegionKit"],
 	"tags": ["Cosmetics", "Content"]
 }

@@ -144,6 +144,7 @@ namespace MagicasContentPack
 
 				hunter.AddRange([
 					MenuScene.SceneID.Outro_Hunter_1_Swim,
+					MenuScene.SceneID.Outro_Hunter_2_Sink,
 					]);
 
 				saint.AddRange([

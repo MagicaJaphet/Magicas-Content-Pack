@@ -7,6 +7,8 @@ using BepInEx.Logging;
 using System.Security.Permissions;
 using System.Collections.Generic;
 using Menu;
+using System.IO;
+using UnityEngine;
 
 // Allows access to private members
 #pragma warning disable CS0618
@@ -72,6 +74,16 @@ public class Plugin : BaseUnityPlugin
 
 			Logger = base.Logger;
 
+			isDMSEnabled = ModManager.ActiveMods.Exists((ModManager.Mod mod) => mod.id == "dressmyslugcat");
+			isCRSEnabled = ModManager.ActiveMods.Exists((ModManager.Mod mod) => mod.id == "crs");
+
+			var mod = ModManager.ActiveMods.FirstOrDefault(mod => mod.id == MOD_ID);
+
+			modPath = mod.path;
+			MOD_NAME = mod.name;
+			VERSION = mod.version;
+			AUTHORS = mod.authors;
+
 			// TODO: ORGANIZE CODE!!!
 
 			On.Menu.Remix.ConfigMenuTab.ButtonManager.SignalSave += ButtonManager_SignalSave;
@@ -84,23 +96,24 @@ public class Plugin : BaseUnityPlugin
 			WorldHooks.Init();
 			PlayerHooks.Init();
 
+			Application.quitting += QuitDebugLog;
+
 			ModOptions.RegisterOI();
 			LoadResources();
 
 			_ = SlidesShowIDs.ArtificerDreamE;
-
-
-			var mod = ModManager.ActiveMods.FirstOrDefault(mod => mod.id == MOD_ID);
-
-			modPath = mod.path;
-			MOD_NAME = mod.name;
-			VERSION = mod.version;
-			AUTHORS = mod.authors;
 		}
 		catch (Exception ex)
 		{
 			Logger.LogError(ex);
 		}
+	}
+
+	private void QuitDebugLog()
+	{
+		DebugLog($"========================================\nMagica's Content Pack Debug Info\n\n" +
+				$"MISSING ELEMENTS:\n{string.Join("\n", GraphicsHooks.debugElementsNotChanged)}\n" +
+				$"========================================");
 	}
 
 	private void ButtonManager_SignalSave(On.Menu.Remix.ConfigMenuTab.ButtonManager.orig_SignalSave orig, Menu.Remix.ConfigMenuTab.ButtonManager self, Menu.Remix.MixedUI.UIfocusable trigger)
@@ -118,9 +131,6 @@ public class Plugin : BaseUnityPlugin
 
 		try
 		{
-			isDMSEnabled = ModManager.ActiveMods.Exists((ModManager.Mod mod) => mod.id == "dressmyslugcat");
-			isCRSEnabled = ModManager.ActiveMods.Exists((ModManager.Mod mod) => mod.id == "crs");
-
 			if (isDMSEnabled)
 				LoadDMSConfigs();
 
@@ -193,25 +203,52 @@ public class Plugin : BaseUnityPlugin
 
 	public void LoadResources()
 	{
-		Futile.atlasManager.LoadAtlas("atlases/MagicaSprites");
-		Futile.atlasManager.LoadAtlas("atlases/magicarainworldmsc");
-		Futile.atlasManager.LoadAtlas("atlases/magicauisprites");
-		Futile.atlasManager.LoadAtlas("atlases/iteratorsprites");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/MagicaSprites");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/magicarainworldmsc");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/magicauisprites");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/iteratorsprites");
 
-		Futile.atlasManager.LoadAtlas("atlases/artificer/scarheadleft");
-		Futile.atlasManager.LoadAtlas("atlases/artificer/scarheadright");
-		Futile.atlasManager.LoadAtlas("atlases/artificer/scarhead");
-		Futile.atlasManager.LoadAtlas("atlases/artificer/scarlegsleft");
-		Futile.atlasManager.LoadAtlas("atlases/artificer/scarlegsright");
-		Futile.atlasManager.LoadAtlas("atlases/artificer/scarlegs");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/artificer/scarheadleft");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/artificer/scarheadright");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/artificer/scarhead");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/artificer/scarlegsleft");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/artificer/scarlegsright");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/artificer/scarlegs");
 
-		Futile.atlasManager.LoadAtlas("atlases/hunter/hunterscars");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/red/hunterscars");
 
-		Futile.atlasManager.LoadAtlas("atlases/saint/saintscar");
-		Futile.atlasManager.LoadAtlas("atlases/saint/saintscarfatique");
-		Futile.atlasManager.LoadAtlas("atlases/saint/karmarings");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/saint/saintscar");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/saint/saintscarfatique");
+		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/saint/karmarings");
 
-		Futile.atlasManager.LoadImage("projections/SRS_PROJ");
+		Futile.atlasManager.LoadImage(modPath + "/projections/SRS_PROJ");
+
+		if (!isDMSEnabled)
+		{
+			string[] customSlugcatSprites = [MoreSlugcatsEnums.SlugcatStatsName.Spear.value, MoreSlugcatsEnums.SlugcatStatsName.Artificer.value, SlugcatStats.Name.Red.value, MoreSlugcatsEnums.SlugcatStatsName.Saint.value];
+			string[] bodyParts = ["body", "hips", "head", "face", "arm", "legs", "tail"];
+			for (int i = 0; i < customSlugcatSprites.Length; i++)
+			{
+				for (int j = 0; j < bodyParts.Length; j++)
+				{
+					string path = $"{modPath}/atlases/slugcats/{customSlugcatSprites[i]}/{bodyParts[j]}";
+					Futile.atlasManager.LoadAtlas(path);
+					if (File.Exists($"extras"))
+					{
+						Futile.atlasManager.LoadAtlas($"extras");
+					}
+					if (File.Exists($"{path}left"))
+					{
+						Futile.atlasManager.LoadAtlas($"{path}left");
+					}
+					if (File.Exists($"{path}right"))
+					{
+						Futile.atlasManager.LoadAtlas($"{path}right");
+					}
+				}
+			}
+			Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/artificer/faceleft");
+		}
 		DebugLog("Resources loaded");
 	}
 

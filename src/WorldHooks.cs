@@ -5,20 +5,37 @@ using RWCustom;
 using SlugBase.SaveData;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine;
+using static MonoMod.InlineRT.MonoModRule;
 
 namespace MagicasContentPack
 {
 	internal class WorldHooks
 	{
 		private static AbstractCreature nshOverseer;
+		internal static bool shouldFadeGhostMode;
+		private static int lastCycle;
 
 		internal static void Init()
 		{
 			try
 			{
-				//On.WorldLoader.ctor_RainWorldGame_Name_bool_string_Region_SetupValues += WorldLoader_ctor_RainWorldGame_Name_bool_string_Region_SetupValues; ;
+				// Change Artificer reputation dynamically
+				IL.RainWorldGame.Update += RainWorldGame_Update; 
+				IL.ScavengerAI.PlayerRelationship += ScavengerAI_PlayerRelationship;
+				On.CreatureCommunities.LikeOfPlayer += CreatureCommunities_LikeOfPlayer;
+
+				// Change the way echoes spawn for Artificer
+				On.GoldFlakes.GoldFlake.DrawSprites += GoldFlake_DrawSprites;
+				On.RoomCamera.Update += RoomCamera_Update;
+				IL.RoomCamera.UpdateGhostMode += RoomCamera_UpdateGhostMode;
+				On.GhostHunch.Update += GhostHunch_Update;
+				On.World.SpawnGhost += World_SpawnGhost;
+
+				//On.WorldLoader.ctor_RainWorldGame_Name_bool_string_Region_SetupValues += WorldLoader_ctor_RainWorldGame_Name_bool_string_Region_SetupValues;
 
 				On.VoidSpawnWorldAI.DirectionFinder.ctor += DirectionFinder_ctor;
 				On.VoidSpawnWorldAI.Update += VoidSpawnWorldAI_Update;
@@ -42,6 +59,245 @@ namespace MagicasContentPack
 			{
 				Plugin.Log(Plugin.LogStates.HookFail, nameof(WorldHooks));
 			}
+		}
+
+		private static void RainWorldGame_Update(ILContext il)
+		{
+			try
+			{
+				ILCursor cursor = new(il);
+
+				bool sooc = cursor.TryGotoNext(
+					MoveType.After,
+					x => x.MatchLdsfld<MoreSlugcatsEnums.SlugcatStatsName>(nameof(MoreSlugcatsEnums.SlugcatStatsName.Artificer)),
+					x => x.MatchCall(out _)
+					);
+
+				if (!sooc)
+				{
+					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(RainWorldGame_Update) + " IDK how this fails... once again");
+					return;
+				}
+
+				ILLabel jump = (ILLabel)cursor.Next.Operand;
+
+				cursor.Emit(OpCodes.Brfalse, jump);
+				cursor.Emit(OpCodes.Ldarg_0);
+				static bool ArtiIsBelow5Cap(RainWorldGame self)
+				{
+					return self.GetStorySession.saveState.deathPersistentSaveData.karmaCap < 4;
+				}
+				cursor.EmitDelegate(ArtiIsBelow5Cap);
+			}
+			catch (Exception ex)
+			{
+				Plugin.Log(Plugin.LogStates.FailILInsert, ex);
+			}
+		}
+
+		private static void ScavengerAI_PlayerRelationship(ILContext il)
+		{
+			try
+			{
+				ILCursor cursor = new(il);
+
+				bool sooc = cursor.TryGotoNext(
+					MoveType.After,
+					x => x.MatchLdsfld<MoreSlugcatsEnums.SlugcatStatsName>(nameof(MoreSlugcatsEnums.SlugcatStatsName.Artificer)),
+					x => x.MatchCall(out _)
+					);
+
+                if (!sooc)
+                {
+					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(ScavengerAI_PlayerRelationship) + " IDK how this fails... once again");
+					return;
+                }
+
+				ILLabel jump = (ILLabel)cursor.Next.Operand;
+
+				cursor.Emit(OpCodes.Brfalse, jump);
+				cursor.Emit(OpCodes.Ldarg_1);
+				static bool IsLC(RelationshipTracker.DynamicRelationship dynamic)
+				{
+					return (dynamic.trackerRep.representedCreature.world?.region != null && dynamic.trackerRep.representedCreature.world.region.name == "LC") 
+						|| 
+						(dynamic.trackerRep.representedCreature.world?.game != null && dynamic.trackerRep.representedCreature.world.game.IsStorySession && dynamic.trackerRep.representedCreature.world.game.GetStorySession.saveState.deathPersistentSaveData.karmaCap == 0);
+				}
+				cursor.EmitDelegate(IsLC);
+            }
+			catch (Exception ex)
+			{
+				Plugin.Log(Plugin.LogStates.FailILInsert, ex);
+			}
+		}
+
+		private static float CreatureCommunities_LikeOfPlayer(On.CreatureCommunities.orig_LikeOfPlayer orig, CreatureCommunities self, CreatureCommunities.CommunityID commID, int region, int playerNumber)
+		{
+			var result = orig(self, commID, region, playerNumber);
+
+			if (ModManager.MSC && self.session is StoryGameSession session && commID == CreatureCommunities.CommunityID.Scavengers && session.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+			{
+				playerNumber = 0;
+				if (self.session is ArenaGameSession)
+				{
+					region = -1;
+				}
+				float num = self.playerOpinions[commID.Index - 1, region + 1, playerNumber];
+				if (region > -1)
+				{
+					num = Custom.MinusOneToOneRangeFloatInfluence(num, self.playerOpinions[commID.Index - 1, 0, playerNumber]);
+				}
+				float lowRange = session.saveState.deathPersistentSaveData.karmaCap > 0 ? -1f + (((float)(session.saveState.deathPersistentSaveData.karmaCap + 1) / 10f) * 2f) : -1f;
+				return Mathf.Min(lowRange, Custom.ExponentMap(num, -1f, 1f, 1f + 0.2f * self.session.difficulty));
+			}
+
+			return result;
+		}
+
+		private static void GoldFlake_DrawSprites(On.GoldFlakes.GoldFlake.orig_DrawSprites orig, GoldFlakes.GoldFlake self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+		{
+			orig(self, sLeaser, rCam, timeStacker, camPos);
+
+			if (shouldFadeGhostMode)
+			{
+				sLeaser.sprites[0].alpha = Mathf.Lerp(0f, 1f, self.room.game.cameras[0].ghostMode);
+			}
+		}
+
+		private static void RoomCamera_Update(On.RoomCamera.orig_Update orig, RoomCamera self)
+		{
+			orig(self);
+
+			if (shouldFadeGhostMode)
+			{
+				if (self.ghostMode <= 0f)
+				{
+					shouldFadeGhostMode = false;
+					if (self.room.updateList.Count > 0 && self.room.updateList.Any(x => x is GoldFlakes))
+					{
+						for (int i = 0; i < self.room.updateList.Count; i++)
+						{
+							UpdatableAndDeletable item = self.room.updateList[i];
+							if (item is GoldFlakes gold)
+							{
+								gold.Destroy();
+							}
+						}
+					}
+				}
+				else
+				{
+					self.ghostMode = Mathf.Lerp(self.ghostMode, 0f, 0.005f);
+				}
+			}
+		}
+
+		private static void RoomCamera_UpdateGhostMode(ILContext il)
+		{
+			try
+			{
+				ILCursor cursor = new(il);
+
+				bool succed = cursor.TryGotoNext(
+					x => x.MatchRet()
+					);
+
+				succed = cursor.TryGotoNext(
+					x => x.MatchRet()
+					);
+
+				if (!succed)
+				{
+					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(RoomCamera_UpdateGhostMode) + " Lowkey dunno how this would fail");
+				}
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				static void AddArtiGhostChecks(RoomCamera self)
+				{
+					if (self.game.IsStorySession && self.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer && WinOrSaveHooks.scavsKilledThisCycle != 0)
+					{
+						self.ghostMode = 0f;
+						(self.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo[self.game.world.worldGhost.ghostID] = 0;
+						if (self.game.world.worldGhost.ghostRoom.realizedRoom != null && self.game.world.worldGhost.ghostRoom.realizedRoom.updateList != null)
+						{
+							for (int i = 0; i < self.game.world.worldGhost.ghostRoom.realizedRoom.updateList.Count; i++)
+							{
+								UpdatableAndDeletable potentialGhost = self.game.world.worldGhost.ghostRoom.realizedRoom.updateList[i];
+								if (potentialGhost != null && potentialGhost is Ghost ghost)
+								{
+									self.game.world.worldGhost.ghostRoom.realizedRoom.RemoveObject(potentialGhost);
+									ghost.Destroy();
+								}
+							}
+						}
+						self.game.world.worldGhost = null;
+					}
+				}
+				cursor.EmitDelegate(AddArtiGhostChecks);
+			}
+			catch (Exception ex)
+			{
+				Plugin.Log(Plugin.LogStates.FailILInsert, ex);
+			}
+		}
+
+		private static void GhostHunch_Update(On.GhostHunch.orig_Update orig, GhostHunch self, bool eu)
+		{
+			Plugin.DebugLog($"cHECKING... {WinOrSaveHooks.scavsKilledThisCycle}");
+			if (self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer && WinOrSaveHooks.scavsKilledThisCycle != 0)
+			{
+				Plugin.DebugLog("Arti killed scavengers >:(");
+				self.Destroy();
+				return;
+			}
+			orig(self, eu);
+		}
+
+		private static void World_SpawnGhost(On.World.orig_SpawnGhost orig, World self)
+		{
+			if (self.game.setupValues.ghosts < 0)
+			{
+				return;
+			}
+			if (!World.CheckForRegionGhost(self.game.StoryCharacter, self.region.name))
+			{
+				return;
+			}
+			GhostWorldPresence.GhostID ghostID = GhostWorldPresence.GetGhostID(self.region.name);
+			if (ghostID == GhostWorldPresence.GhostID.NoGhost)
+			{
+				return;
+			}
+
+			int encounters = 0;
+			if ((self.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo.ContainsKey(ghostID))
+			{
+				encounters = (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo[ghostID];
+			}
+			bool shouldSpawnGhost = self.game.setupValues.ghosts > 0 || GhostWorldPresence.SpawnGhost(ghostID, (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karma, (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karmaCap, encounters, self.game.StoryCharacter == SlugcatStats.Name.Red);
+			if (ModManager.MSC && self.game.IsStorySession && self.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+			{
+				int scavsKilledSinceLastPrime = WinOrSaveHooks.scavsKilledThisCycle;
+				if (scavsKilledSinceLastPrime > 0)
+				{
+					(self.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo[ghostID] = 0;
+					WinOrSaveHooks.scavsKilledThisCycle = 0;
+					return;
+				}
+				else if (encounters == 1 && (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karma == (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karmaCap || (ModManager.Expedition && self.game.rainWorld.ExpeditionMode && (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karma == (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karmaCap))
+				{
+					shouldSpawnGhost = true;
+				}
+			}
+
+			if (shouldSpawnGhost)
+			{
+				self.worldGhost = new GhostWorldPresence(self, ghostID);
+				self.migrationInfluence = self.worldGhost;
+				return;
+			}
+
+			orig(self);
 		}
 
 		private static void WorldLoader_ctor_RainWorldGame_Name_bool_string_Region_SetupValues(On.WorldLoader.orig_ctor_RainWorldGame_Name_bool_string_Region_SetupValues orig, WorldLoader self, RainWorldGame game, SlugcatStats.Name playerCharacter, bool singleRoomWorld, string worldName, Region region, RainWorldGame.SetupValues setupValues)

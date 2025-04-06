@@ -1,3 +1,0 @@
-Template: NONE
-Palette: 5
-EffectColorA: 9

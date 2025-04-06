@@ -29,6 +29,7 @@ namespace MagicasContentPack
 		public static bool CLSeenMoonPearl;
 
 		public static bool HunterHasGreenNeuron;
+		internal static int scavsKilledThisCycle = 0;
 
 		public static string HunterOracleID { get; internal set; }
 
@@ -463,6 +464,8 @@ namespace MagicasContentPack
 					ArtiKilledScavKing = true;
 					Plugin.DebugLog("Arti has killed the scav king");
 				}
+
+				scavsKilledThisCycle = 0;
 			}
 
 			if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear && self.progression.miscProgressionData != null)
@@ -485,11 +488,6 @@ namespace MagicasContentPack
 				{
 					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(SpearMetSRS));
 				}
-
-				//if (self.saveStateNumber != MoreSlugcatsEnums.SlugcatStatsName.Artificer)
-				//{
-				//	self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(WhoShowedFPThePearl));
-				//}
 
 				if (self.saveStateNumber == SlugcatStats.Name.Red)
 				{
