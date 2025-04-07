@@ -271,6 +271,21 @@ namespace MagicasContentPack
 		{
 			if (ModOptions.CustomSlideShows.Value)
 			{
+				if (!self.flatMode && self.sceneID == MenuScene.SceneID.Outro_Hunter_3_Embrace)
+				{
+					float alpha;
+
+					self.depthIllustrations[self.depthIllustrations.Count - 7].alpha = Mathf.InverseLerp(0.05f, 0.44f, self.displayTime);
+					alpha = Mathf.Pow(Custom.SCurve(Mathf.InverseLerp(0.21f, 0.44f, self.displayTime), 0.65f), 1.5f);
+					self.depthIllustrations[self.depthIllustrations.Count - 6].alpha = alpha;
+					self.depthIllustrations[self.depthIllustrations.Count - 1].alpha = alpha;
+					alpha = Custom.SCurve(Mathf.InverseLerp(0.21f, 0.45f, self.displayTime), 0.65f);
+					self.depthIllustrations[self.depthIllustrations.Count - 5].alpha = alpha;
+					self.depthIllustrations[self.depthIllustrations.Count - 3].alpha = alpha;
+					self.depthIllustrations[self.depthIllustrations.Count - 2].alpha = 0.2f + 0.8f * Mathf.InverseLerp(0.05f, 0.75f, self.displayTime);
+					return;
+				}
+
 				SceneMaker.ApplySceneSpecificAlphas(self);
 			}
 

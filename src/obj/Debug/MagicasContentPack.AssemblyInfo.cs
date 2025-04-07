@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MagicasContentPack")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80f0b04e29d11a17abc5dee0739a88a4eba3df5b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+86de806d0aa942a41112676de9fdc6be9aac3e5a")]
 [assembly: System.Reflection.AssemblyProductAttribute("MagicasContentPack")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MagicasContentPack")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

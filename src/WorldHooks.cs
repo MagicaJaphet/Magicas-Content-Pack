@@ -23,6 +23,9 @@ namespace MagicasContentPack
 		{
 			try
 			{
+				// For Custom Arti mechanics
+				On.MoreSlugcats.CutsceneArtificerRobo.Update += CutsceneArtificerRobo_Update;
+
 				// Change Artificer reputation dynamically
 				IL.RainWorldGame.Update += RainWorldGame_Update; 
 				IL.ScavengerAI.PlayerRelationship += ScavengerAI_PlayerRelationship;
@@ -59,6 +62,38 @@ namespace MagicasContentPack
 			{
 				Plugin.Log(Plugin.LogStates.HookFail, nameof(WorldHooks));
 			}
+		}
+
+		private static void CutsceneArtificerRobo_Update(On.MoreSlugcats.CutsceneArtificerRobo.orig_Update orig, CutsceneArtificerRobo self, bool eu)
+		{
+			if (ModOptions.CustomMechanics.Value)
+			{
+				if (self.phase == CutsceneArtificerRobo.Phase.End)
+				{
+					if (self.player != null)
+					{
+						self.player.controller = null;
+					}
+					RainWorldGame.ForceSaveNewDenLocation(self.room.game, "GW_A24", true);
+					self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("Hold pickup on combustable objects to craft explosives, some items can be swallowed at the cost of food to transform them."), 20, 700, true, true);
+					self.Destroy();
+					return;
+				}
+			}
+			else if (self.room.updateList.Any(x => x != null && x is FirecrackerPlant))
+			{
+				for (int i = 0; i < self.room.updateList.Count; i++)
+				{
+					UpdatableAndDeletable item = self.room.updateList[i];
+					if (item != null && item is FirecrackerPlant firecracker)
+					{
+						firecracker.abstractPhysicalObject.realizedObject.RemoveFromRoom();
+						self.room.abstractRoom.RemoveEntity(firecracker.abstractPhysicalObject);
+					}
+				}
+			}
+
+			orig(self, eu);
 		}
 
 		private static void RainWorldGame_Update(ILContext il)
@@ -546,6 +581,14 @@ namespace MagicasContentPack
 		private static void CustomRoomSpecificEvents(On.MoreSlugcats.MSCRoomSpecificScript.orig_AddRoomSpecificScript orig, Room room)
 		{
 			string name = room.abstractRoom.name;
+
+			if (name == "GW_A25_past")
+			{
+				if (room.game.IsStorySession && room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer && !room.game.GetStorySession.saveState.hasRobo && room.game.GetStorySession.saveState.cycleNumber == 0 && room.game.GetStorySession.saveState.denPosition == "GW_A24")
+				{
+					room.AddObject(new CutsceneArtificerRobo(room));
+				}
+			}
 
 			if (name == "7S_AI")
 			{

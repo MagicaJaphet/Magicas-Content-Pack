@@ -28,7 +28,7 @@ namespace MagicasContentPack
 		// Class variables
 		private static MenuScene menuScene;
 		private static string sceneFolder;
-		private static bool flat;
+		private static bool flat = false;
 		private static List<float> idleDepths;
 
 		private static List<MenuDepthIllustration> multiplyScenes;
@@ -145,6 +145,7 @@ namespace MagicasContentPack
 				hunter.AddRange([
 					MenuScene.SceneID.Outro_Hunter_1_Swim,
 					MenuScene.SceneID.Outro_Hunter_2_Sink,
+					MenuScene.SceneID.Outro_Hunter_3_Embrace,
 					]);
 
 				saint.AddRange([
@@ -235,9 +236,9 @@ namespace MagicasContentPack
 		public static void ApplySceneSpecificAlphas(SlideShowMenuScene self)
 		{
 			float fadeNum;
-
 			if (!flat)
 			{
+
 				if (self.sceneID == MagicaEnums.SceneIDs.Outro_SpearmasterOutroEmbrace)
 				{
 					self.depthIllustrations[self.depthIllustrations.Count - 5].alpha = Mathf.InverseLerp(0.05f, 0.44f, self.displayTime);
@@ -1924,6 +1925,10 @@ namespace MagicasContentPack
 				{
 					var _ when name == MenuScene.SceneID.Slugcat_Red => SelectMenu.SelectScreen(ref scenes),
 					var _ when name == MenuScene.SceneID.Slugcat_Dead_Red => SelectMenu.AltEndingOracle(ref scenes),
+
+					var _ when name == MenuScene.SceneID.Outro_Hunter_1_Swim => GhostScenes.Swim(ref scenes),
+					var _ when name == MenuScene.SceneID.Outro_Hunter_2_Sink => GhostScenes.Sink(ref scenes),
+					var _ when name == MenuScene.SceneID.Outro_Hunter_3_Embrace => GhostScenes.Embrace(ref scenes),
 				};
 
 				return scenes;
@@ -2046,6 +2051,73 @@ namespace MagicasContentPack
 						{
 							scenes.Add(CreateIllus("slugcat - red dark - flat"));
 						}
+					}
+
+					return scenes;
+				}
+			}
+
+			internal class GhostScenes
+			{
+				internal static List<MenuIllustration> Swim(ref List<MenuIllustration> scenes)
+				{
+					sceneFolder = SceneFolder(subDirectory, slugcatName, "outro hunter 1 - swim");
+
+					if (!flat)
+					{
+						scenes.Add(CreateIllus("outro hunter 1 - swim - 6", 8f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 1 - swim - 5", 10f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 1 - swim - 4", 6f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 1 - swim - 3", 5f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 1 - swim - 2", 4.2f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 1 - swim - 1", 6.5f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 1 - swim - 0", 1f, MenuDepthIllustration.MenuShader.Normal));
+					}
+					else
+					{
+						scenes.Add(CreateIllus("outro hunter 1 - swim - flat"));
+					}
+
+					return scenes;
+				}
+				internal static List<MenuIllustration> Sink(ref List<MenuIllustration> scenes)
+				{
+					sceneFolder = SceneFolder(subDirectory, slugcatName, "outro hunter 2 - sink");
+
+					if (!flat)
+					{
+						scenes.Add(CreateIllus("outro hunter 2 - sink - 5", 12f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 2 - sink - 4", 16f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 2 - sink - 3", 3.2f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 2 - sink - 2", 3.4f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 2 - sink - 1", 3.1f, MenuDepthIllustration.MenuShader.LightEdges));
+						scenes.Add(CreateIllus("outro hunter 2 - sink - 0", 1.3f, MenuDepthIllustration.MenuShader.SoftLight));
+					}
+					else
+					{
+						scenes.Add(CreateIllus("outro hunter 2 - sink - flat"));
+					}
+
+					return scenes;
+				}
+				internal static List<MenuIllustration> Embrace(ref List<MenuIllustration> scenes)
+				{
+					sceneFolder = SceneFolder(subDirectory, slugcatName, "outro hunter 3 - embrace");
+
+					if (!flat)
+					{
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 7", 15f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 6", 9f, MenuDepthIllustration.MenuShader.Lighten));
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 5", 2f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 3", 4.9f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 2", 3.7f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 0", 3.8f, MenuDepthIllustration.MenuShader.Normal));
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 1", 7f, MenuDepthIllustration.MenuShader.Lighten));
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - 4", 1.2f, MenuDepthIllustration.MenuShader.Normal));
+					}
+					else
+					{
+						scenes.Add(CreateIllus("outro hunter 3 - embrace - flat"));
 					}
 
 					return scenes;

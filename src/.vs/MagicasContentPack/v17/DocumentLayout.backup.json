@@ -7,6 +7,14 @@
       "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:scenemaker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\menuscenehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:menuscenehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\worldhooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:worldhooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\graphicshooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:graphicshooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -15,20 +23,12 @@
       "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:playerhooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\worldhooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:worldhooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\winorsavehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:winorsavehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\menuscenehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:menuscenehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\winorsavehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|solutionrelative:winorsavehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F73D3C84-3910-4203-BD79-CDCE2FECD97C}|MagicasContentPack.csproj|c:\\users\\linda\\onedrive\\documents\\rain mods\\magicas-content-pack\\src\\oraclehooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -70,7 +70,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "Plugin.cs",
               "DocumentMoniker": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\Plugin.cs",
               "RelativeDocumentMoniker": "Plugin.cs",
@@ -82,15 +82,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "MenuSceneHooks.cs",
               "DocumentMoniker": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\MenuSceneHooks.cs",
               "RelativeDocumentMoniker": "MenuSceneHooks.cs",
               "ToolTip": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\MenuSceneHooks.cs",
               "RelativeToolTip": "MenuSceneHooks.cs",
-              "ViewState": "AgIAADsCAAAAAAAAAAAMwFsCAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAAPoAAAAAAAAAAAAQwBgBAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T04:44:04.659Z"
+              "WhenOpened": "2025-04-03T04:44:04.659Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -100,26 +101,27 @@
               "RelativeDocumentMoniker": "SceneMaker.cs",
               "ToolTip": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\SceneMaker.cs",
               "RelativeToolTip": "SceneMaker.cs",
-              "ViewState": "AgIAAKMBAAAAAAAAAAAewIkHAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAABwIAAAAAAAAAAAawEIIAABpAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-03T04:43:23.944Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "WorldHooks.cs",
               "DocumentMoniker": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\WorldHooks.cs",
               "RelativeDocumentMoniker": "WorldHooks.cs",
               "ToolTip": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\WorldHooks.cs",
               "RelativeToolTip": "WorldHooks.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAiwDwAAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAD0AAAAAAAAAAAAgwGEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T04:39:11.176Z"
+              "WhenOpened": "2025-04-03T04:39:11.176Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "GraphicsHooks.cs",
               "DocumentMoniker": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\GraphicsHooks.cs",
               "RelativeDocumentMoniker": "GraphicsHooks.cs",
@@ -144,15 +146,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "PlayerHooks.cs",
               "DocumentMoniker": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\PlayerHooks.cs",
               "RelativeDocumentMoniker": "PlayerHooks.cs",
               "ToolTip": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\PlayerHooks.cs",
               "RelativeToolTip": "PlayerHooks.cs",
-              "ViewState": "AgIAAG4AAAAAAAAAAAAvwHgAAACZAAAAAAAAAA==",
+              "ViewState": "AgIAAJEAAAAAAAAAAAAawLMAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-04T21:48:09.612Z"
+              "WhenOpened": "2025-04-04T21:48:09.612Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -168,7 +171,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "WinOrSaveHooks.cs",
               "DocumentMoniker": "C:\\Users\\linda\\OneDrive\\Documents\\Rain Mods\\Magicas-Content-Pack\\src\\WinOrSaveHooks.cs",
               "RelativeDocumentMoniker": "WinOrSaveHooks.cs",
@@ -176,7 +179,8 @@
               "RelativeToolTip": "WinOrSaveHooks.cs",
               "ViewState": "AgIAALcBAAAAAAAAAAAhwNIBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T04:22:48.024Z"
+              "WhenOpened": "2025-04-03T04:22:48.024Z",
+              "EditorCaption": ""
             }
           ]
         },

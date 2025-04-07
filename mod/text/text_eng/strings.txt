@@ -39,3 +39,4 @@ What are you doing...?|What are you doing...?
 ...Feel... loved...|...Feel... loved...
 Hold pickup and press left or right to change targets, hold throw to perform an ascension.|Hold pickup and press left or right to change targets, hold throw to perform an ascension.
 Helped Big Sis Moon|Helped Big Sis Moon
+Hold pickup on combustable objects to craft explosives, some items can be swallowed at the cost of food to transform them.|Hold pickup on combustable objects to craft explosives, some items can be swallowed at the cost of food to transform them.
