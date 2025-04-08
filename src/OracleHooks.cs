@@ -154,68 +154,82 @@ namespace MagicasContentPack
 				// Saint FP
 				On.MoreSlugcats.CLOracleBehavior.InitateConversation += CLOracleBehavior_InitateConversation;
 				On.MoreSlugcats.CLOracleBehavior.Update += CLOracleBehavior_Update;
+
+				Plugin.HookSucceed();
 			}
-			catch
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(OracleHooks));
+				Plugin.HookFail(ex);
 			}
 		}
 
 		private static void Oracle_SetUpMarbles(ILContext il)
 		{
-			ILCursor cursor = new(il);
-
-			bool succeed = cursor.TryGotoNext(
-				MoveType.After,
-				x => x.MatchLdcI4(0)
-				);
-
-			if (!succeed)
+			try
 			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(Oracle_SetUpMarbles));
-				return;
-			}
+				ILCursor cursor = new(il);
 
-			cursor.Emit(OpCodes.Ldarg_0);
-			cursor.Emit(OpCodes.Ldloc, 0);
-			static void SRSInjection(Oracle self, Vector2 startPos)
-			{
-				if (self.room.world.name == "7S")
+				bool succeed = cursor.TryGotoNext(
+					MoveType.After,
+					x => x.MatchLdcI4(0)
+					);
+
+				if (Plugin.ILMatchFail(succeed))
+					return;
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.Emit(OpCodes.Ldloc, 0);
+				static void SRSInjection(Oracle self, Vector2 startPos)
 				{
-					startPos = new(450f, 100f);
+					if (self.room.world.name == "7S")
+					{
+						startPos = new(450f, 100f);
+					}
 				}
+				cursor.EmitDelegate(SRSInjection);
+
+				Plugin.ILSucceed();
 			}
-			cursor.EmitDelegate(SRSInjection);
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
 		}
 
 		private static void Oracle_ctor(ILContext il)
 		{
-			ILCursor cursor = new(il);
-
-			bool succeed = cursor.TryGotoNext(
-				x => x.MatchNewarr<PhysicalObject.BodyChunkConnection>()
-				);
-
-            if (!succeed)
-            {
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(Oracle_ctor));
-				return;
-            }
-
-			cursor.Emit(OpCodes.Ldarg_0);
-			cursor.Emit(OpCodes.Ldarg_2);
-			static void SRSInjection(Oracle self, Room room)
+			try
 			{
-				if (room.world.name == "7S")
+				ILCursor cursor = new(il);
+
+				bool succeed = cursor.TryGotoNext(
+					x => x.MatchNewarr<PhysicalObject.BodyChunkConnection>()
+					);
+
+				if (Plugin.ILMatchFail(succeed))
+					return;
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.Emit(OpCodes.Ldarg_2);
+				static void SRSInjection(Oracle self, Room room)
 				{
-					self.ID = MagicaEnums.Oracles.SRS;
-					for (int i = 0; i < self.bodyChunks.Length; i++)
+					if (room.world.name == "7S")
 					{
-						self.bodyChunks[i] = new BodyChunk(self, i, new Vector2(500f, 300f), 6f, 0.5f);
+						self.ID = MagicaEnums.Oracles.SRS;
+						for (int i = 0; i < self.bodyChunks.Length; i++)
+						{
+							self.bodyChunks[i] = new BodyChunk(self, i, new Vector2(500f, 300f), 6f, 0.5f);
+						}
 					}
 				}
+				cursor.EmitDelegate(SRSInjection);
+
+				Plugin.ILSucceed();
 			}
-			cursor.EmitDelegate(SRSInjection);
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
         }
 
 		private static void Inspector_InitiateGraphicsModule(On.MoreSlugcats.Inspector.orig_InitiateGraphicsModule orig, Inspector self)
@@ -293,10 +307,8 @@ namespace MagicasContentPack
 					move => move.MatchCall(typeof(OracleGraphics).GetProperty(nameof(OracleGraphics.IsStraw)).GetGetMethod())
 					);
 
-				if (!success)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(ThirdEye));
-				}
+				if (Plugin.ILMatchFail(success))
+					return;
 
 				cursor.Index += 2;
 				ILLabel label = (ILLabel)cursor.Next.Operand;
@@ -313,10 +325,12 @@ namespace MagicasContentPack
 				cursor.Emit(OpCodes.Brtrue_S, label);
 				cursor.Emit(OpCodes.Ldarg_0);
 				cursor.Emit(OpCodes.Call, typeof(OracleGraphics).GetProperty(nameof(OracleGraphics.IsSaintPebbles)).GetGetMethod());
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -337,10 +351,8 @@ namespace MagicasContentPack
 					move => move.MatchCall(typeof(OracleGraphics).GetProperty(nameof(OracleGraphics.IsStraw)).GetGetMethod())
 					);
 
-				if (!success)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(ThirdEyeDrawSprites));
-				}
+				if (Plugin.ILMatchFail(success))
+					return;
 
 				cursor.Index += 2;
 				ILLabel label = (ILLabel)cursor.Next.Operand;
@@ -357,10 +369,12 @@ namespace MagicasContentPack
 				cursor.Emit(OpCodes.Brtrue_S, label);
 				cursor.Emit(OpCodes.Ldarg_0);
 				cursor.Emit(OpCodes.Call, typeof(OracleGraphics).GetProperty(nameof(OracleGraphics.IsSaintPebbles)).GetGetMethod());
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -375,15 +389,13 @@ namespace MagicasContentPack
 					move => move.MatchCallvirt<GraphicsModule>(nameof(GraphicsModule.AddToContainer))
 					);
 
-				if (!success)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(InitiateCustomSprites));
-				}
+				if (Plugin.ILMatchFail(success))
+					return;
 
 				cursor.Emit(OpCodes.Ldarg_0);
 				cursor.Emit(OpCodes.Ldarg_1);
 				cursor.Emit(OpCodes.Ldarg_2);
-				cursor.EmitDelegate((OracleGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam) =>
+				static void SRSDetails(OracleGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
 				{
 					if (self.IsMoon || self.IsPastMoon)
 					{
@@ -476,11 +488,14 @@ namespace MagicasContentPack
 							anchorY = 0
 						};
 					}
-				});
+				}
+				cursor.EmitDelegate(SRSDetails);
+
+				Plugin.ILSucceed();
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				Debug.LogException(e);
+				Plugin.ILFail(ex);
 			}
 		}
 		private static void CustomAddToContainer(On.OracleGraphics.orig_AddToContainer orig, OracleGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
@@ -835,6 +850,7 @@ namespace MagicasContentPack
 				self.dialogBox.NewMessage(self.Translate("...It is... warm... sad..."), 90);
 				self.dialogBox.NewMessage(self.Translate("...No more... lonely..."), 120);
 				self.dialogBox.NewMessage(self.Translate("...Feel... loved..."), 60);
+				self.dialogBox.NewMessage(self.Translate("...Thank you."), 20);
 				return;
 			}
 

@@ -61,11 +61,12 @@ namespace MagicasContentPack
 				// Update for skins
 				On.TailSegment.Update += TailSegment_Update;
 				On.PlayerGraphics.CosmeticPearl.InitiateSprites += CosmeticPearl_InitiateSprites;
+
+				Plugin.HookSucceed();
 			}
 			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(GraphicsHooks));
-				Plugin.Logger.LogError(ex);
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -76,77 +77,85 @@ namespace MagicasContentPack
 				if (Plugin.isDMSEnabled)
 					DMSHooks.ApplyDMSHooks();
 
-				Plugin.Log(Plugin.LogStates.HooksSucceeded, nameof(GraphicsHooks) + " post");
+				Plugin.HookSucceed();
 			}
 			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(GraphicsHooks) + " post");
-				Plugin.Logger.LogError(ex);
+				Plugin.HookFail(ex);
 			}
 		}
 		private static void PlayerGraphics_ColoredBodyPartList(ILContext il)
 		{
-			ILCursor cursor = new(il);
-
-			bool success = cursor.TryGotoNext(
-				MoveType.Before,
-				move => move.MatchRet()
-				);
-
-			if (!success)
+			try
 			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(PlayerGraphics_ColoredBodyPartList));
-			}
+				ILCursor cursor = new(il);
 
-			cursor.Emit(OpCodes.Ldarg_0);
-			cursor.Emit(OpCodes.Ldloc_0);
-			static void AddToList(SlugcatStats.Name slugcatID, List<string> list)
-			{
-				if (slugcatID == SlugcatStats.Name.Red)
+				bool success = cursor.TryGotoNext(
+					MoveType.Before,
+					move => move.MatchRet()
+					);
+
+				if (Plugin.ILMatchFail(success))
+					return;
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.Emit(OpCodes.Ldloc_0);
+				static void AddToList(SlugcatStats.Name slugcatID, List<string> list)
 				{
-					list.Add("Arm");
+					if (slugcatID == SlugcatStats.Name.Red)
+					{
+						list.Add("Arm");
+					}
 				}
-			}
-			cursor.EmitDelegate(AddToList);
+				cursor.EmitDelegate(AddToList);
 
+				Plugin.ILSucceed();
+			}
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
 		}
 		private static void PlayerGraphics_DefaultBodyPartColorHex(ILContext il)
 		{
-			ILCursor cursor = new(il);
-
-			bool saintTongue = cursor.TryGotoNext(
-				x => x.MatchLdstr("FF80A6")
-				);
-
-			if (!saintTongue)
+			try
 			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(PlayerGraphics_DefaultBodyPartColorHex) + " I don't even know how this one would fail");
-			}
+				ILCursor cursor = new(il);
 
-			cursor.Next.Operand = Custom.colorToHex(customColorDict[CustomColorValues.SaintTongue]);
+				bool saintTongue = cursor.TryGotoNext(
+					x => x.MatchLdstr("FF80A6")
+					);
 
-			bool success = cursor.TryGotoNext(
-				MoveType.Before,
-				move => move.MatchRet()
-				);
+				if (Plugin.ILMatchFail(saintTongue))
+					return;
 
-			if (!success)
-			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(PlayerGraphics_DefaultBodyPartColorHex));
-			}
+				cursor.Next.Operand = Custom.colorToHex(customColorDict[CustomColorValues.SaintTongue]);
 
-			cursor.Emit(OpCodes.Ldarg_0);
-			cursor.Emit(OpCodes.Ldloc_0);
-			static void AddToList(SlugcatStats.Name slugcatID, List<string> list)
-			{
-				if (slugcatID == SlugcatStats.Name.Red)
+				bool success = cursor.TryGotoNext(
+					MoveType.Before,
+					move => move.MatchRet()
+					);
+
+				if (Plugin.ILMatchFail(success))
+					return;
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.Emit(OpCodes.Ldloc_0);
+				static void AddToList(SlugcatStats.Name slugcatID, List<string> list)
 				{
-					list.Add(Custom.colorToHex(customColorDict[CustomColorValues.HunterArm]));
+					if (slugcatID == SlugcatStats.Name.Red)
+					{
+						list.Add(Custom.colorToHex(customColorDict[CustomColorValues.HunterArm]));
+					}
 				}
-			}
-			cursor.EmitDelegate(AddToList);
+				cursor.EmitDelegate(AddToList);
 
-			Plugin.Log(Plugin.LogStates.ILSuccess, nameof(PlayerGraphics_DefaultBodyPartColorHex));
+				Plugin.ILSucceed();
+			}
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
 		}
 
 		private static void VultureMask_DrawSprites(ILContext il)
@@ -162,7 +171,7 @@ namespace MagicasContentPack
 
 				if (!success)
 				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(VultureMask_DrawSprites));
+					Plugin.Log(Plugin.LogStates.FailILMatch);
 				}
 
 				cursor.Emit(OpCodes.Ldarg_0);
@@ -174,10 +183,12 @@ namespace MagicasContentPack
 					}
 				}
 				cursor.EmitDelegate(FixVultureMaskPosition);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.FailILInsert, ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -797,14 +808,15 @@ namespace MagicasContentPack
 				// For altering custom mechanics or vanilla sprites
 				if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.ascensionStartSprite)
 				{
+					magicaCWT.saintCreatureCircle.isVisible = ModOptions.CustomMechanics.Value && player.magicaSaintAscension && (player.saintTarget != null || player.wormTarget != null);
+					magicaCWT.saintCreatureKarma.isVisible = magicaCWT.saintCreatureCircle.isVisible;
+					foreach (var line in magicaCWT.saintAcensionLines)
+					{
+						line.isVisible = magicaCWT.saintCreatureCircle.isVisible;
+					}
+
 					if ((ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension)
 					{
-						magicaCWT.saintCreatureCircle.isVisible = ModOptions.CustomMechanics.Value && player.magicaSaintAscension && player.saintTarget != null;
-						magicaCWT.saintCreatureKarma.isVisible = magicaCWT.saintCreatureCircle.isVisible;
-						foreach (var line in magicaCWT.saintAcensionLines)
-						{
-							line.isVisible = magicaCWT.saintCreatureCircle.isVisible;
-						}
 
 						if (magicaCWT.saintGlowTimer == 0)
 						{
@@ -869,7 +881,7 @@ namespace MagicasContentPack
 									player.changingTarget = Mathf.Max(player.changingTarget - 1f, 0f);
 								}
 
-								if (player.saintTarget != null)
+								if (player.saintTarget != null || player.wormTarget != null)
 								{
 									if (player.karmaCycleTimer > 0f)
 									{
@@ -878,6 +890,10 @@ namespace MagicasContentPack
 									if (!player.karmaCycling || (player.karmaCycling && player.karmaCycleTimer <= 0f) || player.ascendTimer > 0f)
 									{
 										magicaCWT.saintCreatureKarma.SetElementByName(GetCreatureKarma(player.saintTarget, player, self.player.room != null && self.player.room.game.IsStorySession && self.player.room.world.name == "HR"));
+										if (player.wormTarget != null)
+										{
+											magicaCWT.saintCreatureKarma.SetElementByName("SaintKarmaRing9");
+										}
 									}
 
 									float alphaLerp = Custom.LerpExpEaseInOut(0f, 1f, (PlayerHooks.saintRadius - Custom.Dist(self.player.firstChunk.pos, player.saintTargetPos)) / PlayerHooks.saintRadius);

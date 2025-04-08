@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using Menu;
 using System.IO;
 using UnityEngine;
+using System.Runtime.CompilerServices;
+using System.Reflection;
+using System.Text;
 
 // Allows access to private members
 #pragma warning disable CS0618
@@ -39,15 +42,16 @@ public class Plugin : BaseUnityPlugin
 	public static bool isDMSEnabled;
 	public static bool isCRSEnabled;
 	public static bool debugState = true;
+	public static List<string> initalizedMethods = [];
 
 	public void OnEnable()
 	{
-		On.RainWorld.PreModsInit += RainWorld_PreModsInit;
-		On.RainWorld.OnModsInit += RainWorld_OnModsInit;
-		On.RainWorld.PostModsInit += RainWorld_PostModsInit;
+		On.RainWorld.PreModsInit += PreModsInit;
+		On.RainWorld.OnModsInit += OnModsInit;
+		On.RainWorld.PostModsInit += PostModsInit;
 	}
 
-	private void RainWorld_PreModsInit(On.RainWorld.orig_PreModsInit orig, RainWorld self)
+	private void PreModsInit(On.RainWorld.orig_PreModsInit orig, RainWorld self)
 	{
 		orig(self);
 
@@ -58,11 +62,11 @@ public class Plugin : BaseUnityPlugin
 		}
 		catch (Exception ex)
 		{
-			Logger.LogError(ex);
+			HookFail(ex);
 		}
 	}
 
-	private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+	private void OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
 	{
 		orig(self);
 
@@ -99,21 +103,39 @@ public class Plugin : BaseUnityPlugin
 			Application.quitting += QuitDebugLog;
 
 			ModOptions.RegisterOI();
-			LoadResources();
+			LoadAtlasResources();
 
 			_ = SlidesShowIDs.ArtificerDreamE;
+
+			HookSucceed();
 		}
 		catch (Exception ex)
 		{
-			Logger.LogError(ex);
+			HookFail(ex);
 		}
 	}
 
 	private void QuitDebugLog()
 	{
-		DebugLog($"========================================\nMagica's Content Pack Debug Info\n\n" +
-				$"MISSING ELEMENTS:\n{string.Join("\n", GraphicsHooks.debugElementsNotChanged)}\n" +
-				$"========================================");
+		if (GraphicsHooks.debugElementsNotChanged.Count > 0 || initalizedMethods.Count > 0)
+		{
+			string information = "=========== MAGICA'S CONTENT PACK DEBUG INFO ===========";
+			if (GraphicsHooks.debugElementsNotChanged.Count > 0)
+			{
+				information += $"\n\nMISSING ATLAS ELEMENTS: \n{string.Join("\n", GraphicsHooks.debugElementsNotChanged)}";
+			}
+				
+			if (initalizedMethods.Count > 0)
+			{
+				string[] suceeded = initalizedMethods.Where(x => x.Contains("SUCCEEDED")).ToArray();
+				string[] failed = initalizedMethods.Where(x => x.Contains("FAILED")).ToArray();
+				information += $"\n\nHOOK STATES ({suceeded.Length}/{initalizedMethods.Count} SUCCEEDED, {initalizedMethods.Where(x => x.Contains("IL")).Count()} IL HOOKS):\n{string.Join("\n", failed)}";
+			}
+
+			information += "\n=======================================";
+
+			DebugLog(information);
+		}
 	}
 
 	private void ButtonManager_SignalSave(On.Menu.Remix.ConfigMenuTab.ButtonManager.orig_SignalSave orig, Menu.Remix.ConfigMenuTab.ButtonManager self, Menu.Remix.MixedUI.UIfocusable trigger)
@@ -123,7 +145,7 @@ public class Plugin : BaseUnityPlugin
 		SceneMaker.allCustomScenes = SceneMaker.AllValidScenes();
 	}
 
-	private void RainWorld_PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
+	private void PostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
 	{
 		// For other mod patches
 
@@ -132,76 +154,20 @@ public class Plugin : BaseUnityPlugin
 		try
 		{
 			if (isDMSEnabled)
-				LoadDMSConfigs();
+				DMSHooks.LoadDMSConfigs();
 
 			GraphicsHooks.PostInit();
 			ObjectHooks.PostInit();
+
+			HookSucceed();
 		}
 		catch (Exception ex)
 		{
-			Logger.LogError(ex);
+			HookFail(ex);
 		}
 	}
 
-	private void LoadDMSConfigs()
-	{
-		//Log("DMS configs loaded");
-
-		//SpriteDefinitions.AvailableSprites.Add(new SpriteDefinitions.AvailableSprite
-		//{
-		//	Name = "ARTIEXTRAS",
-		//	Description = "Arti Extras",
-		//	GallerySprite = "ScarHeadA0",
-		//	RequiredSprites = new List<string>
-		//{
-		//	"TailPuff",
-
-		//	"ScarHeadA0",
-		//	"ScarHeadA1",
-		//	"ScarHeadA2",
-		//	"ScarHeadA3",
-		//	"ScarHeadA4",
-		//	"ScarHeadA5",
-		//	"ScarHeadA6",
-		//	"ScarHeadA7",
-		//	"ScarHeadA8",
-		//	"ScarHeadA9",
-		//	"ScarHeadA10",
-		//	"ScarHeadA11",
-		//	"ScarHeadA12",
-		//	"ScarHeadA13",
-		//	"ScarHeadA14",
-		//	"ScarHeadA15",
-		//	"ScarHeadA16",
-		//	"ScarHeadA17",
-
-		//	"ScarLegsA0"
-		//},
-		//	Slugcats = new List<string>
-		//{
-		//	"Artificer"
-		//}
-		//});
-
-		//SpriteSheet.Get("magica.artificer").ParseAtlases();
-
-		//SpriteDefinitions.AvailableSprites.Add(new SpriteDefinitions.AvailableSprite
-		//{
-		//	Name = "BRAIDS",
-		//	Description = "Braids",
-		//	GallerySprite = "Braid",
-		//	RequiredSprites = new List<string>
-		//{
-		//	"Braid"
-		//},
-		//	Slugcats = new List<string>
-		//{
-		//	"Spear"
-		//}
-		//});
-	}
-
-	public void LoadResources()
+	public void LoadAtlasResources()
 	{
 		Futile.atlasManager.LoadAtlas(modPath + "/atlases/MagicaSprites");
 		Futile.atlasManager.LoadAtlas(modPath + "/atlases/magicarainworldmsc");
@@ -249,7 +215,7 @@ public class Plugin : BaseUnityPlugin
 			}
 			Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/artificer/faceleft");
 		}
-		DebugLog("Resources loaded");
+		ResourceLoad();
 	}
 
 	public static bool DebugLog(string m)
@@ -290,52 +256,74 @@ public class Plugin : BaseUnityPlugin
 		ILSuccess,
 		HookFail,
 		HooksSucceeded,
+		ResourceLoaded,
 		MISC
 	}
 
-	internal static bool Log(LogStates state, object v)
+	internal static bool Log(LogStates state, [CallerMemberName] string methodName = "")
 	{
 		string msg = "";
+		msg = AppendLogState(state, msg);
 
+		try
+		{
+			if (ErrorStates(state) && Logger != null)
+			{
+				Logger.LogError(string.Join(": ", msg, methodName));
+			}
+			if (InfoStates(state) && Logger != null)
+			{
+				Logger.LogInfo(string.Join(": ", msg, methodName));
+			}
+		}
+		catch (Exception ex)
+		{
+			if (Logger != null)
+			{
+				Logger.LogError(ex);
+			}
+		}
+		
+
+		return true;
+	}
+
+	private static string AppendLogState(LogStates state, string msg)
+	{
 		switch (state)
 		{
 			case LogStates.FailILMatch:
-				msg = "INVALID MATCH: ";
+				msg = "INVALID IL MATCH";
 				break;
 
 			case LogStates.FailILInsert:
-				msg = "INVALID IL: ";
-					break;
+				msg = "INVALID IL INSERTION";
+				break;
 
 			case LogStates.ILSuccess:
-				msg = "IL SUCCEEDED: ";
+				msg = "SUCCEEDED IL INSERTION";
 				break;
 
 			case LogStates.HookFail:
-				msg = "HOOK FAILED: ";
+				msg = "HOOK FAILED";
 				break;
 
 			case LogStates.HooksSucceeded:
-				msg = "HOOKS SUCCEEDED: ";
+				msg = "HOOKS SUCCEEDED";
+				break;
+
+			case LogStates.ResourceLoaded:
+				msg = "RESOURCE LOADED";
 				break;
 		}
-
-		if (ErrorStates(state))
-		{
-			Logger.LogError(msg + v);
-		}
-		if (InfoStates(state))
-		{
-			Logger.LogInfo(msg + v);
-		}
-
-		return true;
+		return msg;
 	}
 
 	private static bool InfoStates(LogStates state)
 	{
 		return state == LogStates.ILSuccess
 			|| state == LogStates.HooksSucceeded
+			|| state == LogStates.ResourceLoaded
 			|| state == LogStates.MISC;
 	}
 
@@ -344,6 +332,59 @@ public class Plugin : BaseUnityPlugin
 		return state == LogStates.FailILMatch
 			|| state == LogStates.FailILInsert
 			|| state == LogStates.HookFail;
+	}
+
+	private static string GetTypeName(string type)
+	{
+		return Path.GetFileNameWithoutExtension(type);
+	}
+
+	public static void ResourceLoad([CallerMemberName] string method = "")
+	{
+		Log(LogStates.ResourceLoaded, methodName: method);
+	}
+
+	public static void HookSucceed([CallerFilePath] string type = "", [CallerMemberName] string method = "")
+	{
+		type = GetTypeName(type);
+		Log(LogStates.HooksSucceeded, methodName: $"{type}.{method}");
+
+		initalizedMethods.Add($"{type}.{method} HOOK SUCCEEDED");
+	}
+
+	public static void HookFail(object exception, [CallerFilePath] string type = "", [CallerMemberName] string method = "")
+	{
+		type = GetTypeName(type);
+		Log(LogStates.HookFail, methodName: $"{type}.{method}");
+		Logger.LogError(exception);
+
+		initalizedMethods.Add($"{type}.{method} HOOK FAILED");
+	}
+
+	public static void ILSucceed([CallerFilePath] string type = "", [CallerMemberName] string method = "")
+	{
+		type = GetTypeName(type);
+		Log(LogStates.ILSuccess, methodName: method);
+
+		initalizedMethods.Add($"{type}.{method} IL SUCCEEDED");
+	}
+
+	public static bool ILMatchFail(bool succeed, [CallerMemberName] string method = "")
+	{
+		if (!succeed)
+		{
+			Log(LogStates.FailILMatch, methodName: method);
+		}
+		return !succeed;
+	}
+
+	public static void ILFail(object exception, [CallerFilePath] string type = "", [CallerMemberName] string method = "")
+	{
+		type = GetTypeName(type);
+		Log(LogStates.FailILInsert, methodName: method);
+		Logger.LogError(exception);
+
+		initalizedMethods.Add($"{type}.{method} IL FAILED");
 	}
 }
 public static class Extensions

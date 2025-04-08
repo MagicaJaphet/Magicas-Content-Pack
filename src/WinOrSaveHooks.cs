@@ -60,10 +60,12 @@ namespace MagicasContentPack
 				On.PlayerProgression.WipeSaveState += PlayerProgression_WipeSaveState;
 				On.WinState.CycleCompleted += WinState_CycleCompleted;
 				On.SaveState.LoadGame += SaveState_LoadGame;
+
+				Plugin.HookSucceed();
 			}
-			catch
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(WinOrSaveHooks));
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -107,11 +109,8 @@ namespace MagicasContentPack
 					x => x.MatchLdarg(0)
 					);
 
-				if (!succeed)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(StoryGameStatisticsScreen_ctor));
+				if (Plugin.ILMatchFail(succeed))
 					return;
-				}
 
 				cursor.Emit(OpCodes.Ldarg_1);
 				cursor.Emit(OpCodes.Ldloc, 0);
@@ -132,10 +131,12 @@ namespace MagicasContentPack
 				}
 				cursor.EmitDelegate(AddCustomPops);
 				cursor.Emit(OpCodes.Ldarg_0);
+
+				Plugin.ILSucceed();
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.MISC, "ERROR UPDATING SAVE STATE: " + e.ToString());
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -158,24 +159,20 @@ namespace MagicasContentPack
 			{
 				if (SceneMaker.paletteTexture == null)
 				{
-					SceneMaker.paletteTexture = new Texture2D(32, 8, TextureFormat.ARGB32, false);
-					SceneMaker.paletteTexture.anisoLevel = 0;
-					SceneMaker.paletteTexture.filterMode = FilterMode.Point;
-					SceneMaker.paletteTexture.wrapMode = TextureWrapMode.Clamp;
-
 					self.room.game.cameras[0].LoadPalette(self.room.roomSettings.Palette, ref SceneMaker.paletteTexture);
 
 					SceneMaker.sleepFadeAmount = 0;
 					if (self.room.roomSettings.fadePalette != null)
 					{
-						SceneMaker.fadePaletteTexture = new Texture2D(32, 8, TextureFormat.ARGB32, false);
-						SceneMaker.fadePaletteTexture.anisoLevel = 0;
-						SceneMaker.fadePaletteTexture.filterMode = FilterMode.Point;
-						SceneMaker.fadePaletteTexture.wrapMode = TextureWrapMode.Clamp;
-
 						self.room.game.cameras[0].LoadPalette(self.room.roomSettings.fadePalette.palette, ref SceneMaker.fadePaletteTexture);
 
 						SceneMaker.sleepFadeAmount = self.room.roomSettings.fadePalette.fades[0];
+					}
+
+					RoomSettings.RoomEffect darkness = self.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Darkness);
+					if (darkness != null)
+					{
+						SceneMaker.roomDarknesss = darkness.GetAmount(0);
 					}
 					// (-1 = left / 1 = right / 0 neutral, -1 = down / 1 = up / 0 neutral)
 					SceneMaker.shelterDirection = self.room.shelterDoor.dir;

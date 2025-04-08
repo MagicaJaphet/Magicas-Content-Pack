@@ -27,7 +27,7 @@ namespace MagicasContentPack
 				On.MoreSlugcats.CutsceneArtificerRobo.Update += CutsceneArtificerRobo_Update;
 
 				// Change Artificer reputation dynamically
-				IL.RainWorldGame.Update += RainWorldGame_Update; 
+				IL.RainWorldGame.Update += ShouldScavsPursueArti; 
 				IL.ScavengerAI.PlayerRelationship += ScavengerAI_PlayerRelationship;
 				On.CreatureCommunities.LikeOfPlayer += CreatureCommunities_LikeOfPlayer;
 
@@ -57,10 +57,12 @@ namespace MagicasContentPack
 
 				// Adds custom room scripts
 				On.MoreSlugcats.MSCRoomSpecificScript.AddRoomSpecificScript += CustomRoomSpecificEvents;
+
+				Plugin.HookSucceed();
 			}
-			catch
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(WorldHooks));
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -96,7 +98,7 @@ namespace MagicasContentPack
 			orig(self, eu);
 		}
 
-		private static void RainWorldGame_Update(ILContext il)
+		private static void ShouldScavsPursueArti(ILContext il)
 		{
 			try
 			{
@@ -108,11 +110,8 @@ namespace MagicasContentPack
 					x => x.MatchCall(out _)
 					);
 
-				if (!sooc)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(RainWorldGame_Update) + " IDK how this fails... once again");
+				if (Plugin.ILMatchFail(sooc))
 					return;
-				}
 
 				ILLabel jump = (ILLabel)cursor.Next.Operand;
 
@@ -120,13 +119,15 @@ namespace MagicasContentPack
 				cursor.Emit(OpCodes.Ldarg_0);
 				static bool ArtiIsBelow5Cap(RainWorldGame self)
 				{
-					return self.GetStorySession.saveState.deathPersistentSaveData.karmaCap < 4;
+					return ModOptions.CustomMechanics.Value && self.GetStorySession.saveState.deathPersistentSaveData.karmaCap < 4;
 				}
 				cursor.EmitDelegate(ArtiIsBelow5Cap);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.FailILInsert, ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -142,11 +143,8 @@ namespace MagicasContentPack
 					x => x.MatchCall(out _)
 					);
 
-                if (!sooc)
-                {
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(ScavengerAI_PlayerRelationship) + " IDK how this fails... once again");
+				if (Plugin.ILMatchFail(sooc))
 					return;
-                }
 
 				ILLabel jump = (ILLabel)cursor.Next.Operand;
 
@@ -154,15 +152,17 @@ namespace MagicasContentPack
 				cursor.Emit(OpCodes.Ldarg_1);
 				static bool IsLC(RelationshipTracker.DynamicRelationship dynamic)
 				{
-					return (dynamic.trackerRep.representedCreature.world?.region != null && dynamic.trackerRep.representedCreature.world.region.name == "LC") 
+					return ModOptions.CustomMechanics.Value && ((dynamic.trackerRep.representedCreature.world?.region != null && dynamic.trackerRep.representedCreature.world.region.name == "LC") 
 						|| 
-						(dynamic.trackerRep.representedCreature.world?.game != null && dynamic.trackerRep.representedCreature.world.game.IsStorySession && dynamic.trackerRep.representedCreature.world.game.GetStorySession.saveState.deathPersistentSaveData.karmaCap == 0);
+						(dynamic.trackerRep.representedCreature.world?.game != null && dynamic.trackerRep.representedCreature.world.game.IsStorySession && dynamic.trackerRep.representedCreature.world.game.GetStorySession.saveState.deathPersistentSaveData.karmaCap == 0));
 				}
 				cursor.EmitDelegate(IsLC);
+
+				Plugin.ILSucceed();
             }
 			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.FailILInsert, ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -170,7 +170,7 @@ namespace MagicasContentPack
 		{
 			var result = orig(self, commID, region, playerNumber);
 
-			if (ModManager.MSC && self.session is StoryGameSession session && commID == CreatureCommunities.CommunityID.Scavengers && session.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+			if (ModOptions.CustomMechanics.Value && ModManager.MSC && self.session is StoryGameSession session && commID == CreatureCommunities.CommunityID.Scavengers && session.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
 			{
 				playerNumber = 0;
 				if (self.session is ArenaGameSession)
@@ -241,10 +241,8 @@ namespace MagicasContentPack
 					x => x.MatchRet()
 					);
 
-				if (!succed)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(RoomCamera_UpdateGhostMode) + " Lowkey dunno how this would fail");
-				}
+				if (Plugin.ILMatchFail(succed))
+					return;
 
 				cursor.Emit(OpCodes.Ldarg_0);
 				static void AddArtiGhostChecks(RoomCamera self)
@@ -269,10 +267,12 @@ namespace MagicasContentPack
 					}
 				}
 				cursor.EmitDelegate(AddArtiGhostChecks);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.FailILInsert, ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -433,7 +433,8 @@ namespace MagicasContentPack
 				{
 					if (abstractEntity != null && abstractEntity is AbstractCreature creature && creature.realizedCreature != null && creature.realizedCreature is Overseer overseer)
 					{
-						overseer.Destroy();
+						abstractEntity.Room.RemoveEntity(overseer.abstractCreature);
+						creature.realizedCreature.Destroy();
 						break;
 					}
 				}
@@ -494,88 +495,99 @@ namespace MagicasContentPack
 
 		private static void CommsEndingSlideshow(ILContext il)
 		{
-			ILCursor cursor = new(il);
-
-			bool first = cursor.TryGotoNext(
-				MoveType.Before,
-			instruction => instruction.MatchStfld<ProcessManager>("statsAfterCredits")
-			);
-
-			if (!first)
+			try
 			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(CommsEndingSlideshow));
+				ILCursor cursor = new(il);
+
+				bool first = cursor.TryGotoNext(
+					MoveType.Before,
+				instruction => instruction.MatchStfld<ProcessManager>("statsAfterCredits")
+				);
+
+				if (Plugin.ILMatchFail(first))
+					return;
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.Emit(OpCodes.Ldarg_1);
+				cursor.EmitDelegate((MSCRoomSpecificScript.SpearmasterEnding self, bool eu) =>
+				{
+					self.room.game.GoToRedsGameOver();
+					return;
+				});
+
+				Plugin.ILSucceed();
 			}
-
-			cursor.Emit(OpCodes.Ldarg_0);
-			cursor.Emit(OpCodes.Ldarg_1);
-			cursor.EmitDelegate((MSCRoomSpecificScript.SpearmasterEnding self, bool eu) =>
+			catch (Exception ex)
 			{
-				self.room.game.GoToRedsGameOver();
-				return;
-			});
+				Plugin.ILFail(ex);
+			}
 		}
 
 
 		// Adds the scene ID for the outro
 		private static void EndingPointers(ILContext il)
 		{
-			ILCursor cursor = new(il);
+			try
+			{
+				ILCursor cursor = new(il);
 
-			bool first = cursor.TryGotoNext(
-				MoveType.After,
-				instruction => instruction.MatchStfld<DeathPersistentSaveData>(nameof(DeathPersistentSaveData.redsDeath))
+				bool first = cursor.TryGotoNext(
+					MoveType.After,
+					instruction => instruction.MatchStfld<DeathPersistentSaveData>(nameof(DeathPersistentSaveData.redsDeath))
+					);
+
+				if (Plugin.ILMatchFail(first))
+					return;
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.EmitDelegate((RainWorldGame self) => {
+					if (WinOrSaveHooks.HunterOracleID != null)
+					{
+						if (self.Players[0].realizedCreature != null && (self.Players[0].realizedCreature as Player).redsIllness != null)
+						{
+							Plugin.DebugLog("Set hunter oracleID to (check): " + WinOrSaveHooks.HunterOracleID);
+							self.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<string>(nameof(WinOrSaveHooks.HunterOracleID), WinOrSaveHooks.HunterOracleID);
+
+							self.manager.nextSlideshow = MagicaEnums.SlidesShowIDs.RedsDeath;
+							self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SlideShow, 0f);
+							WinOrSaveHooks.redEndingProcedure = false;
+						}
+					}
+				});
+
+				bool second = cursor.TryGotoNext(
+					MoveType.Before,
+					instruction => instruction.MatchLdfld<MainLoopProcess>("manager"),
+					instruction => instruction.MatchLdsfld<ProcessManager.ProcessID>("Statistics")
+
 				);
 
-			if (!first)
-			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(EndingPointers) + " #1");
-			}
+				if (Plugin.ILMatchFail(second))
+					return;
 
-			cursor.Emit(OpCodes.Ldarg_0);
-			cursor.EmitDelegate((RainWorldGame self) => {
-				if (WinOrSaveHooks.HunterOracleID != null)
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.EmitDelegate((RainWorldGame self) =>
 				{
-					if (self.Players[0].realizedCreature != null && (self.Players[0].realizedCreature as Player).redsIllness != null)
+					Plugin.DebugLog("Spearmaster alt outro scene successfully initalized");
+
+					if (ModManager.MSC && ModOptions.CustomSlideShows.Value)
 					{
-						Plugin.DebugLog("Set hunter oracleID to (check): " + WinOrSaveHooks.HunterOracleID);
-						self.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<string>(nameof(WinOrSaveHooks.HunterOracleID), WinOrSaveHooks.HunterOracleID);
-
-						self.manager.nextSlideshow = MagicaEnums.SlidesShowIDs.RedsDeath;
-						self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SlideShow, 0f);
-						WinOrSaveHooks.redEndingProcedure = false;
+						if (self.GetStorySession.saveState.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+						{
+							self.manager.statsAfterCredits = true;
+							self.manager.nextSlideshow = MagicaEnums.SlidesShowIDs.SpearAltOutro;
+							self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SlideShow);
+							return;
+						}
 					}
-				}
-			});
+				});
 
-			bool second = cursor.TryGotoNext(
-				MoveType.Before,
-				instruction => instruction.MatchLdfld<MainLoopProcess>("manager"),
-				instruction => instruction.MatchLdsfld<ProcessManager.ProcessID>("Statistics")
-
-			);
-
-			if (!second)
-			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(EndingPointers) + " #2");
+				Plugin.ILSucceed();
 			}
-
-			cursor.Emit(OpCodes.Ldarg_0);
-			cursor.EmitDelegate((RainWorldGame self) =>
+			catch (Exception ex)
 			{
-				Plugin.DebugLog("Spearmaster alt outro scene successfully initalized");
-
-				if (ModManager.MSC && ModOptions.CustomSlideShows.Value)
-				{
-					if (self.GetStorySession.saveState.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-					{
-						self.manager.statsAfterCredits = true;
-						self.manager.nextSlideshow = MagicaEnums.SlidesShowIDs.SpearAltOutro;
-						self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SlideShow);
-						return;
-					}
-				}
-			});
-
+				Plugin.ILFail(ex);
+			}
 		}
 
 		private static void CustomRoomSpecificEvents(On.MoreSlugcats.MSCRoomSpecificScript.orig_AddRoomSpecificScript orig, Room room)

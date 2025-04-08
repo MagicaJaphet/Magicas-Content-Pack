@@ -38,10 +38,12 @@ namespace MagicasContentPack
 			{
 				On.Menu.MenuScene.BuildScene += BuildModifiedScenes;
 				On.Menu.MenuScene.BuildMSCScene += BuildModifiedScenesMSC;
+
+				Plugin.HookSucceed();
 			}
-			catch
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(MenuSceneHooks) + " pre");
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -55,7 +57,7 @@ namespace MagicasContentPack
 				On.Menu.MenuScene.Update += MenuScene_Update;
 
 				// For building new slideshows
-				IL.Menu.SlideShow.ctor += AddIlSlideShow;
+				IL.Menu.SlideShow.ctor += AddCustomSlideshows;
 				On.Menu.SlideShow.RawUpdate += SlideShow_RawUpdate;
 				On.Menu.SlideShowMenuScene.ApplySceneSpecificAlphas += ApplyNewAlphas;
 
@@ -73,11 +75,12 @@ namespace MagicasContentPack
 
 				// Intro rolls
 				IL.Menu.IntroRoll.ctor += IntroRoll_ctor;
+
+				Plugin.HookSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(MenuSceneHooks));
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -88,15 +91,12 @@ namespace MagicasContentPack
 				int stLoc = 4;
 				ILCursor cursor = new(il);
 
-				bool sooceed = cursor.TryGotoNext(
+				bool findIntroRollCanidates = cursor.TryGotoNext(
 					x => x.MatchStloc(stLoc)
 					);
 
-				if (!sooceed)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(IntroRoll_ctor));
+				if (Plugin.ILMatchFail(findIntroRollCanidates))
 					return;
-				}
 
 				static string[] AddToArray(string[] names)
 				{
@@ -135,10 +135,12 @@ namespace MagicasContentPack
 						return array;
 					});
 				}
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -146,14 +148,21 @@ namespace MagicasContentPack
 		{
 			orig(self);
 
-			if (self.sceneID == MenuScene.SceneID.SleepScreen && WinOrSaveHooks.HunterHasGreenNeuron && self.depthIllustrations.Count > 29 && SceneMaker.DreamScenes.dotFade < 200)
+			if (self.sceneID == MenuScene.SceneID.SleepScreen && WinOrSaveHooks.HunterHasGreenNeuron && (self.depthIllustrations.Count > 11 || self.flatIllustrations.Count > 11) && SceneMaker.DreamScenes.dotFade < 200)
 			{
 				if (SceneMaker.DreamScenes.lastCycleCount > 0 && SceneMaker.DreamScenes.lastCycleCount <= 25)
 				{
 					SceneMaker.DreamScenes.dotFade++;
 					if (SceneMaker.DreamScenes.dotFade > 100)
 					{
-						self.depthIllustrations[SceneMaker.DreamScenes.lastCycleCount + 11].alpha = 1f - (((float)SceneMaker.DreamScenes.dotFade - 100) / 100f);
+						if (self.depthIllustrations.Count > 0)
+						{
+							self.depthIllustrations[SceneMaker.DreamScenes.lastCycleCount + SceneMaker.DreamScenes.dotFadeStart].alpha = 1f - (((float)SceneMaker.DreamScenes.dotFade - 100) / 100f);
+						}
+						else if (self.flatIllustrations.Count > 0)
+						{
+							self.flatIllustrations[SceneMaker.DreamScenes.lastCycleCount + SceneMaker.DreamScenes.dotFadeStart].alpha = 1f - (((float)SceneMaker.DreamScenes.dotFade - 100) / 100f);
+						}
 					}
 				}
 			}
@@ -186,22 +195,20 @@ namespace MagicasContentPack
 			}
 		}
 
-		// Pushes new code into the SlideShow ctor after the[self.playList = new List<SlideShow.Scene>();] line
-		private static void AddIlSlideShow(ILContext il)
+
+		private static void AddCustomSlideshows(ILContext il)
 		{
 			ILCursor cursor = new(il);
 
-			bool success = cursor.TryGotoNext(
+			bool findPlaylistEnd = cursor.TryGotoNext(
 				MoveType.Before,
 			instruction => instruction.MatchLdfld(out _),
 			instruction => instruction.MatchCallvirt(out _),
 			instruction => instruction.MatchNewarr(out _)
 			);
 
-			if (!success)
-			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(AddIlSlideShow));
-			}
+			if (Plugin.ILMatchFail(findPlaylistEnd))
+				return;
 
 			cursor.Emit(OpCodes.Ldarg_0);
 			cursor.Emit(OpCodes.Ldarg_1);
@@ -219,7 +226,7 @@ namespace MagicasContentPack
 			}
 			cursor.EmitDelegate(PatchSlideshow);
 
-			Plugin.DebugLog("Slideshow code initiated");
+			Plugin.ILSucceed();
 		}
 
 		private static void BuildModifiedScenes(On.Menu.MenuScene.orig_BuildScene orig, MenuScene self)
@@ -675,57 +682,62 @@ namespace MagicasContentPack
 
 		private static void AddIntroListeners(ILContext il)
 		{
-			ILCursor cursor = new(il);
+			try
+			{
+				ILCursor cursor = new(il);
 
-			bool soocood = cursor.TryGotoNext(
-				x => x.MatchBrtrue(out _),
-				x => x.MatchLdstr("s")
+				bool findSkipIntroButton = cursor.TryGotoNext(
+					x => x.MatchBrtrue(out _),
+					x => x.MatchLdstr("s")
+					);
+
+				if (Plugin.ILMatchFail(findSkipIntroButton))
+					return;
+
+				ILLabel nextJump = (ILLabel)cursor.Next.Operand;
+
+				cursor.Emit(OpCodes.Brfalse_S, nextJump);
+				cursor.Emit(OpCodes.Ldarg_1);
+				static bool HasCustomIntro(SlugcatStats.Name name)
+				{
+					return name != MoreSlugcatsEnums.SlugcatStatsName.Spear;
+				}
+				cursor.EmitDelegate(HasCustomIntro);
+
+
+				bool findIntroInsertion = cursor.TryGotoNext(
+						MoveType.After,
+					x => x.MatchLdsfld<SlideShowID>(nameof(SlideShowID.WhiteIntro)),
+					x => x.MatchStfld(out _),
+					x => x.MatchLdarg(0)
 				);
 
-			if (!soocood)
-			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(AddIntroListeners) + " #1");
-			}
+				if (Plugin.ILMatchFail(findIntroInsertion))
+					return;
 
-			ILLabel nextJump = (ILLabel)cursor.Next.Operand;
-
-			cursor.Emit(OpCodes.Brfalse_S, nextJump);
-			cursor.Emit(OpCodes.Ldarg_1); 
-			static bool HasCustomIntro(SlugcatStats.Name name)
-			{
-				return name != MoreSlugcatsEnums.SlugcatStatsName.Spear;
-			}
-			cursor.EmitDelegate(HasCustomIntro);
-
-
-			bool success = cursor.TryGotoNext(
-					MoveType.After,
-				x => x.MatchLdsfld<SlideShowID>(nameof(SlideShowID.WhiteIntro)),
-				x => x.MatchStfld(out _),
-				x => x.MatchLdarg(0)
-			);
-
-			if (!success)
-			{
-				Plugin.Log(Plugin.LogStates.FailILMatch, nameof(AddIntroListeners) + " #2");
-			}
-
-			cursor.Emit(OpCodes.Ldarg_1);
-			static void AddIntros(SlugcatSelectMenu self, SlugcatStats.Name storyGameCharacter)
-			{
-				if (ModOptions.CustomSlideShows.Value)
+				cursor.Emit(OpCodes.Ldarg_1);
+				static void AddIntros(SlugcatSelectMenu self, SlugcatStats.Name storyGameCharacter)
 				{
-					if (storyGameCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+					if (ModOptions.CustomSlideShows.Value)
 					{
-						self.manager.nextSlideshow = MagicaEnums.SlidesShowIDs.SpearIntro;
-						self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SlideShow);
+						if (storyGameCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+						{
+							self.manager.nextSlideshow = MagicaEnums.SlidesShowIDs.SpearIntro;
+							self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SlideShow);
+						}
 					}
-				}
 
-				Plugin.DebugLog("Intro changed to: " + self.manager.nextSlideshow.value);
+					Plugin.DebugLog("Intro changed to: " + self.manager.nextSlideshow.value);
+				}
+				cursor.EmitDelegate(AddIntros);
+				cursor.Emit(OpCodes.Ldarg_0);
+
+				Plugin.ILSucceed();
 			}
-			cursor.EmitDelegate(AddIntros);
-			cursor.Emit(OpCodes.Ldarg_0);
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
 		}
 
 		public static ExtraGameData MineForExtraData(ProcessManager manager, SlugcatStats.Name slugcat)

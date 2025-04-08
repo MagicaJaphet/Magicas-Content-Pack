@@ -13,112 +13,134 @@ namespace MagicasContentPack
 {
 	internal class DMSHooks
 	{
+		public static void LoadDMSConfigs()
+		{
+			//Log("DMS configs loaded");
+
+			//SpriteDefinitions.AvailableSprites.Add(new SpriteDefinitions.AvailableSprite
+			//{
+			//	Name = "ARTIEXTRAS",
+			//	Description = "Arti Extras",
+			//	GallerySprite = "ScarHeadA0",
+			//	RequiredSprites = new List<string>
+			//{
+			//	"TailPuff",
+
+			//	"ScarHeadA0",
+			//	"ScarHeadA1",
+			//	"ScarHeadA2",
+			//	"ScarHeadA3",
+			//	"ScarHeadA4",
+			//	"ScarHeadA5",
+			//	"ScarHeadA6",
+			//	"ScarHeadA7",
+			//	"ScarHeadA8",
+			//	"ScarHeadA9",
+			//	"ScarHeadA10",
+			//	"ScarHeadA11",
+			//	"ScarHeadA12",
+			//	"ScarHeadA13",
+			//	"ScarHeadA14",
+			//	"ScarHeadA15",
+			//	"ScarHeadA16",
+			//	"ScarHeadA17",
+
+			//	"ScarLegsA0"
+			//},
+			//	Slugcats = new List<string>
+			//{
+			//	"Artificer"
+			//}
+			//});
+
+			//SpriteSheet.Get("magica.artificer").ParseAtlases();
+
+			//SpriteDefinitions.AvailableSprites.Add(new SpriteDefinitions.AvailableSprite
+			//{
+			//	Name = "BRAIDS",
+			//	Description = "Braids",
+			//	GallerySprite = "Braid",
+			//	RequiredSprites = new List<string>
+			//{
+			//	"Braid"
+			//},
+			//	Slugcats = new List<string>
+			//{
+			//	"Spear"
+			//}
+			//});
+		}
 
 		// This is in a method in case the dependancy isn't enabled, so the assembly doesn't shit itself
 		public static void ApplyDMSHooks()
 		{
-			_ = new Hook(typeof(PlayerGraphicsDummy).GetMethod("UpdateSprites", BindingFlags.NonPublic | BindingFlags.Instance), (Action<PlayerGraphicsDummy> orig, PlayerGraphicsDummy dummy) =>
+			try
 			{
-				orig(dummy);
-
-				dummy?.UpdateSpritePositions();
-			});
-
-			_ = new Hook(typeof(PlayerGraphicsDummy).GetMethod(nameof(PlayerGraphicsDummy.UpdateSpritePositions), BindingFlags.Public | BindingFlags.Instance), (Action<PlayerGraphicsDummy> orig, PlayerGraphicsDummy dummy) =>
-			{
-				orig(dummy);
-
-				if (dummy != null)
+				_ = new Hook(typeof(PlayerGraphicsDummy).GetMethod("UpdateSprites", BindingFlags.NonPublic | BindingFlags.Instance), (Action<PlayerGraphicsDummy> orig, PlayerGraphicsDummy dummy) =>
 				{
-					FancyMenu owner = (FancyMenu)typeof(PlayerGraphicsDummy).GetField("owner", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dummy);
+					orig(dummy);
 
-					if (owner != null && Customization.For(owner.selectedSlugcat, owner.selectedPlayerIndex, true) != null)
-					{
-						CustomSprite customSprite = Customization.For(owner.selectedSlugcat, owner.selectedPlayerIndex, true).CustomSprite("HEAD", false);
+					dummy?.UpdateSpritePositions();
+				});
 
-						if (customSprite != null && GetKey(customSprite.SpriteSheetID) != null && GetKey(customSprite.SpriteSheetID).faceLift)
-						{
-							dummy.Sprites[9].y = 3f + dummy.Sprites[0].y;
-						}
-					}
-				}
-			});
-
-			_ = new Hook(typeof(AtlasHooks).GetMethod(nameof(AtlasHooks.LoadAtlasesInternal), BindingFlags.Public | BindingFlags.Static), (Action<string> orig, string directory = "dressmyslugcat") =>
-			{
-				orig(directory);
-
-				List<string> source = Utils.ListDirectory(directory, false, true).Distinct<string>().ToList<string>();
-				string text = source.FirstOrDefault((string f) => "metadata.json".Equals(Path.GetFileName(f), StringComparison.InvariantCultureIgnoreCase));
-				if (!string.IsNullOrEmpty(text))
+				_ = new Hook(typeof(PlayerGraphicsDummy).GetMethod(nameof(PlayerGraphicsDummy.UpdateSpritePositions), BindingFlags.Public | BindingFlags.Instance), (Action<PlayerGraphicsDummy> orig, PlayerGraphicsDummy dummy) =>
 				{
-					try
+					orig(dummy);
+
+					if (dummy != null)
 					{
-						Dictionary<string, object> json = File.ReadAllText(text).dictionaryFromJson();
+						FancyMenu owner = (FancyMenu)typeof(PlayerGraphicsDummy).GetField("owner", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dummy);
 
-						if (json != null && json.TryGetValue("id", out object idObj))
+						if (owner != null && Customization.For(owner.selectedSlugcat, owner.selectedPlayerIndex, true) != null)
 						{
-							string id = idObj.ToString();
+							CustomSprite customSprite = Customization.For(owner.selectedSlugcat, owner.selectedPlayerIndex, true).CustomSprite("HEAD", false);
 
-							if (json != null && json.TryGetValue("taller", out object faceLift) && GetKey(id) != null)
+							if (customSprite != null && GetKey(customSprite.SpriteSheetID) != null && GetKey(customSprite.SpriteSheetID).faceLift)
 							{
-								string face = faceLift.ToString();
-								GetKey(id).faceLift = bool.TryParse(face, out _);
-								Plugin.DebugLog("taller found for " + id + ", adding: " + bool.TryParse(face, out _).ToString());
+								dummy.Sprites[9].y = 3f + dummy.Sprites[0].y;
 							}
 						}
 					}
-					catch (Exception e)
+				});
+
+				_ = new Hook(typeof(AtlasHooks).GetMethod(nameof(AtlasHooks.LoadAtlasesInternal), BindingFlags.Public | BindingFlags.Static), (Action<string> orig, string directory = "dressmyslugcat") =>
+				{
+					orig(directory);
+
+					List<string> source = Utils.ListDirectory(directory, false, true).Distinct<string>().ToList<string>();
+					string text = source.FirstOrDefault((string f) => "metadata.json".Equals(Path.GetFileName(f), StringComparison.InvariantCultureIgnoreCase));
+					if (!string.IsNullOrEmpty(text))
 					{
-						Plugin.Logger.LogError(e);
+						try
+						{
+							Dictionary<string, object> json = File.ReadAllText(text).dictionaryFromJson();
+
+							if (json != null && json.TryGetValue("id", out object idObj))
+							{
+								string id = idObj.ToString();
+
+								if (json != null && json.TryGetValue("taller", out object faceLift) && GetKey(id) != null)
+								{
+									string face = faceLift.ToString();
+									GetKey(id).faceLift = bool.TryParse(face, out _);
+									Plugin.DebugLog("taller found for " + id + ", adding: " + bool.TryParse(face, out _).ToString());
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							Plugin.Logger.LogError(e);
+						}
 					}
-				}
-			});
+				});
 
-			// CODE DOESNT WORK BECAUSE IT BREAKS THE ASSEMBLY FOR SYSTEM COLLECTIONS APPARENTLY? IDK LOL
-			//ILHook loadDMSAtlasHook = new(typeof(AtlasHooks).GetMethod(nameof(AtlasHooks.LoadAtlasesInternal), BindingFlags.Public | BindingFlags.Static), (ILContext il) =>
-			//{
-			//	try
-			//	{
-			//		ILCursor cursor = new(il);
-
-			//		bool success = cursor.TryGotoNext(
-			//			MoveType.After,
-			//			x => x.MatchLdstr("author")
-			//			);
-
-			//		if (!success)
-			//		{
-			//			Plugin.Log(Plugin.LogStates.FailILMatch, nameof(loadDMSAtlasHook));
-			//		}
-
-			//		cursor.Emit(OpCodes.Nop);
-			//		cursor.Emit(OpCodes.Ldloc_3);
-			//		cursor.Emit(OpCodes.Ldloc, 5);
-			//		static void AddExtraHeadAnchorCheck(SpriteSheet spriteSheet, Dictionary<string, object> json)
-			//		{
-			//			if (spriteSheet != null && !string.IsNullOrEmpty(spriteSheet.ID) && (json != null && json.TryGetValue("id", out object idObj)))
-			//			{
-			//				string id = string.IsNullOrEmpty(spriteSheet.ID) ? idObj.ToString() : spriteSheet.ID;
-
-			//				if (json != null && json.TryGetValue("taller", out object faceLift))
-			//				{
-			//					string face = faceLift.ToString();
-			//					qualifiedForChange.Add(id, bool.TryParse(face, out _));
-			//					Plugin.DebugLog(qualifiedForChange.TryGetValue(id, out _).ToString());
-			//				}
-			//			}
-
-			//		}
-			//		cursor.EmitDelegate(AddExtraHeadAnchorCheck);
-			//	}
-			//	catch (Exception ex)
-			//	{
-			//		Plugin.Log(Plugin.LogStates.FailILInsert, ex);
-			//	}
-
-			//	Plugin.Log(Plugin.LogStates.ILSuccess, nameof(loadDMSAtlasHook));
-			//});
+				Plugin.HookSucceed();
+			}
+			catch (Exception ex)
+			{
+				Plugin.HookFail(ex);
+			}
+			
 		}
 
 		public enum DMSCheck

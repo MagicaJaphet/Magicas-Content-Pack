@@ -7,6 +7,7 @@ using System.Linq;
 using System;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using VoidSea;
 
 namespace MagicasContentPack
 {
@@ -34,6 +35,7 @@ namespace MagicasContentPack
 				On.PlayerSessionRecord.AddKill += PlayerSessionRecord_AddKill;
 
 				// Custom saint mechanics
+				On.Player.InitVoidWormCutscene += Player_InitVoidWormCutscene;
 				IL.Player.MovementUpdate += AnotherGrabCustomMechanicFix;
 				IL.Player.UpdateBodyMode += BodyModeCustomMechanicFix;
 				On.Player.SaintTongueCheck += TongueCustomMechanicFix;
@@ -46,7 +48,7 @@ namespace MagicasContentPack
 			}
 			catch
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(PlayerHooks));
+				Plugin.Log(Plugin.LogStates.HookFail);
 			}
 		}
 
@@ -70,10 +72,8 @@ namespace MagicasContentPack
 							x => x.MatchCall(out _)
 						);
 
-					if (!cood)
-					{
-						Plugin.Log(Plugin.LogStates.FailILMatch, $"{nameof(Player_SwallowObject)} #{i}");
-					}
+					if (Plugin.ILMatchFail(cood))
+						return;
 
 					if (i != 2)
 					{
@@ -84,10 +84,12 @@ namespace MagicasContentPack
 						cursor.EmitDelegate(MechanicCheck);
 					}
 				}
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception e)
 			{
-				Plugin.Log(Plugin.LogStates.FailILInsert, e);
+				Plugin.Logger.LogError(e);
 			}
 		}
 
@@ -97,7 +99,7 @@ namespace MagicasContentPack
 			{
 				artiCraftables.Clear();
 
-				int index = 1;
+				int index = 0;
 				foreach (var type in AbstractPhysicalObject.AbstractObjectType.values.entries)
 				{
 					AbstractPhysicalObject.AbstractObjectType actualType = (AbstractPhysicalObject.AbstractObjectType)ExtEnumBase.Parse(typeof(AbstractPhysicalObject.AbstractObjectType), type, false);
@@ -120,10 +122,11 @@ namespace MagicasContentPack
 				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.FirecrackerPlant], artiCraftables[AbstractPhysicalObject.AbstractObjectType.Rock]] = AbstractPhysicalObject.AbstractObjectType.ScavengerBomb;
 				artiResults[artiCraftables[AbstractPhysicalObject.AbstractObjectType.SlimeMold], artiCraftables[AbstractPhysicalObject.AbstractObjectType.DangleFruit]] = AbstractPhysicalObject.AbstractObjectType.Lantern;
 
+				Plugin.ResourceLoad();
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(SetUpArtiCrafts) + e);
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -254,10 +257,8 @@ namespace MagicasContentPack
 					x => x.MatchLdfld<Player>(nameof(Player.monkAscension))
 					);
 
-				if (!success)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(AnotherGrabCustomMechanicFix));
-				}
+				if (Plugin.ILMatchFail(success))
+					return;
 
 				cursor.Index++;
 				cursor.Emit(OpCodes.Ldarg_0);
@@ -266,6 +267,8 @@ namespace MagicasContentPack
 					return monkAscension || (ModOptions.CustomMechanics.Value && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension);
 				}
 				cursor.EmitDelegate(SaintAscension);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
@@ -286,10 +289,8 @@ namespace MagicasContentPack
 					x => x.MatchLdfld<UpdatableAndDeletable>(nameof(UpdatableAndDeletable.room))
 					);
 
-				if (!success)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(BodyModeCustomMechanicFix) + " #1");
-				}
+				if (Plugin.ILMatchFail(success))
+					return;
 
 				cursor.Index++;
 				cursor.Emit(OpCodes.Ldarg_0);
@@ -306,18 +307,18 @@ namespace MagicasContentPack
 					x => x.MatchLdsfld<Player.BodyModeIndex>(nameof(Player.BodyModeIndex.ClimbingOnBeam))
 					);
 
-				if (!success2)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(BodyModeCustomMechanicFix) + " #2");
-				}
+				if (Plugin.ILMatchFail(success2))
+					return;
 
 				cursor.Index++;
 				cursor.Emit(OpCodes.Ldarg_0);
 				cursor.EmitDelegate(SaintAscension);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -337,10 +338,8 @@ namespace MagicasContentPack
 					x => x.MatchLdfld<Player>(nameof(Player.monkAscension))
 					);
 
-				if (!success)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(LungCustomMechanicFix) + " #1");
-				}
+				if (Plugin.ILMatchFail(success))
+					return;
 
 				cursor.Emit(OpCodes.Ldarg_0);
 				bool SaintAscension(bool monkAscension, Player self)
@@ -348,10 +347,12 @@ namespace MagicasContentPack
 					return monkAscension || !(!ModOptions.CustomMechanics.Value || (MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && !player.magicaSaintAscension));
 				}
 				cursor.EmitDelegate(SaintAscension);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -366,16 +367,21 @@ namespace MagicasContentPack
 					x => x.MatchLdfld<Player>(nameof(Player.monkAscension))
 					);
 
+				if (Plugin.ILMatchFail(success))
+					return;
+
 				cursor.Emit(OpCodes.Ldarg_0);
 				bool SaintAscension(bool monkAscension, Player self)
 				{
 					return monkAscension || !(!ModOptions.CustomMechanics.Value || (MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && !player.magicaSaintAscension));
 				}
 				cursor.EmitDelegate(SaintAscension);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -384,6 +390,18 @@ namespace MagicasContentPack
 			orig(self, abstractCreature, world);
 
 			var magicaCWT = MagicaPlayer.magicaCWT.GetOrCreateValue(self);
+		}
+
+		private static void Player_InitVoidWormCutscene(On.Player.orig_InitVoidWormCutscene orig, Player self)
+		{
+			if (ModOptions.CustomMechanics.Value)
+			{
+				self.controller = new SaintAscensionController(self);
+				self.voidSceneTimer = 1;
+				self.wormCutsceneLockon = false;
+				return;
+			}
+			orig(self);
 		}
 
 		private static void Player_ClassMechanicsSaint(On.Player.orig_ClassMechanicsSaint orig, Player self)
@@ -414,29 +432,29 @@ namespace MagicasContentPack
 						return;
 					}
 
-					//if (this.voidSceneTimer > 0 && flag)
-					//{
-					//	this.voidSceneTimer++;
-					//	if (!this.monkAscension)
-					//	{
-					//		this.ActivateAscension();
-					//	}
-					//	this.godTimer = this.maxGodTime;
-					//	if (this.voidSceneTimer > 60)
-					//	{
-					//		if (!this.forceBurst)
-					//		{
-					//			this.burstX = 0f;
-					//			this.burstY = 0f;
-					//		}
-					//		this.forceBurst = true;
-					//		this.killWait = Mathf.Min(this.killWait + 0.035f, 1f);
-					//	}
-					//}
-					//if (this.room.world.name == "HR")
-					//{
-					//	this.maxGodTime = 560f;
-					//}
+					if (self.voidSceneTimer > 0 && isSaint)
+					{
+						self.voidSceneTimer++;
+						if (!player.magicaSaintAscension)
+						{
+							player.activationTimer = 9999f;
+							self.ActivateAscension();
+						}
+						if (self.voidSceneTimer > 60)
+						{
+							if (player.wormTarget == null)
+							{
+								for (int i = 0; i < self.room.updateList.Count; i++)
+								{
+									UpdatableAndDeletable obj = self.room.updateList[i];
+									if (obj != null && obj is VoidWorm worm && worm.head != null && worm.mainWorm)
+									{
+										player.wormTarget = worm.head;
+									}
+								}
+							}
+						}
+					}
 					if (player.ascensionFatique > 0f && !player.magicaSaintAscension)
 					{
 						player.ascensionFatique = Mathf.Max(player.ascensionFatique - 1f, 0f);
@@ -484,7 +502,7 @@ namespace MagicasContentPack
 
 					float swimSpeed = 5.75f;
 
-					if (player.saintTarget != null && player.saintTarget.room == self.room)
+					if ((player.saintTarget != null && player.saintTarget.room == self.room) || player.wormTarget != null)
 					{
 						if (player.storedTargetPos.Length == 10 && player.storedTargetPos[9] != null)
 						{
@@ -495,7 +513,7 @@ namespace MagicasContentPack
 						{
 							player.storedTargetPos[i] = player.storedTargetPos[i - 1];
 						}
-						player.storedTargetPos[0] = player.saintTarget.firstChunk.pos;
+						player.storedTargetPos[0] = player.saintTarget == null ? player.wormTarget.HeadPos(self.room.game.myTimeStacker) : player.saintTarget.firstChunk.pos;
 					}
 					else
 					{
@@ -510,7 +528,10 @@ namespace MagicasContentPack
 
 					if (!self.input[0].pckp)
 					{
-						player.activationTimer = Mathf.Max(player.activationTimer - 1f, 0f);
+						if (player.wormTarget == null)
+						{
+							player.activationTimer = Mathf.Max(player.activationTimer - 1f, 0f);
+						}
 
 						player.saintTargetMode = false;
 						player.scannedForTargets = false;
@@ -621,7 +642,7 @@ namespace MagicasContentPack
 						}
 					}
 
-					if (player.saintTarget == null || (player.saintTarget.room != self.room && !player.saintTargetMode || !Custom.DistLess(self.firstChunk.pos, player.saintTarget.firstChunk.pos, saintRadius)))
+					if ((player.saintTarget == null || (player.saintTarget.room != self.room && !player.saintTargetMode || !Custom.DistLess(self.firstChunk.pos, player.saintTarget.firstChunk.pos, saintRadius))) && player.wormTarget == null)
 					{
 						player.changingTarget = 20f;
 						player.saintTarget = null;
@@ -657,12 +678,12 @@ namespace MagicasContentPack
 					{
 						player.ascensionBuffer = Mathf.Max(player.ascensionBuffer - 1f, 0f);
 					}
-					if (self.input[0].thrw && player.saintTarget != null && player.ascensionBuffer <= 0f)
+					if (self.input[0].thrw && (player.saintTarget != null || player.wormTarget != null) && player.ascensionBuffer <= 0f)
 					{
 						float karmaLocked = player.saintTargetIsKarmaLocked ? 0.2f : 1f;
-						player.ascendTimer = Mathf.Min(Custom.LerpBackEaseOut(player.ascendTimer + (0.15f * karmaLocked), player.ascendTimer + (0.01f * karmaLocked), Custom.Dist(self.firstChunk.pos, player.saintTarget.firstChunk.pos) / (saintRadius * 1.5f)), 1f);
-
-						if (player.saintTarget is Creature creature)
+						player.ascendTimer = Mathf.Min(Custom.LerpBackEaseOut(player.ascendTimer + (0.15f * karmaLocked), player.ascendTimer + (0.01f * karmaLocked), Custom.Dist(self.firstChunk.pos, (player.saintTarget == null && player.wormTarget != null ? player.wormTarget.HeadPos(self.room.game.myTimeStacker) : player.saintTarget.firstChunk.pos)) / (saintRadius * 1.5f)), 1f);
+						
+						if (player.saintTarget != null && player.saintTarget is Creature creature)
 						{
 							if (creature is DaddyLongLegs dLL)
 							{
@@ -757,7 +778,7 @@ namespace MagicasContentPack
 						player.ascendedSinceActivation++;
 						player.activationTimer = Mathf.Max(player.activationTimer - 200f, 0f);
 
-                        if (ascended)
+                        if (ascended || self.voidSceneTimer > 0)
                         {
 							self.room.PlaySound(SoundID.Firecracker_Bang, self.mainBodyChunk, false, 1f, 0.75f + UnityEngine.Random.value);
 							self.room.PlaySound(SoundID.SS_AI_Give_The_Mark_Boom, self.mainBodyChunk, false, 1f, 0.5f + UnityEngine.Random.value * 0.5f);
@@ -770,13 +791,18 @@ namespace MagicasContentPack
 						{
 							self.room.AddObject(new Spark(player.saintTargetPos, Custom.RNV() * UnityEngine.Random.value * 40f, new Color(1f, 1f, 1f), null, 30, 120));
 						}
+
+						if (self.voidSceneTimer > 0)
+						{
+							self.voidSceneTimer = 0;
+							self.DeactivateAscension();
+							self.controller = null;
+							player.wormTarget = null;
+							return;
+						}
 					}
 
 					return;
-				}
-				else
-				{
-
 				}
 			}
 			orig(self);
@@ -876,6 +902,26 @@ namespace MagicasContentPack
 			internal bool karmaCycling;
 			internal float karmaCycleTimer;
 			internal float changingTarget;
+			internal VoidWorm.Head wormTarget;
+		}
+	}
+
+	internal class SaintAscensionController : Player.PlayerController
+	{
+		private Player player;
+
+		public SaintAscensionController(Player self)
+		{
+			player = self;
+		}
+
+		public override Player.InputPackage GetInput()
+		{
+			if (player.voidSceneTimer > 80)
+			{
+				return new Player.InputPackage(false, null, 0, 0, false, true, false, false, false);
+			}
+			return default;
 		}
 	}
 }

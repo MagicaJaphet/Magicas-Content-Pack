@@ -46,10 +46,12 @@ namespace MagicasContentPack
 
 				// Change the color of saint broadcasts
 				On.MoreSlugcats.CollectionsMenu.ctor += CollectionsMenu_ctor;
+
+				Plugin.HookSucceed();
 			}
-			catch 
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(ObjectHooks));
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -64,10 +66,12 @@ namespace MagicasContentPack
 			try
 			{
 				On.MoreSlugcats.ChatlogData.getChatlog_ChatlogID += ChatlogData_getChatlog_ChatlogID;
+
+				Plugin.HookSucceed();
 			}
-			catch
+			catch (Exception ex)
 			{
-				Plugin.Log(Plugin.LogStates.HookFail, nameof(ObjectHooks) + " post");
+				Plugin.HookFail(ex);
 			}
 		}
 
@@ -455,11 +459,8 @@ namespace MagicasContentPack
 					x => x.MatchCall(out _)
 					);
 
-				if (!success)
-				{
-					Plugin.Log(Plugin.LogStates.FailILMatch, nameof(Room_Loaded) + " broadcasts");
+				if (Plugin.ILMatchFail(success))
 					return;
-				}
 
 				ILLabel nextJump = (ILLabel)cursor.Next.Operand;
 
@@ -470,10 +471,12 @@ namespace MagicasContentPack
 					return self.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Saint;
 				}
 				cursor.EmitDelegate(IsSaint);
+
+				Plugin.ILSucceed();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 
 			try
@@ -488,11 +491,8 @@ namespace MagicasContentPack
 						x => x.MatchCall(out _)
 						);
 
-					if (!success)
-					{
-						Plugin.Log(Plugin.LogStates.FailILMatch, nameof(Room_Loaded) + $" karma flowers #{i}");
+					if (Plugin.ILMatchFail(success))
 						return;
-					}
 
 					ILLabel jump = (ILLabel)cursor.Next.Operand;
 
@@ -503,11 +503,13 @@ namespace MagicasContentPack
 						return self.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Spear && self.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Artificer;
 					}
 					cursor.EmitDelegate(IsArtiOrSpear);
+
+					Plugin.ILSucceed();
 				}
 			}
 			catch (Exception ex)
 			{
-				Debug.LogException(ex);
+				Plugin.ILFail(ex);
 			}
 		}
 	}

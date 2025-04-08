@@ -3,8 +3,10 @@ using MoreSlugcats;
 using RWCustom;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -31,7 +33,7 @@ namespace MagicasContentPack
 		private static bool flat = false;
 		private static List<float> idleDepths;
 
-		private static List<MenuDepthIllustration> multiplyScenes;
+		private static List<MenuIllustration> multiplyScenes;
 		private static List<Color> multiplyColors;
 		internal static bool lanternInStomach;
 
@@ -51,6 +53,7 @@ namespace MagicasContentPack
 		}
 
 		public static Dictionary<SceneKey, List<MenuScene.SceneID>> allCustomScenes = AllValidScenes();
+		internal static float roomDarknesss;
 
 		public static Dictionary<SceneKey, List<MenuScene.SceneID>> AllValidScenes()
 		{
@@ -227,9 +230,12 @@ namespace MagicasContentPack
 			return new MenuDepthIllustration(menuScene.menu, menuScene, sceneFolder, fileName, (menuScene.owner is InteractiveMenuScene ? new(0f, 0f) : new(71f, 49f)) , depth, shader);
 		}
 
-		private static MenuIllustration CreateIllus(string fileName)
+		private static MenuIllustration CreateIllus(string fileName, Vector2 position = default, bool anchorCenter = true)
 		{
-			return new MenuIllustration(menuScene.menu, menuScene, sceneFolder, fileName, new(683f, 384f), false, true);
+			if (position == default)
+				position = new(683f, 384f);
+
+			return new MenuIllustration(menuScene.menu, menuScene, sceneFolder, fileName, position, false, anchorCenter);
 		}
 
 		// Basic methods to build scenes
@@ -352,32 +358,36 @@ namespace MagicasContentPack
 
 		private static void ApplyMultiplyOnDepthMaps(MenuIllustration scene, Color color)
 		{
-			if (scene is MenuDepthIllustration menuDepth)
-			{
-				multiplyScenes.Add(menuDepth);
-				multiplyColors.Add(color);
-			}
+			multiplyScenes.Add(scene);
+			multiplyColors.Add(color);
 		}
 
-		private static void ApplyTheFuckingMultiplyBitch(MenuDepthIllustration illus, Color multiplyColor)
+		private static void ApplyTheFuckingMultiplyBitch(MenuIllustration illus, Color multiplyColor)
 		{
 			if (illus.texture.width > 0)
 			{
-				try
+				if (illus is MenuDepthIllustration depth)
 				{
-					Color[] pixels = illus.texture.GetPixels();
-					for (int i = pixels.Length / 2; i < pixels.Length; i++)
+					try
 					{
-						pixels[i] = pixels[i] * multiplyColor;
-					}
-					illus.texture.SetPixels(pixels, 0);
-					illus.texture.Apply(false);
+						Color[] pixels = depth.texture.GetPixels();
+						for (int i = pixels.Length / 2; i < pixels.Length; i++)
+						{
+							pixels[i] = pixels[i] * multiplyColor;
+						}
+						depth.texture.SetPixels(pixels, 0);
+						depth.texture.Apply(false);
 
-					pixels = null;
+						pixels = null;
+					}
+					catch
+					{
+						Plugin.Logger.LogError("Unable to apply multiply to menu illustrations oops");
+					}
 				}
-				catch
+				else if (illus.sprite != null)
 				{
-					Plugin.Logger.LogError("Unable to apply multiply to menu illustrations oops");
+					illus.sprite.color = multiplyColor;
 				}
 			}
 		}
@@ -443,6 +453,7 @@ namespace MagicasContentPack
 			public static int lastKarmaCap;
 			public static int lastCycleCount;
 			public static bool greenNeuronFlash;
+			public static int dotFadeStart;
 			internal static int dotFade;
 			public static int slugpupNum;
 			internal static List<Color> slugpupColors;
@@ -496,27 +507,32 @@ namespace MagicasContentPack
 			{
 				sceneFolder = SceneFolder("slugcats", currentSlugcat.value, "sleep screen - " + currentSlugcat.value);
 
-				Color gateColor = Color.white;
-				Color grassColor = Color.white;
+				Color gateColor = Custom.hexToColor("061F2C");
+				Color grassColor = Custom.hexToColor("1E6188");
 				Color slugColor = Color.white;
 				// here we fuck up some colors
 				if (paletteTexture != null)
 				{
-					gateColor = paletteTexture.GetPixel(1, 4);
-					grassColor = paletteTexture.GetPixel(5, 5);
-					slugColor = paletteTexture.GetPixel(32, 4);
-
-					Plugin.DebugLog(gateColor.ToString());
-					Plugin.DebugLog(grassColor.ToString());
+					gateColor = paletteTexture.GetPixel(1, 10);
+					grassColor = paletteTexture.GetPixel(5, 11);
+					slugColor = paletteTexture.GetPixel(29, 10);
 
 					if (fadePaletteTexture != null)
 					{
-						gateColor = Color.Lerp(gateColor, fadePaletteTexture.GetPixel(1, 4), sleepFadeAmount);
-						grassColor = Color.Lerp(grassColor, fadePaletteTexture.GetPixel(5, 5), sleepFadeAmount);
-						slugColor = Color.Lerp(grassColor, Color.white, 0.6f);
+						gateColor = Color.Lerp(gateColor, fadePaletteTexture.GetPixel(1, 10), sleepFadeAmount);
+						grassColor = Color.Lerp(grassColor, fadePaletteTexture.GetPixel(5, 11), sleepFadeAmount);
+						slugColor = Color.Lerp(slugColor, grassColor, 0.4f);
 					}
 
-					slugColor = Color.Lerp(slugColor, Color.white, 0.6f);
+					if (roomDarknesss > 0f)
+					{
+						Color offBlack = new(0.001f, 0.001f, 0.001f);
+						gateColor = Color.Lerp(gateColor, offBlack, roomDarknesss);
+						grassColor = Color.Lerp(grassColor, offBlack, roomDarknesss);
+						slugColor = Color.Lerp(slugColor, offBlack, roomDarknesss);
+					}
+
+					slugColor = Color.Lerp(slugColor, Color.white, 0.4f);
 				}
 
 				// setting the actual menuscenes
@@ -621,12 +637,9 @@ namespace MagicasContentPack
 					}
 					else if (currentSlugcat == SlugcatStats.Name.Red)
 					{
-						string num = "";
-						if (slugpupNum > 0)
-						{
-							num = slugpupNum.ToString();
-						}
-						scenes.Add(CreateIllus("Sleep - 2" + num + " - " + value, 1.7f, MenuDepthIllustration.MenuShader.Normal));
+						string slugPups = slugpupNum > 0 ? slugpupNum.ToString() : "";
+
+						scenes.Add(CreateIllus("Sleep - 2" + slugPups + " - " + value, 1.7f, MenuDepthIllustration.MenuShader.Normal));
 						ApplyMultiplyOnDepthMaps(scenes[scenes.Count - 1], slugColor);
 
 						float? scarProgression = 0f;
@@ -643,7 +656,7 @@ namespace MagicasContentPack
 							Plugin.DebugLog(scarProgression.ToString());
 						}
 
-						scenes.Add(CreateIllus("Sleep - 2b - " + value, 1.8f, MenuDepthIllustration.MenuShader.Multiply));
+						scenes.Add(CreateIllus("Sleep - 2b" + slugPups + " - " + value, 1.8f, MenuDepthIllustration.MenuShader.Multiply));
 						ApplyMultiplyOnDepthMaps(scenes[scenes.Count - 1], slugColor);
 						scenes[scenes.Count - 1].setAlpha = scarProgression;
 
@@ -683,7 +696,10 @@ namespace MagicasContentPack
 							scenes.Add(CreateIllus("Sleep - 3 - " + value, 1.8f, MenuDepthIllustration.MenuShader.Normal));
 							ApplyMultiplyOnDepthMaps(scenes[scenes.Count - 1], slugColor);
 
-							scenes.Add(CreateIllus("sleep - 4" + num + " - red", 1.65f, MenuDepthIllustration.MenuShader.LightEdges));
+							scenes.Add(CreateIllus("sleep - 4" + slugPups + " - red", 1.69f, MenuDepthIllustration.MenuShader.Lighten));
+							scenes[scenes.Count - 1].setAlpha = 0.65f;
+
+							scenes.Add(CreateIllus("sleep - neuron - red", 1.4f, MenuDepthIllustration.MenuShader.Basic));
 
 							int cycleCount = 0;
 
@@ -708,15 +724,16 @@ namespace MagicasContentPack
 
 							Plugin.DebugLog("Cycle count: " + cycleCount.ToString() + " " + greenNeuronFlash);
 
+							dotFadeStart = scenes.Count - 1;
 							for (int i = 0; i < 25; i++)
 							{
 								if (i < lastCycleCount + 1)
 								{
-									scenes.Add(CreateIllus("sleep - dot - red", 1.6f, MenuDepthIllustration.MenuShader.Basic));
+									scenes.Add(CreateIllus("sleep - dot - red", 1.39f, MenuDepthIllustration.MenuShader.Basic));
 								}
 								else
 								{
-									scenes.Add(CreateIllus("empty", 1.6f, MenuDepthIllustration.MenuShader.Basic));
+									scenes.Add(CreateIllus("empty", 1.39f, MenuDepthIllustration.MenuShader.Basic));
 								}
 							}
 							dotFade = 0;
@@ -727,6 +744,7 @@ namespace MagicasContentPack
 							ApplyMultiplyOnDepthMaps(scenes[scenes.Count - 1], slugColor);
 
 							// Green neuron
+							scenes.Add(CreateIllus("empty", 1.65f, MenuDepthIllustration.MenuShader.Basic));
 							scenes.Add(CreateIllus("empty", 1.65f, MenuDepthIllustration.MenuShader.Basic));
 
 							// All da dots
@@ -819,6 +837,75 @@ namespace MagicasContentPack
 					{
 						scenes.Add(CreateIllus("Sleep Screen - White - FlatB"));
 					}
+					else if (currentSlugcat == SlugcatStats.Name.Red)
+					{
+						string slugPups = slugpupNum > 0 ? slugpupNum.ToString() : "";
+						float? scarProgression = 0f;
+						if (menuScene.menu != null && menuScene.menu is SleepAndDeathScreen menu && menu.manager.rainWorld != null && menu.manager.rainWorld.progression != null && menu.manager.rainWorld.progression.currentSaveState != null)
+						{
+							if (RedsIllness.RedsCycles(menu.manager.rainWorld.progression.currentSaveState.redExtraCycles) - menu.manager.rainWorld.progression.currentSaveState.cycleNumber < 0)
+							{
+								scarProgression = 1f;
+							}
+							else
+							{
+								scarProgression = new float?((float)(menu.manager.rainWorld.progression.currentSaveState.cycleNumber / (float)RedsIllness.RedsCycles(menu.manager.rainWorld.progression.currentSaveState.redExtraCycles))) - 0.1f;
+							}
+							Plugin.DebugLog(scarProgression.ToString());
+						}
+						scenes.Add(CreateIllus($"sleep screen - red{(WinOrSaveHooks.HunterHasGreenNeuron ? " neuron" : "")}{slugPups} - flat"));
+
+						if (WinOrSaveHooks.HunterHasGreenNeuron)
+						{
+
+							int cycleCount = 0;
+							if (lastCycleCount != 0)
+							{
+								cycleCount = lastCycleCount;
+							}
+
+							if (menuScene.menu != null && menuScene.menu is SleepAndDeathScreen screen)
+							{
+								if (screen.manager.rainWorld != null && screen.manager.rainWorld.progression != null && screen.manager.rainWorld.progression.currentSaveState != null)
+								{
+									cycleCount = RedsIllness.RedsCycles(screen.manager.rainWorld.progression.currentSaveState.redExtraCycles) - screen.manager.rainWorld.progression.currentSaveState.cycleNumber;
+								}
+								lastCycleCount = cycleCount;
+							}
+
+							if (lastCycleCount < 0)
+							{
+								lastCycleCount = -1;
+							}
+
+							Plugin.DebugLog("Cycle count: " + cycleCount.ToString() + " " + greenNeuronFlash);
+
+							dotFadeStart = scenes.Count - 1;
+							Vector2[] positions = GetPositions(sceneFolder);
+							if (positions != null && positions.Length > 11)
+							{
+								scenes.Add(CreateIllus("sleep - neuron - red", position: positions[11], anchorCenter: false));
+								for (int i = 0; i < 25; i++)
+								{
+									if (i < lastCycleCount + 1)
+									{
+										scenes.Add(CreateIllus("sleep - dot - red", position: positions[i + 12], anchorCenter: false));
+									}
+								}
+							}
+							dotFade = 0;
+						}
+					}
+					else if (ModManager.MSC && currentSlugcat == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+					{
+						int karmaCap = 1;
+						if (lastKarmaCap != 0)
+						{
+							karmaCap = lastKarmaCap;
+						}
+
+						scenes.Add(CreateIllus("Sleep Screen - Saint" + karmaCap.ToString() + " - Flat"));
+					}
 					else
 					{
 						scenes.Add(CreateIllus("Sleep Screen - " + value + " - Flat"));
@@ -871,6 +958,40 @@ namespace MagicasContentPack
 				return scenes;
 			}
 		}
+
+		private static Vector2[] GetPositions(string sceneFolder)
+		{
+			if (string.IsNullOrEmpty(sceneFolder))
+			{
+				return null;
+			}
+
+			string path;
+			if (!string.IsNullOrEmpty(menuScene.positionsFile))
+			{
+				path = AssetManager.ResolveFilePath(sceneFolder + Path.DirectorySeparatorChar.ToString() + menuScene.positionsFile);
+			}
+			else
+			{
+				path = AssetManager.ResolveFilePath(sceneFolder + Path.DirectorySeparatorChar.ToString() + "positions_ims.txt");
+			}
+			if (!File.Exists(path))
+			{
+				path = AssetManager.ResolveFilePath(sceneFolder + Path.DirectorySeparatorChar.ToString() + "positions.txt");
+			}
+			if (File.Exists(path))
+			{
+				string[] array = File.ReadAllLines(path);
+				Vector2[] positions = new Vector2[array.Length];
+				for (int num = 0; num < array.Length; num++) 
+				{
+					positions[num] = new(float.Parse(Regex.Split(Custom.ValidateSpacedDelimiter(array[num], ","), ", ")[0], NumberStyles.Any, CultureInfo.InvariantCulture), float.Parse(Regex.Split(Custom.ValidateSpacedDelimiter(array[num], ","), ", ")[1], NumberStyles.Any, CultureInfo.InvariantCulture));
+				}
+				return positions;
+			}
+			return null;
+		}
+
 		public class SpearScenes
 		{
 			public static readonly string subDirectory = "slugcats";
