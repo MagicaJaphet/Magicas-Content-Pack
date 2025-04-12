@@ -21,14 +21,13 @@ namespace MagicasContentPack;
 
 [BepInDependency("crs", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("dressmyslugcat", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("slime-cubed.slugbase", BepInDependency.DependencyFlags.HardDependency)]
 
-[BepInPlugin(MOD_ID, "Magica's Content Pack", "1.0.0")]
+[BepInPlugin(MOD_ID, "Magica's Content Pack", "1.2.0")]
 
 public class Plugin : BaseUnityPlugin
 {
 	// Update this and the modinfo for new workshop upload
-	public const string MOD_ID = "magicaanthro.skins";
+	public const string MOD_ID = "magica.contentpack";
 	public static string modPath;
 	public static string MOD_NAME = "";
 	public static string VERSION = "";

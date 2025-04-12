@@ -340,7 +340,7 @@ namespace MagicasContentPack
 			if (ModManager.MSC && self.PlayingAsSlugcat == MoreSlugcatsEnums.SlugcatStatsName.Spear)
 				SpearAchievedCommsEnd = self.miscProgressionData.beaten_SpearMaster_AltEnd;
 
-			if (self.PlayingAsSlugcat == SlugcatStats.Name.Red)
+			if (self.PlayingAsSlugcat == SlugcatStats.Name.Red && self.currentSaveState != null)
 				HunterScarProgression = Mathf.RoundToInt(Mathf.Lerp(0f, 3f, (float)(self.currentSaveState.cycleNumber) / (float)RedsIllness.RedsCycles(self.currentSaveState.redExtraCycles)));
 		}
 

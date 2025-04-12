@@ -205,7 +205,7 @@ namespace MagicasContentPack
 			{
 				if (SaveInformation.ContainsKey(name))
 				{
-					if (SaveInformation.ContainsKey(anySave) && (GetKey(anySave, nameof(SaveValues.WhoShowedFPThePearl), out string pearlName) && pearlName == name) || SaveInformation[anySave].ContainsKey(nameof(SaveValues.WhoShowedFPThePearl)))
+					if (SaveInformation.ContainsKey(anySave) && ((GetKey(anySave, nameof(SaveValues.WhoShowedFPThePearl), out string pearlName) && pearlName == name) || SaveInformation[anySave].ContainsKey(nameof(SaveValues.WhoShowedFPThePearl))))
 					{
 						SaveValues.WhoShowedFPThePearl = default;
 						SaveInformation[anySave].Remove(nameof(SaveValues.WhoShowedFPThePearl));
