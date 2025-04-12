@@ -3,13 +3,11 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MoreSlugcats;
 using RWCustom;
-using SlugBase.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -28,8 +26,7 @@ namespace MagicasContentPack
 		public static Dictionary<SlugcatStats.Name, ExtraGameData> magicaGameData;
 		private static bool spearVisitedFP;
 		private static int saintKarmaCap;
-
-		public static string OracleValue { get; set; }
+		public static string oracleValue;
 
 
 		internal static void PreInit()
@@ -303,7 +300,7 @@ namespace MagicasContentPack
 		{
 			orig(self, menu, owner, pageIndex, slugcatNumber);
 
-			if (slugcatNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear && self.menu.manager.rainWorld.progression != null && self.menu.manager.rainWorld.progression.miscProgressionData != null && self.menu.manager.rainWorld.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(WinOrSaveHooks.SpearMetSRS), out _))
+			if (slugcatNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear && MagicaSaveState.GetKey(slugcatNumber.value, nameof(SaveValues.SpearMetSRS), out bool _))
 			{
 				self.regionLabel.text = menu.Translate("THE SPEARMASTER");
 			}
@@ -330,7 +327,7 @@ namespace MagicasContentPack
 
 				if (self.slugcatNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
 				{
-					if (self.menu.manager.rainWorld.progression != null && self.menu.manager.rainWorld.progression.miscProgressionData != null && self.menu.manager.rainWorld.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(WinOrSaveHooks.SpearMetSRS), out _))
+					if (MagicaSaveState.GetKey(self.slugcatNumber.value, nameof(SaveValues.SpearMetSRS), out bool _))
 					{
 						sceneID = MagicaEnums.SceneIDs.CustomSlugcat_SpearSRS;
 						self.slugcatDepth = 3f;
@@ -375,10 +372,9 @@ namespace MagicasContentPack
 						Plugin.DebugLog("It's been " + data.cyclesSinceSsAi + " cycles since SSai!");
 					}
 
-					if (self.slugcatNumber == SlugcatStats.Name.Red && !string.IsNullOrEmpty(data.redDeath))
+					if (self.slugcatNumber == SlugcatStats.Name.Red && MagicaSaveState.GetKey(self.slugcatNumber.value, nameof(SaveValues.HunterOracleID), out oracleValue))
 					{
-						OracleValue = data.redDeath;
-						Plugin.DebugLog("Hunter died with: " + OracleValue);
+						Plugin.DebugLog("Hunter died with: " + oracleValue);
 					}
 				}
 
@@ -415,7 +411,7 @@ namespace MagicasContentPack
 
 				if (self.slugcatNumber == SlugcatStats.Name.Red)
 				{
-					if (self.menu is SlugcatSelectMenu menu && menu.redIsDead && !string.IsNullOrEmpty(OracleValue))
+					if (self.menu is SlugcatSelectMenu menu && menu.redIsDead && MagicaSaveState.GetKey(self.slugcatNumber.value, nameof(SaveValues.HunterOracleID), out oracleValue))
 					{
 						sceneID = MenuScene.SceneID.Slugcat_Dead_Red;
 					}
@@ -748,22 +744,11 @@ namespace MagicasContentPack
 			}
 			if (manager.rainWorld.progression.currentSaveState != null && manager.rainWorld.progression.currentSaveState.saveStateNumber == slugcat)
 			{
-				if (manager.rainWorld.progression.miscProgressionData != null && manager.rainWorld.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(WinOrSaveHooks.SpearMetSRS), out bool spearSRS))
-				{
-					WinOrSaveHooks.SpearMetSRS = spearSRS;
-				}
-
-				if (manager.rainWorld.progression.miscProgressionData != null && manager.rainWorld.progression.miscProgressionData.GetSlugBaseData().TryGet<string>(nameof(WinOrSaveHooks.HunterOracleID), out string redsDeath))
-				{
-					WinOrSaveHooks.HunterOracleID = redsDeath;
-				}
 
 				ExtraGameData extraGameData = new()
 				{
 					ssAiConvosHad = manager.rainWorld.progression.currentSaveState.miscWorldSaveData.SSaiConversationsHad,
 					cyclesSinceSsAi = manager.rainWorld.progression.currentSaveState.miscWorldSaveData.cyclesSinceSSai,
-					spearMetSRS = WinOrSaveHooks.SpearMetSRS,
-					redDeath = WinOrSaveHooks.HunterOracleID
 				};
 
 				return extraGameData;
@@ -848,11 +833,7 @@ namespace MagicasContentPack
 		public ExtraGameData() { }
 
 		public int cyclesSinceSsAi;
-
 		public int ssAiConvosHad;
-		internal bool spearMetSRS;
-		internal string redDeath;
-
 		public bool pearlBroadcastTagged;
 	}
 

@@ -14,7 +14,7 @@ FP: That dying itself was the answer. It was not as complex and nuanced as most 
 
 BSM: How did you come to that conclusion?
 
-FP: Well, it was the natural outcome of the way I mingled with it in the first place, I took solace in the words of someone I thought was my mentor and ran with it.
+FP: Well, it was the natural outcome of the way I mingled with it in the first place, I took solace in the words of<LINE>someone I thought was my mentor and ran with it.
 
 FP: But I was also furious with how they would describe it.
 

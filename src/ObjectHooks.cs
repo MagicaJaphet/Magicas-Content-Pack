@@ -18,6 +18,9 @@ namespace MagicasContentPack
 	{
 		public static SaintBroadcastEffect ghostScreen;
 		private static string saintBroadcastSong;
+		private static int startSaintSongAtSeconds = 0;
+		private static int saintBroadcastNum;
+		private static bool setSaintSongTime;
 
 		public static void Init()
 		{
@@ -31,7 +34,9 @@ namespace MagicasContentPack
 				On.DataPearl.UniquePearlMainColor += DataPearl_UniquePearlMainColor;
 
 				// Change whitetoken behavior for saint
+				On.Music.MusicPlayer.Update += MusicPlayer_Update;
 				On.MoreSlugcats.ChatLogDisplay.NewMessage_string_int += ChatLogDisplay_NewMessage_string_int;
+				On.HUD.DialogBox.Update += DialogBox_Update;
 				On.HUD.DialogBox.GetDelay += DialogBox_GetDelay;
 				On.Music.PlayerThreatTracker.Update += PlayerThreatTracker_Update;
 				IL.Room.Loaded += Room_Loaded;
@@ -39,6 +44,7 @@ namespace MagicasContentPack
 				On.CollectToken.ctor += CollectToken_ctor;
 				On.CollectToken.DrawSprites += CollectToken_DrawSprites;
 				On.CollectToken.AddToContainer += CollectToken_AddToContainer;
+				On.CollectToken.TokenStalk.Update += TokenStalk_Update;
 				On.CollectToken.TokenStalk.AddToContainer += TokenStalk_AddToContainer;
 				On.CollectToken.TokenStalk.DrawSprites += TokenStalk_DrawSprites;
 				On.CollectToken.TokenStalk.ApplyPalette += TokenStalk_ApplyPalette;
@@ -55,6 +61,16 @@ namespace MagicasContentPack
 			}
 		}
 
+		private static void TokenStalk_Update(On.CollectToken.TokenStalk.orig_Update orig, CollectToken.TokenStalk self, bool eu)
+		{
+			if (self.room?.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && self.token == null && self.forceSatellite)
+			{
+				self.Destroy();
+			}
+
+			orig(self, eu);
+		}
+
 		private static void Room_PlaySound_SoundID_Vector2_float_float(On.Room.orig_PlaySound_SoundID_Vector2_float_float orig, Room self, SoundID soundId, Vector2 pos, float vol, float pitch)
 		{
 			if (soundId == SoundID.Coral_Circuit_Jump_Explosion) { vol /= 3f; }
@@ -65,7 +81,7 @@ namespace MagicasContentPack
 		{
 			try
 			{
-				On.MoreSlugcats.ChatlogData.getChatlog_ChatlogID += ChatlogData_getChatlog_ChatlogID;
+				On.MoreSlugcats.ChatlogData.getChatlog_ChatlogID += GetSaintSong;
 
 				Plugin.HookSucceed();
 			}
@@ -75,30 +91,45 @@ namespace MagicasContentPack
 			}
 		}
 
-		private static string[] ChatlogData_getChatlog_ChatlogID(On.MoreSlugcats.ChatlogData.orig_getChatlog_ChatlogID orig, ChatlogData.ChatlogID id)
+		private static string[] GetSaintSong(On.MoreSlugcats.ChatlogData.orig_getChatlog_ChatlogID orig, ChatlogData.ChatlogID id)
 		{
 			if (id.value.Contains("Saintchatlog_"))
 			{
-				switch (int.Parse(id.value.Substring("Saintchatlog_".Length)))
+				startSaintSongAtSeconds = 0;
+				saintBroadcastNum = int.Parse(id.value.Substring("Saintchatlog_".Length));
+				Plugin.DebugLog($"Log ID: {saintBroadcastNum}");
+				switch (saintBroadcastNum)
 				{
 					case < 3:
 						saintBroadcastSong = "Matvis1 - Stagnation";
+						if (saintBroadcastNum == 2)
+							startSaintSongAtSeconds = 45;
 						break;
 
 					case < 7:
 						saintBroadcastSong = "Matvis2 - Remembrance";
+						if (saintBroadcastNum > 4)
+							startSaintSongAtSeconds = (60 * 1) + 42;
 						break;
 
 					case < 12:
 						saintBroadcastSong = "Matvis3 - Sentimentality";
+						if (saintBroadcastNum > 7)
+							startSaintSongAtSeconds = (60 * 1);
 						break;
 
 					case < 18:
 						saintBroadcastSong = "Matvis4 - Desperation";
+						if (saintBroadcastNum > 13)
+							startSaintSongAtSeconds = (60 * 1) + 2;
 						break;
 
 					case >= 18:
 						saintBroadcastSong = "Matvis5 - Oneness";
+						if (saintBroadcastNum > 19)
+							startSaintSongAtSeconds = (60 * 1) + 20;
+						else if (saintBroadcastNum > 21)
+								startSaintSongAtSeconds = (60 * 2) + 31;
 						break;
 				}
 			}
@@ -153,6 +184,17 @@ namespace MagicasContentPack
 
 					self.chatlogButtons[i].rectColor = color;
 				}
+			}
+		}
+		private static void MusicPlayer_Update(On.Music.MusicPlayer.orig_Update orig, MusicPlayer self)
+		{
+			orig(self);
+
+			if (ghostScreen != null && self.song != null && self.song is SaintBroadcastSong && startSaintSongAtSeconds != 0 && !setSaintSongTime && self.song.subTracks.Where(x => x != null).FirstOrDefault() != null && self.song.subTracks.Where(x => x != null).FirstOrDefault().source != null)
+			{
+				setSaintSongTime = true;
+				self.song.subTracks.Where(x => x != null).FirstOrDefault().source.time = startSaintSongAtSeconds;
+				Plugin.DebugLog($"Saint broadcast song started at: {startSaintSongAtSeconds}");
 			}
 		}
 
@@ -216,7 +258,8 @@ namespace MagicasContentPack
 			{
 				self.song = song;
 				self.song.playWhenReady = true;
-				self.song.volume += 0.2f;
+				self.song.baseVolume += 0.5f;
+
 				return;
 			}
 			self.nextSong = song;
@@ -263,6 +306,7 @@ namespace MagicasContentPack
 			{
 				self.room.RemoveObject(ghostScreen);
 				ghostScreen = null;
+				setSaintSongTime = false;
 			}
 			if (ModOptions.CustomInGameCutscenes.Value && self.chatlog && self.room != null && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint)
 			{
@@ -280,6 +324,10 @@ namespace MagicasContentPack
 				else if (self.room.game.cameras[0].hud.chatLog == null && self.chatlogCounter >= 60)
 				{
 					self.chatlog = false;
+					if (Plugin.isCRSEnabled)
+					{
+						CRSHooks.SaveCustomBroadcast(self, self.chatlogID);
+					}
 
 					if (ghostScreen != null)
 					{
@@ -293,16 +341,27 @@ namespace MagicasContentPack
 
 		private static void ChatLogDisplay_NewMessage_string_int(On.MoreSlugcats.ChatLogDisplay.orig_NewMessage_string_int orig, ChatLogDisplay self, string text, int extraLinger)
 		{
-			if (ghostScreen != null)
+			if (ghostScreen != null && saintBroadcastNum < 1)
 			{
 				extraLinger += 70;
 			}
+			extraLinger = Mathf.RoundToInt((float)extraLinger * 0.6f);
+
 			orig(self, text, extraLinger);
+		}
+
+		private static void DialogBox_Update(On.HUD.DialogBox.orig_Update orig, HUD.DialogBox self)
+		{
+            if (self.CurrentMessage != null && self.CurrentMessage.text.Contains("FP:") && self.hud?.rainWorld.inGameSlugCat == MoreSlugcatsEnums.SlugcatStatsName.Saint && saintBroadcastNum > 11)
+            {
+				self.showDelay += UnityEngine.Random.Range(0, 3);
+            }
+            orig(self);
 		}
 
 		private static int DialogBox_GetDelay(On.HUD.DialogBox.orig_GetDelay orig)
 		{
-			if (ghostScreen != null)
+			if (ghostScreen != null && saintBroadcastNum < 2)
 			{
 				if (Custom.rainWorld.options.language == InGameTranslator.LanguageID.Japanese)
 				{
@@ -361,6 +420,7 @@ namespace MagicasContentPack
 				}
 			}
 		}
+
 		private static void TokenStalk_AddToContainer(On.CollectToken.TokenStalk.orig_AddToContainer orig, CollectToken.TokenStalk self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
 		{
 			orig(self, sLeaser, rCam, newContatiner);

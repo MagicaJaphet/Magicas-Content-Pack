@@ -8,19 +8,19 @@ SOURCE NODE TRACE: LTTM_ROOT, ERROR
 
 EM: Seismic activity leading to imminent crash, evacuate remaining civilians.
 
-EM: No emergency backup gravity cores present, instruct others to stay out of facility radius or remain airborne if possible. Inform the predictions of upcoming downpours as emergency deconstruction protocols unfold.
+EM: No emergency backup gravity cores present, instruct others to stay out of facility radius or remain airborne if possible.<LINE>Inform the predictions of upcoming downpours as emergency deconstruction protocols unfold.
 
 EM: Emergency deconstruction protocols missing, critical data retrieval failure. Do not attempt to access internals through any means.]
 
 BSM: ... Love?
 
-BSM: Love is... not a concept in our database. I know of poets and many stories of romance found in the hardships of life, but.
+BSM: Love is... not a concept in our database. I know of poets and many stories of family found in the hardships of life, but.
 
 BSM: He was the last I'd expect to hear that phrase from.
 
 BSM: My brother.
 
-BSM: My little brother…
+BSM: My little brother...
 
 BSM: I'm so sorry.
 

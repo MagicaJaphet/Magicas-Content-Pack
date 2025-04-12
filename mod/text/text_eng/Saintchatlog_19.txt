@@ -4,17 +4,17 @@
 
 SOURCE NODE TRACE: LTTM_ROOT, ERROR
 
-BSM: I tried to direct my overseers to what is left of your body, but the unfamilarity of the state of it seems to have made them get lost.
+BSM: I tried to direct my overseers to what is left of your body, but the unfamilarity of the state of it seems to have<LINE>made them get lost.
 
 BSM: The increase of scavengers also has proven to become a problem.
 
 BSM: ...
 
-BSM: It's been getting colder, you know? It is not uncomfortable to me. I merely imagine that others are reaching this state too, slowly.
+BSM: It's been getting colder, you know? It is not uncomfortable to me. I merely imagine that others are reaching<LINE>this state too, slowly.
 
 BSM: I am not sure this is how I envisioned this to play out. Not that I thought of the end much, unlike you.
 
-BSM: I was content working with others and sharing theories that had logical basis. I was happy when small creatures like that red messenger would come by and lay for a while until the rain came.
+BSM: I was content working with others and sharing theories that had logical basis. I was happy when small creatures<LINE>like that red messenger would come by and lay for a while until the rain came.
 
 BSM: I... was more than happy when you started talking to me again.
 

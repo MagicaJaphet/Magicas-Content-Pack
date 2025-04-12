@@ -47,6 +47,8 @@ namespace MagicasContentPack
 			public static SceneID Outro_SpearmasterOutroAltLuna = new(nameof(Outro_SpearmasterOutroAltLuna), true);
 			public static SceneID Outro_SpearmasterOutroAltChamber = new(nameof(Outro_SpearmasterOutroAltChamber), true);
 			public static SceneID Outro_SpearmasterOutroAltCollapse = new(nameof(Outro_SpearmasterOutroAltCollapse), true);
+
+			public static SceneID Placeholder = new(nameof(Placeholder), true);
 		}
 
 		// Slideshow MagicaEnums

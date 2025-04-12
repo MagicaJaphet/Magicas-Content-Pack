@@ -4,7 +4,7 @@
 
 SOURCE NODE TRACE: LTTM_ROOT, FP_COMM04, FP_ROOT
 
-BSM: I have not seen Ruffles in a fair few cycles, my overseers have not reported any sighting of them either. Have you any idea where they’ve gone?
+BSM: I have not seen Ruffles in a fair few cycles, my overseers have not reported any sighting of them either.<LINE>Have you any idea where they’ve gone?
 
 FP: Actually, they paid me a visit.
 
@@ -18,6 +18,6 @@ BSM: A music piece? If I were a single-brained organism, I believe I too would b
 
 BSM: Ah, so then I presume they must be somewhere around the chimney stacks! I will try to direct my wild overseers that way.
 
-FP: You'll find their natural migration path to be more predictable. My inner structure has become far too hazardous to venture.
+FP: You'll find their natural migration path to be more predictable. My inner structure has become far too<LINE>hazardous to venture.
 
 FP: I can share the sound data of this hymn to you, too.

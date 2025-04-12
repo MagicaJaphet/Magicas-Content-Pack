@@ -1,6 +1,6 @@
 {"frames": {
 
-"RedRedLeftOnTopOfTerrainHand.png":
+"RedLeftOnTopOfTerrainHand.png":
 {
 	"frame": {"x":2,"y":2,"w":15,"h":12},
 	"rotated": false,
@@ -8,7 +8,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":12},
 	"sourceSize": {"w":15,"h":12}
 },
-"RedRedLeftOnTopOfTerrainHand2.png":
+"RedLeftOnTopOfTerrainHand2.png":
 {
 	"frame": {"x":19,"y":2,"w":14,"h":11},
 	"rotated": false,

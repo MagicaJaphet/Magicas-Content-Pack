@@ -1,10 +1,10 @@
 {
-	"id": "magicaanthro.skins",
+	"id": "magica.contentpack",
 	"name": "Magica's Content Pack",
-	"version": "1.0.0",
+	"version": "1.2.0",
 	"authors": "MagicaJaphet",
-	"description": "Includes DMS skins based on my renditions of the slugcats, and all new scenes/artwork for the currently implemented slugcats!",
-	"requirements": ["moreslugcats","crs", "slime-cubed.slugbase", "regionkit"],
-	"requirements_names": ["More Slugcats Expansion", "Custom Region Support", "SlugBase", "RegionKit"],
+	"description": "A retelling of MSC through the lens of a single insane modder.",
+	"requirements": ["moreslugcats", "crs", "regionkit"],
+	"requirements_names": ["More Slugcats Expansion", "Custom Region Support", "RegionKit"],
 	"tags": ["Cosmetics", "Content"]
 }

@@ -228,8 +228,8 @@ namespace MagicasContentPack
 
 			if (victim is Scavenger && Custom.rainWorld.processManager?.currentMainLoop is RainWorldGame game && game != null && game.IsStorySession && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
 			{
-				WinOrSaveHooks.scavsKilledThisCycle++;
-				Plugin.DebugLog($"Arti killed scavenger!: {WinOrSaveHooks.scavsKilledThisCycle}");
+				SaveValues.scavsKilledThisCycle++;
+				Plugin.DebugLog($"Arti killed scavenger!: {SaveValues.scavsKilledThisCycle}");
 
 				GhostWorldPresence.GhostID ghostID = GhostWorldPresence.GetGhostID(game.world.region.name);
 				if (ghostID != GhostWorldPresence.GhostID.NoGhost && game.GetStorySession.saveState.deathPersistentSaveData.ghostsTalkedTo.ContainsKey(ghostID))

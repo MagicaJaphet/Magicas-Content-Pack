@@ -1,8 +1,8 @@
-﻿using Mono.Cecil.Cil;
+﻿using MagicasContentPack.IteratorHooks;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MoreSlugcats;
 using RWCustom;
-using SlugBase.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ using static MonoMod.InlineRT.MonoModRule;
 
 namespace MagicasContentPack
 {
-	internal class WorldHooks
+    internal class WorldHooks
 	{
 		private static AbstractCreature nshOverseer;
 		internal static bool shouldFadeGhostMode;
@@ -247,7 +247,7 @@ namespace MagicasContentPack
 				cursor.Emit(OpCodes.Ldarg_0);
 				static void AddArtiGhostChecks(RoomCamera self)
 				{
-					if (self.game.IsStorySession && self.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer && WinOrSaveHooks.scavsKilledThisCycle != 0)
+					if (self.game.IsStorySession && self.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer && SaveValues.scavsKilledThisCycle != 0)
 					{
 						self.ghostMode = 0f;
 						(self.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo[self.game.world.worldGhost.ghostID] = 0;
@@ -278,8 +278,8 @@ namespace MagicasContentPack
 
 		private static void GhostHunch_Update(On.GhostHunch.orig_Update orig, GhostHunch self, bool eu)
 		{
-			Plugin.DebugLog($"cHECKING... {WinOrSaveHooks.scavsKilledThisCycle}");
-			if (self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer && WinOrSaveHooks.scavsKilledThisCycle != 0)
+			Plugin.DebugLog($"cHECKING... {SaveValues.scavsKilledThisCycle}");
+			if (self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer && SaveValues.scavsKilledThisCycle != 0)
 			{
 				Plugin.DebugLog("Arti killed scavengers >:(");
 				self.Destroy();
@@ -312,11 +312,11 @@ namespace MagicasContentPack
 			bool shouldSpawnGhost = self.game.setupValues.ghosts > 0 || GhostWorldPresence.SpawnGhost(ghostID, (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karma, (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karmaCap, encounters, self.game.StoryCharacter == SlugcatStats.Name.Red);
 			if (ModManager.MSC && self.game.IsStorySession && self.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
 			{
-				int scavsKilledSinceLastPrime = WinOrSaveHooks.scavsKilledThisCycle;
+				int scavsKilledSinceLastPrime = SaveValues.scavsKilledThisCycle;
 				if (scavsKilledSinceLastPrime > 0)
 				{
 					(self.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo[ghostID] = 0;
-					WinOrSaveHooks.scavsKilledThisCycle = 0;
+					SaveValues.scavsKilledThisCycle = 0;
 					return;
 				}
 				else if (encounters == 1 && (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karma == (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karmaCap || (ModManager.Expedition && self.game.rainWorld.ExpeditionMode && (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karma == (self.game.session as StoryGameSession).saveState.deathPersistentSaveData.karmaCap))
@@ -541,12 +541,11 @@ namespace MagicasContentPack
 
 				cursor.Emit(OpCodes.Ldarg_0);
 				cursor.EmitDelegate((RainWorldGame self) => {
-					if (WinOrSaveHooks.HunterOracleID != null)
+					if (SaveValues.HunterOracleID != null)
 					{
 						if (self.Players[0].realizedCreature != null && (self.Players[0].realizedCreature as Player).redsIllness != null)
 						{
-							Plugin.DebugLog("Set hunter oracleID to (check): " + WinOrSaveHooks.HunterOracleID);
-							self.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<string>(nameof(WinOrSaveHooks.HunterOracleID), WinOrSaveHooks.HunterOracleID);
+							Plugin.DebugLog("Set hunter oracleID to (check): " + SaveValues.HunterOracleID);
 
 							self.manager.nextSlideshow = MagicaEnums.SlidesShowIDs.RedsDeath;
 							self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SlideShow, 0f);
@@ -612,7 +611,7 @@ namespace MagicasContentPack
 				room.AddObject(new SevenRedSunsMuralRoom(room));
 			}
 
-			if (name == "SH_E01" && !ModOptions.CustomInGameCutscenes.Value || (room.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Spear && OracleHooks.CheckIfWhoTookThePearlIsBeforeCurrent(room.game.TimelinePoint)))
+			if (name == "SH_E01" && !ModOptions.CustomInGameCutscenes.Value || (room.game.StoryCharacter != MoreSlugcatsEnums.SlugcatStatsName.Spear && SSOracleBehaviorHooks.CheckIfWhoTookThePearlIsBeforeCurrent(room.game.TimelinePoint)))
 			{
 				for (int i = 0; i < room.updateList.Count; i++)
 				{
@@ -664,7 +663,7 @@ namespace MagicasContentPack
 
 			string name = self.room.abstractRoom.name;
 
-			if (self.room.game != null && WinOrSaveHooks.OEGateOpenedAsSpear && name == "GATE_SB_OE")
+			if (self.room.game != null && SaveValues.OEGateOpenedAsSpear && name == "GATE_SB_OE")
 			{
 				self.Unlock();
 			}
@@ -764,26 +763,23 @@ namespace MagicasContentPack
 			this.room = room;
 			currentRoom = "";
 
-			if (room.game.GetStorySession.saveState != null && room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad > 0 && WinOrSaveHooks.SpearAchievedCommsEnd)
+			if (room?.game.GetStorySession.saveState != null && room?.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad > 0 && WinOrSaveHooks.SpearAchievedCommsEnd && ExtEnumBase.TryParse(typeof(ChatlogData.ChatlogID), chatB, true, out var chatlog))
 			{
-				ExtEnumBase.TryParse(typeof(ChatlogData.ChatlogID), chatB, true, out var chatlog);
 				fullChatlog = chatlog as ChatlogData.ChatlogID;
 			}
-			else if (room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad > 0 && !WinOrSaveHooks.SpearAchievedCommsEnd)
+			else if (room?.game.GetStorySession.saveState != null && room?.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad > 0 && !WinOrSaveHooks.SpearAchievedCommsEnd && ExtEnumBase.TryParse(typeof(ChatlogData.ChatlogID), chatC, true, out var chatlog2))
 			{
-				ExtEnumBase.TryParse(typeof(ChatlogData.ChatlogID), chatC, true, out var chatlog);
-				fullChatlog = chatlog as ChatlogData.ChatlogID;
+				fullChatlog = chatlog2 as ChatlogData.ChatlogID;
 			}
-			else
+			else if (ExtEnumBase.TryParse(typeof(ChatlogData.ChatlogID), chatA, true, out var chatlog3))
 			{
-				ExtEnumBase.TryParse(typeof(ChatlogData.ChatlogID), chatA, true, out var chatlog);
-				fullChatlog = chatlog as ChatlogData.ChatlogID;
+				fullChatlog = chatlog3 as ChatlogData.ChatlogID;
 			}
 		}
 
 		public override void Update(bool eu)
 		{
-			if (!WorldHooks.ValidDepthsRooms.Contains(room.abstractRoom.name))
+			if (!WorldHooks.ValidDepthsRooms.Contains(room?.abstractRoom.name))
 			{
 				if (room != null && room.game != null && room.game.cameras != null && room.game.cameras[0].hud.chatLog != null)
 				{
@@ -1241,7 +1237,7 @@ namespace MagicasContentPack
 				{
 					player.controller = null;
 
-					WinOrSaveHooks.OEGateOpenedAsSpear = true;
+					SaveValues.OEGateOpenedAsSpear = true;
 					(room.world.game.session as StoryGameSession).saveState.miscWorldSaveData.playerGuideState.InfluenceLike(100f, false);
 					room.game.GetStorySession.saveState.miscWorldSaveData.playerGuideState.wantDirectionHandHoldingThisCycle = 0.96f;
 

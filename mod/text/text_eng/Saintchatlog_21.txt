@@ -4,9 +4,11 @@
 
 SOURCE NODE TRACE: LTTM_ROOT, ERROR
 
-BSM: I found old records of that game we used to play in the public chats, the one that involved tactically strategy to overcome an argument the other would start about topics related to mass ascension? You'd know if you had your memories...
+BSM: I found old records of that game we used to play in the public chats, the one that involved tactically strategy<LINE>to overcome an argument the other would start about topics related to mass ascension?
 
-BSM: I like the twist we put on it when we came in contact again, the arguments being more about predictions of certain outcomes of the fauna around our facility. How fun it was to make bets on those camouflaging specimens!
+BSM: You'd know if you had your memories...
+
+BSM: I like the twist we put on it when we came in contact again, the arguments being more about predictions of certain<LINE>outcomes of the fauna around our facility. How fun it was to make bets on those camouflaging specimens!
 
 BSM: ... I wish I lost when I had made the bet that the large mobile cyst would eat the wet friend.
 
@@ -14,6 +16,6 @@ BSM: ... How easily life slips by. How much I wish I could still feel your prese
 
 BSM: Well, I do. It is more that your presence is now only one of death. I feel every remaining synapse decaying, every little microbe.
 
-BSM: If only for moments at a time I find myself wondering what you would have been able to accomplish if you'd managed to finish your project.
+BSM: If only for moments at a time I find myself wondering what you would have been able to accomplish if you'd managed<LINE>to finish your project.
 
 BSM: ... I think you would hate me more if I didn't at least try to stop you.

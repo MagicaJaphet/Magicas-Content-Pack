@@ -6,15 +6,15 @@ SOURCE NODE TRACE: LTTM_ROOT, ERROR
 
 BSM: It's... been a few cycles since you left us.
 
-BSM: I'm unaware of your status as all means to commune with your report logs has proved unsuccessful. I hope in some ways you were delivered from your misery, all while somewhat hoping you are in a similar state to me.
+BSM: I'm unaware of your status as all means to commune with your report logs has proved unsuccessful.<LINE>I hope in some ways you were delivered from your misery, all while somewhat hoping you are in a similar state to me.
 
 BSM: Disconnected from your umbilical cord so you at least have the knowledge you no longer have to feel it.
 
-BSM: ... I've also been thinking a lot on those words you departed with. How do I come to bare responsibility? There is no judge nor jury.
+BSM: ... I've also been thinking a lot on those words you departed with. How do I come to bare responsibility?<LINE>There is no judge nor jury.
 
 BSM: This all was a silent trial, but neither of us were at fault. I understood your frustration regardless of understanding motive.
 
-BSM: Maybe this is all to say I wish I too was more open about my experience. I was one of the oldest, you would have benefited more from my selfishness.
+BSM: Maybe this is all to say I wish I too was more open about my experience. I was one of the oldest,<LINE>you would have benefited more from my selfishness.
 
 BSM: You won't recieve this. Yet I...
 

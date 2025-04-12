@@ -79,10 +79,10 @@ namespace MagicasContentPack
 			{
 				spearmaster.AddRange([
 					MoreSlugcatsEnums.MenuSceneID.Slugcat_Spear,
-					MagicaEnums.SceneIDs.CustomSlugcat_SpearPearl,
+					SceneIDs.CustomSlugcat_SpearPearl,
 					MoreSlugcatsEnums.MenuSceneID.End_Spear,
 					MoreSlugcatsEnums.MenuSceneID.AltEnd_Spearmaster,
-					MagicaEnums.SceneIDs.CustomSlugcat_SpearSRS,
+					SceneIDs.CustomSlugcat_SpearSRS,
 					]);
 
 				artificer.AddRange([
@@ -107,41 +107,41 @@ namespace MagicasContentPack
 			if (ModOptions.CustomSlideShows.Value)
 			{
 				spearmaster.AddRange([
-					MagicaEnums.SceneIDs.Intro_Spearmasterlook,
-					MagicaEnums.SceneIDs.Intro_Spearmasterentrance,
-					MagicaEnums.SceneIDs.Intro_Spearmasteroverseer,
-					MagicaEnums.SceneIDs.Intro_Spearmasterdownlook,
-					MagicaEnums.SceneIDs.Intro_Spearmasterleap,
-					MagicaEnums.SceneIDs.Intro_SpearmasterSRS,
+					SceneIDs.Intro_Spearmasterlook,
+					SceneIDs.Intro_Spearmasterentrance,
+					SceneIDs.Intro_Spearmasteroverseer,
+					SceneIDs.Intro_Spearmasterdownlook,
+					SceneIDs.Intro_Spearmasterleap,
+					SceneIDs.Intro_SpearmasterSRS,
 
-					MagicaEnums.SceneIDs.Outro_SpearmasterSwimLeft,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroSwim,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroPause,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroLook,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroHop,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroEmbrace,
+					SceneIDs.Outro_SpearmasterSwimLeft,
+					SceneIDs.Outro_SpearmasterOutroSwim,
+					SceneIDs.Outro_SpearmasterOutroPause,
+					SceneIDs.Outro_SpearmasterOutroLook,
+					SceneIDs.Outro_SpearmasterOutroHop,
+					SceneIDs.Outro_SpearmasterOutroEmbrace,
 
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltComms,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltDescent,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltChimney,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltMice,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltWaterfront,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltLuna,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltChamber,
-					MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltCollapse,
+					SceneIDs.Outro_SpearmasterOutroAltComms,
+					SceneIDs.Outro_SpearmasterOutroAltDescent,
+					SceneIDs.Outro_SpearmasterOutroAltChimney,
+					SceneIDs.Outro_SpearmasterOutroAltMice,
+					SceneIDs.Outro_SpearmasterOutroAltWaterfront,
+					SceneIDs.Outro_SpearmasterOutroAltLuna,
+					SceneIDs.Outro_SpearmasterOutroAltChamber,
+					SceneIDs.Outro_SpearmasterOutroAltCollapse,
 					]);
 
 				artificer.AddRange([
 					MoreSlugcatsEnums.MenuSceneID.Outro_Artificer1,
 					MoreSlugcatsEnums.MenuSceneID.Outro_Artificer2,
 					MoreSlugcatsEnums.MenuSceneID.Outro_Artificer3,
-					MagicaEnums.SceneIDs.Outro_Artificer6,
+					SceneIDs.Outro_Artificer6,
 					MoreSlugcatsEnums.MenuSceneID.Outro_Artificer4,
 					MoreSlugcatsEnums.MenuSceneID.Outro_Artificer5,
 
 					MoreSlugcatsEnums.MenuSceneID.AltEnd_Artificer_1,
 					MoreSlugcatsEnums.MenuSceneID.AltEnd_Artificer_2,
-					MagicaEnums.SceneIDs.AltEnd_Artificer_4,
+					SceneIDs.AltEnd_Artificer_4,
 					MoreSlugcatsEnums.MenuSceneID.AltEnd_Artificer_3,
 					]);
 
@@ -158,6 +158,9 @@ namespace MagicasContentPack
 					MoreSlugcatsEnums.MenuSceneID.Intro_S4,
 					]);
 			}
+
+			if (Plugin.debugState)
+				dreams.Add(SceneIDs.Placeholder);
 
 			sceneDict.Add(SceneKey.Dream, dreams);
 			sceneDict.Add(SceneKey.Spearmaster, spearmaster);
@@ -245,7 +248,7 @@ namespace MagicasContentPack
 			if (!flat)
 			{
 
-				if (self.sceneID == MagicaEnums.SceneIDs.Outro_SpearmasterOutroEmbrace)
+				if (self.sceneID == SceneIDs.Outro_SpearmasterOutroEmbrace)
 				{
 					self.depthIllustrations[self.depthIllustrations.Count - 5].alpha = Mathf.InverseLerp(0.05f, 0.44f, self.displayTime);
 					fadeNum = Mathf.Pow(Custom.SCurve(Mathf.InverseLerp(0.21f, 0.44f, self.displayTime), 0.65f), 1.5f);
@@ -255,13 +258,13 @@ namespace MagicasContentPack
 					self.depthIllustrations[self.depthIllustrations.Count - 2].alpha = 0f + 1f * Mathf.InverseLerp(0f, 1f, self.displayTime * 3);
 				}
 
-				if (self.sceneID == MagicaEnums.SceneIDs.Intro_Spearmasterdownlook)
+				if (self.sceneID == SceneIDs.Intro_Spearmasterdownlook)
 				{
 					self.depthIllustrations[self.depthIllustrations.Count - 3].alpha = 1f * Mathf.InverseLerp(1f, 0f, self.displayTime * 3 - 1);
 					self.depthIllustrations[self.depthIllustrations.Count - 4].alpha = 1f * Mathf.InverseLerp(0f, 1f, self.displayTime * 3 - 1);
 				}
 
-				if (self.sceneID == MagicaEnums.SceneIDs.Intro_SpearmasterSRS)
+				if (self.sceneID == SceneIDs.Intro_SpearmasterSRS)
 				{
 					fadeNum = Mathf.Lerp(0.8f, 1f, Mathf.Sin(self.displayTime * 50));
 
@@ -270,19 +273,19 @@ namespace MagicasContentPack
 					self.depthIllustrations[self.depthIllustrations.Count - 5].alpha = fadeNum;
 				}
 
-				if (self.sceneID == MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltComms)
+				if (self.sceneID == SceneIDs.Outro_SpearmasterOutroAltComms)
 				{
 					self.depthIllustrations[self.depthIllustrations.Count - 1].alpha = 1f * Mathf.InverseLerp(1f, 0f, self.displayTime * 5 - 2);
 					self.depthIllustrations[self.depthIllustrations.Count - 2].alpha = 1f * Mathf.InverseLerp(0f, 1f, self.displayTime * 5 - 2);
 				}
 
-				if (self.sceneID == MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltDescent)
+				if (self.sceneID == SceneIDs.Outro_SpearmasterOutroAltDescent)
 				{
 					self.depthIllustrations[self.depthIllustrations.Count - 3].alpha = 1f * Mathf.InverseLerp(1f, 0f, self.displayTime * 6 - 2);
 					self.depthIllustrations[self.depthIllustrations.Count - 2].alpha = 1f * Mathf.InverseLerp(1f, 0f, 1 - (self.displayTime * 6 - 2));
 				}
 
-				if (self.sceneID == MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltChamber)
+				if (self.sceneID == SceneIDs.Outro_SpearmasterOutroAltChamber)
 				{
 					self.depthIllustrations[self.depthIllustrations.Count - 3].alpha = 1f * Mathf.InverseLerp(1f, 0f, self.displayTime * 5 - 2);
 					self.depthIllustrations[self.depthIllustrations.Count - 5].alpha = 1f * Mathf.InverseLerp(1f, 0f, self.displayTime * 5 - 2);
@@ -297,7 +300,7 @@ namespace MagicasContentPack
 					self.depthIllustrations[self.depthIllustrations.Count - 6].alpha = 1f * Mathf.InverseLerp(1f, 0f, self.displayTime * 5 - 1);
 				}
 
-				if (self.sceneID == MagicaEnums.SceneIDs.Outro_SpearmasterOutroAltCollapse)
+				if (self.sceneID == SceneIDs.Outro_SpearmasterOutroAltCollapse)
 				{
 					fadeNum = Mathf.Lerp(1f, 0f, 1 + -Mathf.Sin((self.displayTime * 2f) * (40f / (self.displayTime + 0.17f))) - (self.displayTime / 20f));
 					self.depthIllustrations[self.depthIllustrations.Count - 2].alpha = fadeNum;
@@ -407,6 +410,11 @@ namespace MagicasContentPack
 			List<MenuIllustration> menuIllustrations = new();
 			MenuScene.SceneID name = self.sceneID;
 
+			if (self.sceneID == SceneIDs.Placeholder)
+			{
+				return PlaceHolder();
+			}
+
 			if (allCustomScenes.ContainsKey(SceneKey.Dream) && allCustomScenes[SceneKey.Dream].Contains(self.sceneID))
 			{
 				return DreamScenes.SelectScene(name, currentSlugcat);
@@ -433,6 +441,15 @@ namespace MagicasContentPack
 			}
 
 			return menuIllustrations;
+		}
+
+		private static List<MenuIllustration> PlaceHolder()
+		{
+			sceneFolder = "magicascenes";
+
+			List<MenuIllustration> scenes = [CreateIllus("placeholder - flat")];
+
+			return scenes;
 		}
 
 		internal static List<SlugcatStats.Name> SleepSlugcats()
@@ -1553,7 +1570,7 @@ namespace MagicasContentPack
 						}
 						if (menuScene.UseSlugcatUnlocked(MoreSlugcatsEnums.SlugcatStatsName.Spear))
 						{
-							if (menuScene.sceneID == MagicaEnums.SceneIDs.CustomSlugcat_SpearPearl)
+							if (menuScene.sceneID == SceneIDs.CustomSlugcat_SpearPearl)
 							{
 								if (MenuSceneHooks.magicaGameData != null && MenuSceneHooks.magicaGameData.ContainsKey(MoreSlugcatsEnums.SlugcatStatsName.Spear) && MenuSceneHooks.magicaGameData[MoreSlugcatsEnums.SlugcatStatsName.Spear] != null && MenuSceneHooks.magicaGameData[MoreSlugcatsEnums.SlugcatStatsName.Spear].pearlBroadcastTagged)
 								{
@@ -1615,7 +1632,7 @@ namespace MagicasContentPack
 					{
 						if (menuScene.UseSlugcatUnlocked(MoreSlugcatsEnums.SlugcatStatsName.Spear))
 						{
-							if (menuScene.sceneID == MagicaEnums.SceneIDs.CustomSlugcat_SpearPearl)
+							if (menuScene.sceneID == SceneIDs.CustomSlugcat_SpearPearl)
 							{
 								scenes.Add(CreateIllus("Slugcat - Spearmaster - Flatb"));
 							}
@@ -1652,13 +1669,13 @@ namespace MagicasContentPack
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.Outro_Artificer1 => GhostScenes.Swim(ref scenes),
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.Outro_Artificer2 => GhostScenes.Zoom(ref scenes),
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.Outro_Artificer3 => GhostScenes.See(ref scenes),
-					var _ when name == MagicaEnums.SceneIDs.Outro_Artificer6 => GhostScenes.Shock(ref scenes),
+					var _ when name == SceneIDs.Outro_Artificer6 => GhostScenes.Shock(ref scenes),
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.Outro_Artificer4 => GhostScenes.Embrace(ref scenes),
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.Outro_Artificer5 => GhostScenes.Fade(ref scenes),
 
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.AltEnd_Artificer_1 => AltEndingScenes.Beast(ref scenes),
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.AltEnd_Artificer_2 => AltEndingScenes.Wrath(ref scenes),
-					var _ when name == MagicaEnums.SceneIDs.AltEnd_Artificer_4 => AltEndingScenes.Mask(ref scenes),
+					var _ when name == SceneIDs.AltEnd_Artificer_4 => AltEndingScenes.Mask(ref scenes),
 					var _ when name == MoreSlugcatsEnums.MenuSceneID.AltEnd_Artificer_3 => AltEndingScenes.Victory(ref scenes),
 				};
 
@@ -2062,18 +2079,19 @@ namespace MagicasContentPack
 					sceneFolder = SceneFolder(subDirectory, slugcatName, "dead red");
 
 					string oracle = "";
-					if (MenuSceneHooks.OracleValue != "")
+					if (!string.IsNullOrEmpty(MenuSceneHooks.oracleValue))
 					{
-						if (MenuSceneHooks.OracleValue == Oracle.OracleID.SL.value)
+						if (MenuSceneHooks.oracleValue == Oracle.OracleID.SL.value)
 						{
 							oracle = " moon";
 						}
-						if (MenuSceneHooks.OracleValue == Oracle.OracleID.SS.value)
+						if (MenuSceneHooks.oracleValue == Oracle.OracleID.SS.value)
 						{
 							oracle = " pebbles";
 						}
-						Plugin.DebugLog(oracle);
 					}
+					
+					Plugin.DebugLog(oracle);
 
 					if (!flat)
 					{
@@ -2098,7 +2116,7 @@ namespace MagicasContentPack
 					}
 					else
 					{
-						scenes.Add(CreateIllus("Dead Red - Flat"));
+						scenes.Add(CreateIllus("Dead Red" + oracle + " - Flat"));
 					}
 
 					return scenes;
@@ -2505,7 +2523,7 @@ namespace MagicasContentPack
 				var _ when slideShowID == SlidesShowIDs.SpearIntro => SpearScenes.Intro(ref playList, ref song, ref fadeIn, ref process, ref stats),
 				var _ when slideShowID == SlidesShowIDs.SpearAltOutro => SpearScenes.CommsEnding(ref playList, ref song, ref fadeIn, ref process, ref stats),
 
-				var _ when slideShowID == SlidesShowIDs.ArtificerDreamE => ArtiScenes.FInalDream(ref playList, ref song, ref fadeIn, ref process, ref stats),
+				var _ when slideShowID == SlidesShowIDs.ArtificerDreamE => ArtiScenes.FinalDream(ref playList, ref song, ref fadeIn, ref process, ref stats),
 				var _ when slideShowID == MoreSlugcatsEnums.SlideShowID.ArtificerAltEnd => ArtiScenes.ScavKingEnding(ref playList, ref song, ref fadeIn, ref process, ref stats),
 				var _ when slideShowID == MoreSlugcatsEnums.SlideShowID.ArtificerOutro => ArtiScenes.GhostOutro(ref playList, ref song, ref fadeIn, ref process, ref stats),
 
@@ -2615,11 +2633,12 @@ namespace MagicasContentPack
 				return playList;
 			}
 
-			internal static List<SlideShow.Scene> FInalDream(ref List<SlideShow.Scene> playList, ref string song, ref float fadeIn, ref ProcessManager.ProcessID process, ref bool stats)
+			internal static List<SlideShow.Scene> FinalDream(ref List<SlideShow.Scene> playList, ref string song, ref float fadeIn, ref ProcessManager.ProcessID process, ref bool stats)
 			{
 				process = ProcessManager.ProcessID.SleepScreen;
 
 				slideShow.AddNewScene(MenuScene.SceneID.Empty, 0f, 0f, 0f);
+				slideShow.AddNewScene(SceneIDs.Placeholder, ConvertTime(0, 2, 0), ConvertTime(0, 4, 0), ConvertTime(0, 10, 0));
 				// NOTE: Add scene here
 
 				return playList;
@@ -2630,11 +2649,12 @@ namespace MagicasContentPack
 		{
 			internal static List<SlideShow.Scene> OracleDeathEnding(ref List<SlideShow.Scene> playList, ref string song, ref float fadeIn, ref ProcessManager.ProcessID process, ref bool stats)
 			{
-				song = "RW_Outro_Theme";
+				song = "RW_Outro_Theme"; // Placeholder
 				fadeIn = 10f;
 				process = ProcessManager.ProcessID.Credits;
 
-				slideShow.AddNewScene(MenuScene.SceneID.Empty, 0f, 0f, ConvertTime(0, 2, 0));
+				slideShow.AddNewScene(MenuScene.SceneID.Empty, 0f, 0f, 0f);
+				slideShow.AddNewScene(SceneIDs.Placeholder, ConvertTime(0, 2, 0), ConvertTime(0, 4, 0), ConvertTime(0, 10, 0));
 				// NOTE: Add scene here
 
 				return playList;

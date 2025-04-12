@@ -3,35 +3,21 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MoreSlugcats;
 using RWCustom;
-using SlugBase.SaveData;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace MagicasContentPack
 {
-	internal class WinOrSaveHooks
+    internal class WinOrSaveHooks
 	{
 		public static int artiDreamNumber;
 
-		private static bool magicaSaveWipe;
-		public static bool OEGateOpenedAsSpear;
-		public static string WhoShowedFPThePearl;
 		public static bool ArtiKilledScavKing;
 		public static bool SpearAchievedCommsEnd;
 		public static int HunterScarProgression; // 3 - 0
-		public static bool SpearMetSRS;
 		internal static bool redEndingProcedure;
-
-		public static bool fpHasSeenMonkAscension;
-		public static bool lttmHasSeenMonkAscension;
-		public static bool MoonOverWrotePearl;
-		public static bool CLSeenMoonPearl;
-
 		public static bool HunterHasGreenNeuron;
-		internal static int scavsKilledThisCycle = 0;
-
-		public static string HunterOracleID { get; internal set; }
 
 		internal static void Init()
 		{
@@ -41,7 +27,7 @@ namespace MagicasContentPack
 				On.Menu.StoryGameStatisticsScreen.TickerIsDone += StoryGameStatisticsScreen_TickerIsDone;
 				IL.Menu.StoryGameStatisticsScreen.GetDataFromGame += StoryGameStatisticsScreen_ctor;
 
-				// For menuscene shenanijans and other cycle based stuff
+				//// For menuscene shenanijans and other cycle based stuff
 				On.ShelterDoor.ctor += ResetShelterRoomInformation;
 				On.ShelterDoor.DoorClosed += GatherShelterRoomInformation;
 
@@ -52,14 +38,13 @@ namespace MagicasContentPack
 				On.RainWorldGame.ArtificerDreamEnd += ArtiDreamEndSlideshow;
 
 				// Fixes saint not getting the scholar passage given there is a new colored pearl
-				On.SlugcatStats.PearlsGivePassageProgress += SlugcatStats_PearlsGivePassageProgress;
+				On.SlugcatStats.PearlsGivePassageProgress += GiveBackSaintProgress;
 
-				// Updates custom values using slugbase (for now?)
-				On.PlayerProgression.SaveProgressionAndDeathPersistentDataOfCurrentState += PlayerProgression_SaveProgressionAndDeathPersistentDataOfCurrentState;
-				On.PlayerProgression.WipeAll += PlayerProgression_WipeAll;
-				On.PlayerProgression.WipeSaveState += PlayerProgression_WipeSaveState;
-				On.WinState.CycleCompleted += WinState_CycleCompleted;
-				On.SaveState.LoadGame += SaveState_LoadGame;
+				On.PlayerProgression.SaveWorldStateAndProgression += SaveSlugcatData;
+				On.PlayerProgression.WipeSaveState += WipeSlugcatData;
+				On.PlayerProgression.WipeAll += WipeAllData;
+
+				On.PlayerProgression.LoadProgression += PlayerProgression_LoadProgression;
 
 				Plugin.HookSucceed();
 			}
@@ -69,20 +54,25 @@ namespace MagicasContentPack
 			}
 		}
 
-		private static bool PlayerProgression_SaveProgressionAndDeathPersistentDataOfCurrentState(On.PlayerProgression.orig_SaveProgressionAndDeathPersistentDataOfCurrentState orig, PlayerProgression self, bool saveAsDeath, bool saveAsQuit)
+		private static bool SaveSlugcatData(On.PlayerProgression.orig_SaveWorldStateAndProgression orig, PlayerProgression self, bool malnourished)
 		{
-			bool result = orig(self, saveAsDeath, saveAsQuit);
+			MagicaSaveState.SaveFile(self.currentSaveState.saveStateNumber.value);
 
-			try
-			{
-				ResetSave(self, self.PlayingAsSlugcat);
-			}
-			catch (Exception e)
-			{
-				Debug.LogException(e);
-			}
+			return orig(self, malnourished);
+		}
 
-			return result;
+		private static void WipeSlugcatData(On.PlayerProgression.orig_WipeSaveState orig, PlayerProgression self, SlugcatStats.Name saveStateNumber)
+		{
+			MagicaSaveState.WipeSave(saveStateNumber.value);
+
+			orig(self, saveStateNumber);
+		}
+
+		private static void WipeAllData(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
+		{
+			MagicaSaveState.WipeSave();
+
+			orig(self);
 		}
 
 		private static void StoryGameStatisticsScreen_TickerIsDone(On.Menu.StoryGameStatisticsScreen.orig_TickerIsDone orig, StoryGameStatisticsScreen self, StoryGameStatisticsScreen.Ticker ticker)
@@ -120,7 +110,7 @@ namespace MagicasContentPack
 					if (package.saveState.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Saint)
 					{
 						Plugin.DebugLog("Custom ticker IDs being checked...");
-						if (package.saveState.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(CLSeenMoonPearl), out var seenPearl))
+						if (MagicaSaveState.GetKey(package.saveState.saveStateNumber.value, nameof(SaveValues.CLSeenMoonPearl), out bool _))
 						{
 							StoryGameStatisticsScreen.Popper helpedMoon = new(self, self.pages[0], pos + new Vector2(0f, -30f * (float)index), "<" + self.Translate("Helped Big Sis Moon") + ">", MagicaEnums.TickerIDs.HelpedBSM);
 							self.allTickers.Add(helpedMoon);
@@ -145,9 +135,9 @@ namespace MagicasContentPack
 			SceneMaker.paletteTexture = null;
 			SceneMaker.fadePaletteTexture = null;
 
-			if (OracleHooks.moonRevivedThisCycle)
+			if (IteratorHooks.SLOracleBehaviorHooks.moonRevivedThisCycle)
 			{
-				OracleHooks.moonRevivedThisCycle = false;
+				IteratorHooks.SLOracleBehaviorHooks.moonRevivedThisCycle = false;
 			}
 
 			orig(self, room);
@@ -219,19 +209,19 @@ namespace MagicasContentPack
 				{
 					if (self.room.PlayersInRoom[i].objectInStomach != null && self.room.PlayersInRoom[i].objectInStomach.type == AbstractPhysicalObject.AbstractObjectType.NSHSwarmer)
 					{
-						WinOrSaveHooks.HunterHasGreenNeuron = true;
+						HunterHasGreenNeuron = true;
 						break;
 					}
 				}
 				for (int j = 0; j < self.room.physicalObjects.Length; j++)
 				{
-					if (WinOrSaveHooks.HunterHasGreenNeuron) { break; }
+					if (HunterHasGreenNeuron) { break; }
 
 					for (int h = 0; h < self.room.physicalObjects[j].Count; h++)
 					{
 						if (self.room.physicalObjects[j][h] != null && self.room.physicalObjects[j][h].abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.NSHSwarmer)
 						{
-							WinOrSaveHooks.HunterHasGreenNeuron = true;
+							HunterHasGreenNeuron = true;
 							break;
 						}
 					}
@@ -271,7 +261,6 @@ namespace MagicasContentPack
 
 			// Used for dreamscreen art progression
 			artiDreamNumber = familyThread;
-			Debug.Log(artiDreamNumber);
 		}
 
 		private static void DreamChecks(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
@@ -332,230 +321,27 @@ namespace MagicasContentPack
 			orig(self);
 		}
 
-		private static bool SlugcatStats_PearlsGivePassageProgress(On.SlugcatStats.orig_PearlsGivePassageProgress orig, StoryGameSession session)
+		private static bool GiveBackSaintProgress(On.SlugcatStats.orig_PearlsGivePassageProgress orig, StoryGameSession session)
 		{
-			if (ModManager.MSC && session.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+			if (ModManager.MSC && ModOptions.CustomInGameCutscenes.Value && session.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Saint)
 			{
 				return true;
 			}
 			return orig(session);
 		}
 
-		private static void SaveState_LoadGame(On.SaveState.orig_LoadGame orig, SaveState self, string str, RainWorldGame game)
+		private static void PlayerProgression_LoadProgression(On.PlayerProgression.orig_LoadProgression orig, PlayerProgression self)
 		{
-			orig(self, str, game);
-			try
-			{
-				UpdateSaveBeforeCycle(self);
-			}
-			catch (Exception e)
-			{
-				Plugin.Log(Plugin.LogStates.MISC, "ERROR UPDATING SAVE STATE: " + e.ToString());
-			}
-		}
-
-
-		private static void WinState_CycleCompleted(On.WinState.orig_CycleCompleted orig, WinState self, RainWorldGame game)
-		{
-			try
-			{
-				UpdateSaveAfterCycle(game);
-			}
-			catch (Exception e)
-			{
-				Plugin.Log(Plugin.LogStates.MISC, "ERROR UPDATING SAVE STATE: " + e.ToString());
-			}
-			orig(self, game);
-		}
-		private static void PlayerProgression_WipeSaveState(On.PlayerProgression.orig_WipeSaveState orig, PlayerProgression self, SlugcatStats.Name saveStateNumber)
-		{
-			try
-			{
-				magicaSaveWipe = true;
-				ResetSave(self, saveStateNumber);
-			}
-			catch (Exception e)
-			{
-				Plugin.Log(Plugin.LogStates.MISC, "ERROR UPDATING SAVE STATE: " + e.ToString());
-			}
-			Plugin.DebugLog("Save has been wiped!");
-			orig(self, saveStateNumber);
-		}
-
-		private static void PlayerProgression_WipeAll(On.PlayerProgression.orig_WipeAll orig, PlayerProgression self)
-		{
-			try
-			{
-				if (self != null)
-				{
-					magicaSaveWipe = true;
-					ResetSave(self);
-				}
-			}
-			catch (Exception e)
-			{
-				Plugin.Log(Plugin.LogStates.MISC, "ERROR UPDATING SAVE STATE: " + e.ToString());
-			}
-			Plugin.DebugLog("Save has been wiped!");
 			orig(self);
-		}
 
-		private static void UpdateSaveAfterCycle(RainWorldGame game)
-		{
-			if (game.IsStorySession)
-			{
-				if (OEGateOpenedAsSpear)
-				{
-					OEGateOpenedAsSpear = false;
-				}
+			if (ModManager.MSC && self.PlayingAsSlugcat == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+				ArtiKilledScavKing = self.miscProgressionData.artificerEndingID == 1 && self.miscProgressionData.beaten_Artificer;
 
-				if (OracleHooks.hasBeenTouchedBySaintsHalo)
-				{
-					OracleHooks.hasBeenTouchedBySaintsHalo = false;
-				}
-				if (OracleHooks.checkedForMoonPearlThisCycle)
-				{
-					OracleHooks.checkedForMoonPearlThisCycle = false;
-				}
+			if (ModManager.MSC && self.PlayingAsSlugcat == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+				SpearAchievedCommsEnd = self.miscProgressionData.beaten_SpearMaster_AltEnd;
 
-				if (!string.IsNullOrEmpty(WhoShowedFPThePearl))
-				{
-					game.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<string>(nameof(WhoShowedFPThePearl), WhoShowedFPThePearl);
-				}
-
-				if (fpHasSeenMonkAscension)
-				{
-					game.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<bool>(nameof(fpHasSeenMonkAscension), true);
-				}
-				if (lttmHasSeenMonkAscension)
-				{
-					game.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<bool>(nameof(lttmHasSeenMonkAscension), true);
-				}
-				if (MoonOverWrotePearl)
-				{
-					game.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<bool>(nameof(MoonOverWrotePearl), true);
-				}
-				if (CLSeenMoonPearl)
-				{
-					game.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<bool>(nameof(CLSeenMoonPearl), true);
-				}
-			}
-		}
-
-		private static void UpdateSaveBeforeCycle(SaveState self)
-		{
-			if (self.saveStateNumber == SlugcatStats.Name.Red && !self.deathPersistentSaveData.redsDeath && !Custom.rainWorld.ExpeditionMode)
-			{
-				HunterScarProgression = Mathf.RoundToInt(Mathf.LerpUnclamped(3f, 0f, (float)self.cycleNumber / (float)RedsIllness.RedsCycles(self.redExtraCycles)));
-				if (HunterScarProgression < 0)
-				{
-					HunterScarProgression = 0;
-				}
-				Plugin.DebugLog("Hunter prog: " + HunterScarProgression.ToString());
-			}
-
-			if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Artificer && self.progression.miscProgressionData != null)
-			{
-				if (self.progression.currentSaveState.deathPersistentSaveData.altEnding)
-				{
-					ArtiKilledScavKing = true;
-					Plugin.DebugLog("Arti has killed the scav king");
-				}
-
-				scavsKilledThisCycle = 0;
-			}
-
-			if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear && self.progression.miscProgressionData != null)
-			{
-				if (self.progression.currentSaveState.deathPersistentSaveData.altEnding)
-				{
-					SpearAchievedCommsEnd = true;
-					Plugin.DebugLog("Spear is epic and awesome sauce");
-				}
-
-				if (self.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(SpearMetSRS), out bool spearSRS))
-				{
-					SpearMetSRS = spearSRS;
-				}
-			}
-
-			if (magicaSaveWipe && self.progression.miscProgressionData != null)
-			{
-				if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-				{
-					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(SpearMetSRS));
-				}
-
-				if (self.saveStateNumber == SlugcatStats.Name.Red)
-				{
-					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(HunterOracleID));
-				}
-
-				if (self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Saint)
-				{
-					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(fpHasSeenMonkAscension));
-					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(lttmHasSeenMonkAscension));
-					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(MoonOverWrotePearl));
-					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(CLSeenMoonPearl));
-				}
-
-				if (self.progression.miscProgressionData.GetSlugBaseData().TryGet<string>(nameof(WhoShowedFPThePearl), out string who) && (who == "false" || string.IsNullOrEmpty(who) || who == self.saveStateNumber.value))
-				{
-					self.progression.miscProgressionData.GetSlugBaseData().Remove(nameof(WhoShowedFPThePearl)); 
-				}
-
-				magicaSaveWipe = false;
-			}
-
-			if (!magicaSaveWipe && self.progression.miscProgressionData.GetSlugBaseData().TryGet<string>(nameof(WhoShowedFPThePearl), out string otherPearl) && otherPearl != "false")
-			{
-				WhoShowedFPThePearl = otherPearl;
-				Plugin.DebugLog("Pearl status: " + otherPearl);
-			}
-
-			if (!magicaSaveWipe && self.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Saint)
-			{
-				self.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(fpHasSeenMonkAscension), out fpHasSeenMonkAscension);
-				self.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(lttmHasSeenMonkAscension), out lttmHasSeenMonkAscension);
-				self.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(MoonOverWrotePearl), out MoonOverWrotePearl);
-				self.progression.miscProgressionData.GetSlugBaseData().TryGet<bool>(nameof(CLSeenMoonPearl), out CLSeenMoonPearl);
-			}
-		}
-
-		public static void ResetSave(PlayerProgression self)
-		{
-			OEGateOpenedAsSpear = false;
-			ArtiKilledScavKing = false;
-			SpearMetSRS = false;
-			SpearAchievedCommsEnd = false;
-			WhoShowedFPThePearl = "";
-			fpHasSeenMonkAscension = false;
-			lttmHasSeenMonkAscension = false;
-			MoonOverWrotePearl = false;
-			CLSeenMoonPearl = false;
-		}
-
-		public static void ResetSave(PlayerProgression self, SlugcatStats.Name name)
-		{
-			if (name == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-			{
-				OEGateOpenedAsSpear = false;
-				SpearAchievedCommsEnd = false;
-				SpearMetSRS = false;
-			}
-
-			if (name == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
-			{
-				ArtiKilledScavKing = false;
-			}
-
-			if (name == MoreSlugcatsEnums.SlugcatStatsName.Saint)
-			{
-				fpHasSeenMonkAscension = false;
-				lttmHasSeenMonkAscension = false;
-				MoonOverWrotePearl = false;
-				CLSeenMoonPearl = false;
-			}
+			if (self.PlayingAsSlugcat == SlugcatStats.Name.Red)
+				HunterScarProgression = Mathf.RoundToInt(Mathf.Lerp(0f, 3f, (float)(self.currentSaveState.cycleNumber) / (float)RedsIllness.RedsCycles(self.currentSaveState.redExtraCycles)));
 		}
 
 		internal static void BeatGameMode(RainWorldGame game)
@@ -567,7 +353,7 @@ namespace MagicasContentPack
 					string roomName = "";
 					if (game.GetStorySession.saveStateNumber == MoreSlugcatsEnums.SlugcatStatsName.Spear)
 					{
-						game.GetStorySession.saveState.progression.miscProgressionData.GetSlugBaseData().Set<bool>(nameof(SpearMetSRS), true);
+						SaveValues.SpearMetSRS = true;
 						game.GetStorySession.saveState.deathPersistentSaveData.altEnding = true;
 						game.GetStorySession.saveState.deathPersistentSaveData.ascended = false;
 						game.GetStorySession.saveState.deathPersistentSaveData.karma = game.GetStorySession.saveState.deathPersistentSaveData.karmaCap;

@@ -1,6 +1,6 @@
 [ADD]MagicaSB1 : CustomChatlog_SB1
 [ADD]MagicaE91 : CustomChatlog_E91
-[ADD]MagicaSaintchatlog : Saintchatlog_00 > Saintchatlog_01 > Saintchatlog_02 > Saintchatlog_03 > Saintchatlog_04 > Saintchatlog_05 > Saintchatlog_06 > Saintchatlog_07 > Saintchatlog_08 > Saintchatlog_09 > Saintchatlog_10 > Saintchatlog_11 > Saintchatlog_12 > Saintchatlog_13 > Saintchatlog_14 > Saintchatlog_15 > Saintchatlog_16 > Saintchatlog_17 > Saintchatlog_18 > Saintchatlog_19 > Saintchatlog_20 > Saintchatlog_21 > Saintchatlog_22 
+[ADD]MagicaSaintchatlog : Saintchatlog_00 > Saintchatlog_01 > Saintchatlog_02 > Saintchatlog_03 > Saintchatlog_04 > Saintchatlog_05 > Saintchatlog_06 > Saintchatlog_07 > Saintchatlog_08 > Saintchatlog_09 > Saintchatlog_10 > Saintchatlog_11 > Saintchatlog_12 > Saintchatlog_13 > Saintchatlog_14 > Saintchatlog_15 > Saintchatlog_16 > Saintchatlog_17 > Saintchatlog_18 > Saintchatlog_19 > Saintchatlog_20 > Saintchatlog_21 > Saintchatlog_22
 [ADD]Magicachatlog_SBFullA : Magicachatlog_SB0A > Magicachatlog_SB1A > Magicachatlog_SB2A > Magicachatlog_SB3A > Magicachatlog_SB4A > Magicachatlog_SB5A
 [ADD]Magicachatlog_SBFullB : Magicachatlog_SB0B > Magicachatlog_SB1B > Magicachatlog_SB2B > Magicachatlog_SB3B > Magicachatlog_SB4B > Magicachatlog_SB5B
 [ADD]Magicachatlog_SBFullC : Magicachatlog_SB0C > Magicachatlog_SB1C > Magicachatlog_SB2C > Magicachatlog_SB3C > Magicachatlog_SB4C > Magicachatlog_SB5C

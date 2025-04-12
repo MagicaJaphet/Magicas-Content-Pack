@@ -10,8 +10,6 @@ using Menu;
 using System.IO;
 using UnityEngine;
 using System.Runtime.CompilerServices;
-using System.Reflection;
-using System.Text;
 
 // Allows access to private members
 #pragma warning disable CS0618
@@ -21,6 +19,7 @@ using System.Text;
 
 namespace MagicasContentPack;
 
+[BepInDependency("crs", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("dressmyslugcat", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("slime-cubed.slugbase", BepInDependency.DependencyFlags.HardDependency)]
 
@@ -94,7 +93,7 @@ public class Plugin : BaseUnityPlugin
 
 			GraphicsHooks.Init();
 			ObjectHooks.Init();
-			OracleHooks.Init();
+			IteratorHooks.IteratorHooks.Init();
 			MenuSceneHooks.Init();
 			WinOrSaveHooks.Init();
 			WorldHooks.Init();
@@ -214,7 +213,13 @@ public class Plugin : BaseUnityPlugin
 				}
 			}
 			Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/artificer/faceleft");
+			for (int i = 0; i < 4; i++)
+			{
+				Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/red/facescar{i}");
+				Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/red/facescarleft{i}");
+			}
 		}
+
 		ResourceLoad();
 	}
 

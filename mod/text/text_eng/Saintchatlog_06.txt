@@ -10,7 +10,7 @@ BSM: You are dying, so let us move on from the past. I want to cherish you now! 
 
 BSM: Does speaking ease the pain at all?
 
-FP: It only serves as a distraction. It is not a medicine, still I will accept it as it’s the only thing I have left. Is the wet mouse with you?
+FP: It only serves as a distraction. It is not a medicine, still I will accept it as it’s the only thing I have left.<LINE>Is the wet mouse with you?
 
 BSM: Ah! Yes, they have been with me for some time now! They fell asleep not long after returning to my chamber.
 
@@ -18,7 +18,7 @@ BSM: I’ve actually been considering naming it, as foolish as it seems.
 
 FP: Ah? With our lack of company and dwindling purpose, I see nothing wrong in it.
 
-FP: There used to be one I’d refer to as The Ruffian, due to their violent nature and also as they somehow managed to obtain a lost citizen’s ID drone.
+FP: There used to be one I’d refer to as The Ruffian, due to their violent nature and also as they somehow managed<LINE>to obtain a lost citizen’s ID drone.
 
 BSM: Wow! In that case, perhaps I could find a similar name as a homage to them. If that is alright of course.
 

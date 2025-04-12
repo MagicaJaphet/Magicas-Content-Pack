@@ -8,7 +8,7 @@ FP: I received your message.
 
 BSM: Thank you for responding, this brings me great relief!
 
-BSM: Still, please do not force yourself to respond if it is bringing strain to your systems. I can only imagine what it's like in your situation.
+BSM: Still, please do not force yourself to respond if it is bringing strain to your systems. I can only imagine<LINE>what it's like in your situation.
 
 FP: It's fine.
 

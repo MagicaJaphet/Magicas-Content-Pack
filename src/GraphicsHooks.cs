@@ -292,6 +292,8 @@ namespace MagicasContentPack
 				magicaCWT.legSprite = sLeaser.sprites[4];
 				magicaCWT.faceSprite = sLeaser.sprites[9];
 
+				int spritesLength = sLeaser.sprites.Length;
+
 				if (ModOptions.CustomMechanics.Value)
 				{
 					if (ModManager.MSC)
@@ -316,6 +318,8 @@ namespace MagicasContentPack
 								];
 							magicaCWT.saintCreatureCircle = sLeaser.sprites[magicaCWT.ascensionStartSprite + 4];
 							magicaCWT.saintCreatureKarma = sLeaser.sprites[magicaCWT.ascensionStartSprite + 5];
+
+							Plugin.DebugLog("Saint mechanic sprites initated");
 						}
 					}
 				}
@@ -380,13 +384,13 @@ namespace MagicasContentPack
 						{
 							WinOrSaveHooks.HunterScarProgression = 3;
 						}
-						float scarAlpha = 1f - (((float)(WinOrSaveHooks.HunterScarProgression + 1) / 4f) * 0.6f);
+						float scarAlpha = 1f - ((((float)WinOrSaveHooks.HunterScarProgression + 1f) / 4f) * 0.6f);
 
 						magicaCWT.hunterStartSprite = sLeaser.sprites.Length;
 
 						Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 6);
 
-						sLeaser.sprites[magicaCWT.hunterStartSprite] = new("HunterFaceScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite] = new($"Red{WinOrSaveHooks.HunterScarProgression.ToString()}RightFaceA0") { alpha = scarAlpha };
 						sLeaser.sprites[magicaCWT.hunterStartSprite + 1] = new("HunterHipScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
 						sLeaser.sprites[magicaCWT.hunterStartSprite + 2] = new("HunterLegScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
 						sLeaser.sprites[magicaCWT.hunterStartSprite + 3] = new("HunterBodyScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
@@ -400,7 +404,10 @@ namespace MagicasContentPack
 						magicaCWT.hunterTailSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 4];
 						magicaCWT.hunterTailTipSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 5];
 					}
+				}
 
+				if (spritesLength != sLeaser.sprites.Length)
+				{
 					self.AddToContainer(sLeaser, rCam, null);
 				}
 			}
@@ -913,8 +920,8 @@ namespace MagicasContentPack
 									line.alpha = magicaCWT.saintCreatureCircle.alpha;
 
 									//float numOfRotations = 5f;
-									float rotationLerp = (player.activationTimer % 50f) / 50f;
-									Vector2 facePos = GetFacePos(magicaCWT.saintScarSprite ?? magicaCWT.faceSprite, i);
+									float rotationLerp = (timeStacker % 50f) / 50f;
+									Vector2 facePos = GetFacePos(magicaCWT.saintScarSprite == null? magicaCWT.faceSprite : magicaCWT.saintScarSprite, i);
 									Vector2 circlePos = Custom.RotateAroundVector(magicaCWT.saintCreatureCircle.GetPosition() + (new Vector2(magicaCWT.saintCreatureCircle.width, 0f) / 2f), magicaCWT.saintCreatureCircle.GetPosition(), Mathf.Lerp(0, 360f, (float)(i + 1) / 4f) + Mathf.Lerp(-45f, 315f, rotationLerp));
 
 									line.SetPosition(facePos);
@@ -1070,6 +1077,13 @@ namespace MagicasContentPack
 						if (magicaCWT.hunterFaceSprite != null && magicaCWT.faceSprite != null)
 						{
 							CopyOverSpriteAttributes(magicaCWT.hunterFaceSprite, magicaCWT.faceSprite);
+							string direction = magicaCWT.faceSprite.scaleX > 0f ? "Right" : "Left";
+
+							if (!magicaCWT.hunterFaceSprite.element.name.Contains(magicaCWT.faceSprite.element.name) || (!magicaCWT.hunterFaceSprite.element.name.Contains(direction)))
+							{
+								string faceSprite = magicaCWT.faceSprite.element.name.Contains("Red") ? magicaCWT.faceSprite.element.name.Substring("Red".Length) : magicaCWT.faceSprite.element.name;
+								magicaCWT.hunterFaceSprite.SetElementByName($"Red{WinOrSaveHooks.HunterScarProgression}{direction}{faceSprite}");
+							}
 						}
 						if (magicaCWT.hunterHipSprite != null && magicaCWT.hipSprite != null)
 						{

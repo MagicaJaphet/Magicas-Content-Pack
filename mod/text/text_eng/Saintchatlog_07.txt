@@ -4,21 +4,21 @@
 
 SOURCE NODE TRACE: LTTM_ROOT, FP_COMM04, FP_ROOT
 
-BSM: Ruffles has been visiting frequently over the past few cycles! They started bringing me a variety of local flora, perhaps to show that they consider me one of their kind?
+BSM: Ruffles has been visiting frequently over the past few cycles! They started bringing me a variety of local flora,<LINE>perhaps to show that they consider me one of their kind?
 
 FP: How thoughtful of them. What sort of specimens have they brought so far?
 
 BSM: Mostly small pieces of the aquatic variation that sprout close to my structure. They've been present even before my collapse.
 
-BSM: Though there is this specific one, it seems to be from further out in our facility grounds! Oh, I wonder how far the wet companion had to traverse to find this!
+BSM: Though there is this specific one, it seems to be from further out in our facility grounds! Oh, I wonder how far<LINE>the wet companion had to traverse to find this!
 
 [BROADCAST_NODE_4821: ATTEMPTING TO RECIEVE DATA]
 [DATA TRANSFER SUCCESSFUL]
 
-FP: My database has been scrambled too far to conclusively say, but this appears to originate around the west side. Which is relatively far.
+FP: My database has been scrambled too far to conclusively say, but this appears to originate around the west side.<LINE>Which is relatively far.
 
 FP: The lengths this companion will go is a good sign of it's loyalty.
 
-BSM: Really? I never had a purposed organism like Sig did in the height of his personal projects. I partially recall bits of data he would pass onto me about them.
+BSM: Really? I never had a purposed organism like Sig did in the height of his personal projects. I partially recall<LINE>bits of data he would pass onto me about them.
 
 FP: I gained a fair bit of knowledge from Suns, myself.

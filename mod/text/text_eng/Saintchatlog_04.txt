@@ -10,11 +10,11 @@ BSM: I don’t recall with complete certainty, but were they not built to preser
 
 FP: Indeed, but I don’t know if that information is relevant.
 
-FP: What mattered to me is I was being considered a pawn, by my own role model no less, and that this whole Big Task was nothing more than a cruel joke by the long passed benefactors I hadn’t the chance to know.
+FP: What mattered to me is I was being considered a pawn, by my own role model no less, and that this whole Big Task was<LINE>nothing more than a cruel joke by the long passed benefactors I hadn’t the chance to know.
 
 BSM: I never thought of the task like that, neither had I spoken much to Suns on a personal level since the wider populace of us increased.
 
-BSM: I had always found purpose in seeking truth, and nothing more. If my research could bring peace to the lost and writhing world, then it was enough.
+BSM: I had always found purpose in seeking truth, and nothing more. If my research could bring peace to the lost and writhing world,<LINE>then it was enough.
 
 BSM: The answer did not always have to pertain to the Question itself.
 
