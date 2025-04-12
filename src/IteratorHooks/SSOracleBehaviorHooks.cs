@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static MagicasContentPack.IteratorHooks.IteratorHooks;
 using UnityEngine;
 using MoreSlugcats;
 using RWCustom;
@@ -14,7 +13,7 @@ namespace MagicasContentPack.IteratorHooks
 {
 	internal class SSOracleBehaviorHooks
 	{
-		private static HalcyonPearl halcyonPearl;
+		internal static HalcyonPearl halcyonPearl;
 		private static int halcyonTimer;
 		private static ProjectionCircle halcyonCircle;
 
@@ -94,7 +93,7 @@ namespace MagicasContentPack.IteratorHooks
 
 		private static void ItemRecognitions(On.SSOracleBehavior.orig_Update orig, SSOracleBehavior self, bool eu)
 		{
-			if (ModOptions.CustomInGameCutscenes.Value && allowFpToCheckHisPearl && self.oracle.ID == Oracle.OracleID.SS)
+			if (ModOptions.CustomInGameCutscenes.Value && IteratorHooks.allowFpToCheckHisPearl && self.oracle.ID == Oracle.OracleID.SS)
 			{
 				if (halcyonPearl == null)
 				{
@@ -431,8 +430,8 @@ namespace MagicasContentPack.IteratorHooks
 
 					if (!startedConverstation)
 					{
-						owner.dialogBox.Interrupt(Translate("... Hm? What is this, little ruffian?"), 50);
-						owner.dialogBox.NewMessage(Translate("Let's see whats on it."), 40);
+						owner.dialogBox.Interrupt(Translate("ss_reactiontorm0"), 50);
+						owner.dialogBox.NewMessage(Translate("ss_reactiontorm1"), 40);
 						owner.dialogBox.NewMessage(Translate("..."), 60);
 						startedConverstation = true;
 					}
@@ -540,23 +539,23 @@ namespace MagicasContentPack.IteratorHooks
 							{
 								Plugin.DebugLog("Grabbed FP's Music pearl, increment: " + numGrabbedHalcyon);
 								startedConverstation = true;
-								owner.dialogBox.Interrupt(Translate("Ah, do you not like the sound?"), 50);
+								owner.dialogBox.Interrupt(Translate("ss_reactiontormbeinggrabbed0"), 50);
 							}
 							if (halcyon != null && !halcyon.Carried)
 							{
-								owner.dialogBox.Interrupt(Translate("Thank you, now where were we..."), 50);
+								owner.dialogBox.Interrupt(Translate("ss_reactiontormresumeplaying"), 50);
 								owner.NewAction(MagicaEnums.OracleActions.ArtiFPPearlPlay);
 								return;
 							}
 
 							if (inActionCounter == 500)
 							{
-								owner.dialogBox.NewMessage(Translate("I suppose you won't be giving that back."), 50);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontormimpatience0"), 50);
 							}
 
 							if (inActionCounter == 1000)
 							{
-								owner.dialogBox.NewMessage(Translate("If you intend on wasting my time, this is not the place for it little beast. I will be getting back to my work now."), 50);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontormimpatience1"), 50);
 								if (owner.conversation != null)
 								{
 									owner.conversation.slatedForDeletion = true;
@@ -570,23 +569,23 @@ namespace MagicasContentPack.IteratorHooks
 							{
 								Plugin.DebugLog("Grabbed FP's Music pearl, increment: " + numGrabbedHalcyon);
 								startedConverstation = true;
-								owner.dialogBox.Interrupt(Translate("... What are you doing?"), 50);
+								owner.dialogBox.Interrupt(Translate("ss_reactiontormbeinggrabbed1"), 50);
 							}
 							if (halcyon != null && !halcyon.Carried)
 							{
-								owner.dialogBox.Interrupt(Translate("Thank you, now where were we..."), 50);
+								owner.dialogBox.Interrupt(Translate("ss_reactiontormresumeplaying"), 50);
 								owner.NewAction(MagicaEnums.OracleActions.ArtiFPPearlPlay);
 								return;
 							}
 
 							if (inActionCounter == 500)
 							{
-								owner.dialogBox.NewMessage(Translate("I suppose you won't be giving that back."), 50);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontormimpatience0"), 50);
 							}
 
 							if (inActionCounter == 1000)
 							{
-								owner.dialogBox.NewMessage(Translate("If you intend on wasting my time, this is not the place for it little beast. I will be getting back to my work now."), 50);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontormimpatience1"), 50);
 								if (owner.conversation != null)
 								{
 									owner.conversation.slatedForDeletion = true;
@@ -600,7 +599,7 @@ namespace MagicasContentPack.IteratorHooks
 							{
 								Plugin.DebugLog("Grabbed FP's Music pearl, increment: " + numGrabbedHalcyon);
 								startedConverstation = true;
-								owner.dialogBox.Interrupt(Translate("I'm growing tired of your shenanijans, little ruffian."), 50);
+								owner.dialogBox.Interrupt(Translate("ss_reactiontormbeinggrabbed2"), 50);
 							}
 							if (halcyon != null && !halcyon.Carried)
 							{
@@ -611,8 +610,8 @@ namespace MagicasContentPack.IteratorHooks
 
 							if (inActionCounter == 500)
 							{
-								owner.dialogBox.NewMessage(Translate("I've had enough, get out."), 50);
-								owner.dialogBox.NewMessage(Translate("OUT."), 50);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontormimpatience2"), 50);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontormimpatience3"), 50);
 								if (owner.conversation != null)
 								{
 									owner.conversation.slatedForDeletion = true;
@@ -626,8 +625,8 @@ namespace MagicasContentPack.IteratorHooks
 							{
 								Plugin.DebugLog("Grabbed FP's Music pearl, increment: " + numGrabbedHalcyon);
 								startedConverstation = true;
-								owner.dialogBox.Interrupt(Translate("That's it, enough with your antics. If you cannot spare me the patience of allowing me some peace, then GO."), 50);
-								owner.dialogBox.NewMessage(Translate("OUT."), 50);
+								owner.dialogBox.Interrupt(Translate("ss_reactiontormbeinggrabbed3"), 50);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontormimpatience3"), 50);
 								owner.NewAction(MagicaEnums.OracleActions.ArtiFPPearlStop);
 							}
 							break;
@@ -723,7 +722,7 @@ namespace MagicasContentPack.IteratorHooks
 
 						if (!startedConverstation)
 						{
-							owner.dialogBox.Interrupt(Translate("... What do you have there?"), 10);
+							owner.dialogBox.Interrupt(Translate("ss_reactiontormnonarti"), 10);
 							startedConverstation = true;
 						}
 					}
@@ -824,15 +823,15 @@ namespace MagicasContentPack.IteratorHooks
 
 						if (inActionCounter == 1000)
 						{
-							owner.dialogBox.NewMessage(Translate("Hm..."), 50);
+							owner.dialogBox.NewMessage(Translate("ss_reactiontormmidplay"), 50);
 						}
 					}
 
 					if (inActionCounter == 1600)
 					{
 						owner.dialogBox.NewMessage(Translate("..."), 50);
-						owner.dialogBox.NewMessage(Translate("I think that is enough for now, I have a problem to focus on."), 50);
-						owner.dialogBox.NewMessage(Translate("I suppose I will say thanks. But don't get any ideas in bringing me more things, beast."), 50);
+						owner.dialogBox.NewMessage(Translate("ss_reactiontormnonartipost0"), 50);
+						owner.dialogBox.NewMessage(Translate("ss_reactiontormnonartipost1"), 50);
 					}
 
 					if (inActionCounter > 1700)
@@ -877,6 +876,7 @@ namespace MagicasContentPack.IteratorHooks
 			private bool dialogueSet;
 			private bool holdingNeuron;
 			private FadeOut fadeOut;
+			private DataPearl greenPearl;
 
 			public Vector2 GrabPos
 			{
@@ -890,7 +890,7 @@ namespace MagicasContentPack.IteratorHooks
 				}
 			}
 
-			public Vector2 holdPlayerPos
+			public Vector2 HoldPlayerPos
 			{
 				get
 				{
@@ -957,7 +957,7 @@ namespace MagicasContentPack.IteratorHooks
 
 						if (inActionCounter == 50)
 						{
-							dialogBox.Interrupt(Translate("I do not have time for you right now little creature."), 0);
+							dialogBox.Interrupt(Translate("ss_reactiontoreddyingintro"), 0);
 						}
 
 						if (inActionCounter > 130)
@@ -976,21 +976,16 @@ namespace MagicasContentPack.IteratorHooks
 
 						if (inActionCounter > 250 && foundPlayer.objectInStomach == null)
 						{
-
-							for (int i = 0; i < oracle.room.physicalObjects.Length; i++)
+							for (int i = 0; i < oracle.room.updateList.Count; i++)
 							{
-								for (int j = 0; j < oracle.room.physicalObjects[i].Count; j++)
+								UpdatableAndDeletable obj = oracle.room.updateList[i];
+								if (obj is NSHSwarmer swarmer)
 								{
-									if (oracle.room.physicalObjects[i][j].abstractPhysicalObject.type == AbstractPhysicalObject.AbstractObjectType.NSHSwarmer)
-									{
-										greenNeuron = oracle.room.physicalObjects[i][j] as NSHSwarmer;
-										break;
-									}
+									greenNeuron = swarmer;
 								}
-
-								if (greenNeuron != null)
+								if (obj is DataPearl pearl && pearl.AbstractPearl.dataPearlType == DataPearl.AbstractDataPearl.DataPearlType.Red_stomach)
 								{
-									break;
+									greenPearl = pearl;
 								}
 							}
 
@@ -1019,84 +1014,93 @@ namespace MagicasContentPack.IteratorHooks
 					greenNeuron.direction = Custom.PerpendicularVector(oracle.firstChunk.pos, greenNeuron.firstChunk.pos);
 				}
 
+				if (greenPearl != null)
+				{
+					greenPearl.firstChunk.vel = Vector2.zero;
+
+					float heightVariance = Mathf.Lerp(10f, -10f, Mathf.Sin(inActionCounter / 30f));
+					greenPearl.firstChunk.pos = Vector2.Lerp(greenPearl.firstChunk.pos, oracle.firstChunk.pos + new Vector2(20f, heightVariance), 0.05f);
+				}
+
 				if (phase == RedPhases.START)
 				{
-					if (oracle.oracleBehavior is SSOracleBehavior oracleBehavior)
+					owner.getToWorking = 0f;
+					owner.movementBehavior = SSOracleBehavior.MovementBehavior.Talk;
+
+					if (greenNeuron != null && !holdingNeuron)
 					{
-						oracleBehavior.getToWorking = 0f;
-						oracleBehavior.movementBehavior = SSOracleBehavior.MovementBehavior.Talk;
-
-						if (greenNeuron != null && !holdingNeuron)
+						greenNeuron.storyFly = true;
+						greenNeuron.storyFlyTarget = GrabPos;
+						if (Custom.DistLess(GrabPos, greenNeuron.firstChunk.pos, 10f))
 						{
-							greenNeuron.storyFly = true;
-							greenNeuron.storyFlyTarget = GrabPos;
-							if (Custom.DistLess(GrabPos, greenNeuron.firstChunk.pos, 10f))
-							{
-								holdingNeuron = true;
-								greenNeuron.storyFly = false;
-							}
+							holdingNeuron = true;
+							greenNeuron.storyFly = false;
+						}
+					}
+
+					if (dialogueSet && owner.dialogBox.messages.Count == 0)
+					{
+						phase = RedPhases.TALK;
+						return;
+					}
+
+					if (owner.dialogBox.messages.Count == 0 && !dialogueSet)
+					{
+						dialogueSet = true;
+
+						if (oracle.room.game.GetStorySession.saveState.deathPersistentSaveData.pebblesHasIncreasedRedsKarmaCap)
+						{
+							owner.dialogBox.NewMessage(Translate("ss_reactiontoreddying_extracycles"), 30);
+						}
+						else
+						{
+							owner.dialogBox.NewMessage(Translate("ss_reactiontoreddying_noextracycles"), 30);
 						}
 
-						if (dialogueSet && oracleBehavior.dialogBox.messages.Count == 0)
+						if (greenNeuron != null)
 						{
-							phase = RedPhases.TALK;
-							return;
-						}
-
-						if (oracleBehavior.dialogBox.messages.Count == 0 && !dialogueSet)
-						{
-							dialogueSet = true;
-
-							if (oracle.room.game.GetStorySession.saveState.deathPersistentSaveData.pebblesHasIncreasedRedsKarmaCap)
+							if (oracle.room.game.GetStorySession.saveState.miscWorldSaveData.pebblesSeenGreenNeuron)
 							{
-								oracleBehavior.dialogBox.NewMessage(Translate("What brings you back? You've wasted the extra time I've provided you."), 30);
+								owner.dialogBox.NewMessage(Translate("ss_reactiontoreddying_seengreenneuron"), 20);
 							}
 							else
 							{
-								oracleBehavior.dialogBox.NewMessage(Translate("Why do you come here in such a terrible state? Do you believe I have something to provide you?"), 30);
-							}
-
-							if (greenNeuron != null)
-							{
-								if (oracle.room.game.GetStorySession.saveState.miscWorldSaveData.pebblesSeenGreenNeuron)
-								{
-									oracleBehavior.dialogBox.NewMessage(Translate("And you've brought back that which you were meant to deliver to Moon."), 20);
-								}
-								else
-								{
-									oracleBehavior.dialogBox.NewMessage(Translate("And it seems you've brought something along with you that is important to your destination."), 20);
-									oracle.room.game.GetStorySession.saveState.miscWorldSaveData.pebblesSeenGreenNeuron = true;
-								}
+								owner.dialogBox.NewMessage(Translate("ss_reactiontoreddying_withgreenneuron"), 20);
 							}
 						}
 
-						if (owner.nextPos != oracle.room.MiddleOfTile(10, 22))
+						if (greenPearl != null && !SaveValues.fpSeenHunterPearl)
 						{
-							owner.SetNewDestination(oracle.room.MiddleOfTile(10, 22));
+							owner.dialogBox.NewMessage(Translate("ss_reactiontoreddying_withpearl"), 20);
+						}
+					}
+
+					if (owner.nextPos != oracle.room.MiddleOfTile(10, 22))
+					{
+						owner.SetNewDestination(oracle.room.MiddleOfTile(10, 22));
+					}
+
+					if (foundPlayer != null)
+					{
+						foundPlayer.mainBodyChunk.vel *= Custom.LerpMap(inActionCounter, 0f, 30f, 1f, 0.95f);
+						foundPlayer.bodyChunks[1].vel *= Custom.LerpMap(inActionCounter, 0f, 30f, 1f, 0.95f);
+						foundPlayer.mainBodyChunk.vel += Custom.DirVec(foundPlayer.mainBodyChunk.pos, HoldPlayerPos) * Mathf.Lerp(0.5f, Custom.LerpMap(Vector2.Distance(foundPlayer.mainBodyChunk.pos, HoldPlayerPos), 30f, 150f, 2.5f, 7f), oracle.room.gravity) * Mathf.InverseLerp(0f, 10f, inActionCounter) * Mathf.InverseLerp(0f, 30f, Vector2.Distance(player.mainBodyChunk.pos, HoldPlayerPos));
+
+						if (projectionCircle == null)
+						{
+							projectionCircle = new ProjectionCircle(foundPlayer.bodyChunks[0].pos, 0f, 3f);
+							oracle.room.AddObject(projectionCircle);
+						}
+						else
+						{
+							float radiusSize = Mathf.Lerp(0f, 1f, (inActionCounter - 300f) / 150f);
+							projectionCircle.radius = 12f * Mathf.Clamp(radiusSize * 2f, 0f, 1f);
+							projectionCircle.pos = foundPlayer.bodyChunks[0].pos;
 						}
 
-						if (foundPlayer != null)
+						if (UnityEngine.Random.value > 0.9f)
 						{
-							foundPlayer.mainBodyChunk.vel *= Custom.LerpMap(inActionCounter, 0f, 30f, 1f, 0.95f);
-							foundPlayer.bodyChunks[1].vel *= Custom.LerpMap(inActionCounter, 0f, 30f, 1f, 0.95f);
-							foundPlayer.mainBodyChunk.vel += Custom.DirVec(foundPlayer.mainBodyChunk.pos, holdPlayerPos) * Mathf.Lerp(0.5f, Custom.LerpMap(Vector2.Distance(foundPlayer.mainBodyChunk.pos, holdPlayerPos), 30f, 150f, 2.5f, 7f), oracle.room.gravity) * Mathf.InverseLerp(0f, 10f, inActionCounter) * Mathf.InverseLerp(0f, 30f, Vector2.Distance(player.mainBodyChunk.pos, holdPlayerPos));
-
-							if (projectionCircle == null)
-							{
-								projectionCircle = new ProjectionCircle(foundPlayer.bodyChunks[0].pos, 0f, 3f);
-								oracle.room.AddObject(projectionCircle);
-							}
-							else
-							{
-								float radiusSize = Mathf.Lerp(0f, 1f, (inActionCounter - 300f) / 150f);
-								projectionCircle.radius = 12f * Mathf.Clamp(radiusSize * 2f, 0f, 1f);
-								projectionCircle.pos = foundPlayer.bodyChunks[0].pos;
-							}
-
-							if (UnityEngine.Random.value > 0.9f)
-							{
-								foundPlayer.Stun((int)(UnityEngine.Random.value * 5f));
-							}
+							foundPlayer.Stun((int)(UnityEngine.Random.value * 5f));
 						}
 					}
 				}
@@ -1111,9 +1115,21 @@ namespace MagicasContentPack.IteratorHooks
 
 					if (owner.pathProgression == 1f && owner.conversation == null)
 					{
+						if (greenPearl != null)
+						{
+							owner.dialogBox.NewMessage(owner.Translate("..."), 60);
+							owner.dialogBox.NewMessage(owner.Translate("ss_reactiontoreddying_hunterpearl0"), 60);
+							owner.dialogBox.NewMessage(owner.Translate("ss_reactiontoreddying_hunterpearl1"), 60);
+						}
+
 						if (greenNeuron != null && !oracle.room.game.GetStorySession.saveState.miscWorldSaveData.pebblesSeenGreenNeuron)
 						{
+							if (greenPearl != null)
+							{
+								owner.dialogBox.NewMessage(owner.Translate("ss_reactiontoreddying_hunterpearlextra"), 60);
+							}
 							owner.InitateConversation(MagicaEnums.ConversationIDs.GreenNeuronTooLate, this);
+							oracle.room.game.GetStorySession.saveState.miscWorldSaveData.pebblesSeenGreenNeuron = true;
 						}
 						else
 						{
@@ -1133,7 +1149,7 @@ namespace MagicasContentPack.IteratorHooks
 							projectionCircle = null;
 						}
 
-						moonHugRed = true;
+						IteratorHooks.moonHugRed = true;
 						phase = RedPhases.END;
 						circleTimer = inActionCounter;
 					}
@@ -1142,7 +1158,7 @@ namespace MagicasContentPack.IteratorHooks
 					{
 						foundPlayer.mainBodyChunk.vel *= Custom.LerpMap(inActionCounter, 0f, 30f, 1f, 0.95f);
 						foundPlayer.bodyChunks[1].vel *= Custom.LerpMap(inActionCounter, 0f, 30f, 1f, 0.95f);
-						foundPlayer.mainBodyChunk.vel += Custom.DirVec(foundPlayer.mainBodyChunk.pos, holdPlayerPos) * Mathf.Lerp(0.5f, Custom.LerpMap(Vector2.Distance(foundPlayer.mainBodyChunk.pos, holdPlayerPos), 30f, 150f, 2.5f, 7f), oracle.room.gravity) * Mathf.InverseLerp(0f, 10f, inActionCounter) * Mathf.InverseLerp(0f, 30f, Vector2.Distance(player.mainBodyChunk.pos, holdPlayerPos));
+						foundPlayer.mainBodyChunk.vel += Custom.DirVec(foundPlayer.mainBodyChunk.pos, HoldPlayerPos) * Mathf.Lerp(0.5f, Custom.LerpMap(Vector2.Distance(foundPlayer.mainBodyChunk.pos, HoldPlayerPos), 30f, 150f, 2.5f, 7f), oracle.room.gravity) * Mathf.InverseLerp(0f, 10f, inActionCounter) * Mathf.InverseLerp(0f, 30f, Vector2.Distance(player.mainBodyChunk.pos, HoldPlayerPos));
 
 						if (UnityEngine.Random.value > 0.95f)
 						{
@@ -1168,7 +1184,7 @@ namespace MagicasContentPack.IteratorHooks
 						if (Custom.DistLess(foundPlayer.firstChunk.pos, greenNeuron.firstChunk.pos, 20f) && !foundPlayer.grasps.Any(x => x != null && x.grabbed == greenNeuron))
 						{
 							greenNeuron.storyFly = false;
-							foundPlayer.SlugcatGrab(greenNeuron, 1);
+							foundPlayer.SlugcatGrab(greenNeuron, foundPlayer.flipDirection == 1f ? 1 : 0);
 							foundPlayer.controller = new Player.NullController();
 						}
 						else if (!foundPlayer.grasps.Any(x => x != null && x.grabbed == greenNeuron))
@@ -1218,7 +1234,7 @@ namespace MagicasContentPack.IteratorHooks
 					if (fadeOut != null && fadeOut.fade == 1f)
 					{
 						foundPlayer.abstractCreature.world.game.GameOver(null);
-						moonHugRed = false;
+						IteratorHooks.moonHugRed = false;
 					}
 				}
 			}

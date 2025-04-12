@@ -184,7 +184,7 @@ namespace MagicasContentPack.IteratorHooks
 		{
 			if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && PlayerHooks.CheckForSaintAscension(self.player) && (Custom.Dist(self.oracle.bodyChunks[0].pos, new Vector2(self.player.mainBodyChunk.pos.x + self.player.burstX, self.player.mainBodyChunk.pos.y + self.player.burstY + 60f)) < 30f || ModOptions.CustomMechanics.Value && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(self.player, out var saint) && saint.ascendTimer > 0f) && !IteratorHooks.hasBeenTouchedBySaintsHalo)
 			{
-				self.dialogBox.Interrupt("What are you doing...?", 80);
+				self.dialogBox.Interrupt(self.Translate("sl_reactiontokarma"), 80);
 				IteratorHooks.hasBeenTouchedBySaintsHalo = true;
 				if (self.currentConversation != null)
 				{

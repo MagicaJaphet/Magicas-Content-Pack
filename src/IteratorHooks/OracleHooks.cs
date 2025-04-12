@@ -102,6 +102,7 @@ namespace MagicasContentPack.IteratorHooks
 			if (self.ID == Oracle.OracleID.SS && self.room.world.name != "RM")
 			{
 				MagicaSaveState.GetKey(MagicaSaveState.anySave, nameof(SaveValues.WhoShowedFPThePearl), out SaveValues.WhoShowedFPThePearl);
+				SSOracleBehaviorHooks.halcyonPearl = null;
 
 				int halcyonNum = 0;
 				for (int i = 0; i < self.room.updateList.Count; i++)
@@ -121,7 +122,7 @@ namespace MagicasContentPack.IteratorHooks
 							continue;
 						}
 
-						if (self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear || !ModOptions.CustomInGameCutscenes.Value || SSOracleBehaviorHooks.CheckIfWhoTookThePearlIsBeforeCurrent(self.room.game.TimelinePoint))
+						if (self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear || !ModOptions.CustomInGameCutscenes.Value || string.IsNullOrEmpty(SaveValues.WhoShowedFPThePearl) || SSOracleBehaviorHooks.CheckIfWhoTookThePearlIsBeforeCurrent(self.room.game.TimelinePoint))
 						{
 							Plugin.DebugLog("Invalid Halcyon found, removing... " + pearl.abstractPhysicalObject.ID);
 							if (self.oracleBehavior is SSOracleBehavior behav && behav.readDataPearlOrbits.Contains(pearl.AbstractPearl))

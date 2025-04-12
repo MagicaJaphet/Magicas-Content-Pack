@@ -39,10 +39,10 @@ namespace MagicasContentPack.IteratorHooks
 			if (SaveValues.fpHasSeenMonkAscension)
 			{
 				self.dialogBox.NewMessage(self.Translate("..."), 60);
-				self.dialogBox.NewMessage(self.Translate("...Little... green?"), 60);
-				self.dialogBox.NewMessage(self.Translate("...What is... this... energy?"), 80);
-				self.dialogBox.NewMessage(self.Translate("...It is... warm..."), 60);
-				self.dialogBox.NewMessage(self.Translate("...Thank... you..."), 80);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontokarma0"), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontokarma1"), 80);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontokarma2"), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontokarma3"), 80);
 				return;
 			}
 
@@ -50,17 +50,17 @@ namespace MagicasContentPack.IteratorHooks
 			{
 				SaveValues.CLSeenMoonPearl = true;
 
-				self.dialogBox.NewMessage(self.Translate("...What is..."), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl0"), 60);
 				self.dialogBox.NewMessage(self.Translate("..."), 120);
-				self.dialogBox.NewMessage(self.Translate("...This sphere..."), 60);
-				self.dialogBox.NewMessage(self.Translate("...It is... odd."), 60);
-				self.dialogBox.NewMessage(self.Translate("...Why does... Give me..."), 60);
-				self.dialogBox.NewMessage(self.Translate("...Lost feeling..."), 90);
-				self.dialogBox.NewMessage(self.Translate("...Where... got...?"), 60);
-				self.dialogBox.NewMessage(self.Translate("...It is... warm... sad..."), 90);
-				self.dialogBox.NewMessage(self.Translate("...No more... lonely..."), 120);
-				self.dialogBox.NewMessage(self.Translate("...Feel... loved..."), 60);
-				self.dialogBox.NewMessage(self.Translate("...Thank you."), 20);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl1"), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl2"), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl3"), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl4"), 90);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl5"), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl6"), 90);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl7"), 120);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl8"), 60);
+				self.dialogBox.NewMessage(self.Translate("cl_reactiontopearl9"), 20);
 				return;
 			}
 

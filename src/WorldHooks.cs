@@ -77,7 +77,7 @@ namespace MagicasContentPack
 						self.player.controller = null;
 					}
 					RainWorldGame.ForceSaveNewDenLocation(self.room.game, "GW_A24", true);
-					self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("Hold pickup on combustable objects to craft explosives, some items can be swallowed at the cost of food to transform them."), 20, 700, true, true);
+					self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("articustomtutorial"), 20, 700, true, true);
 					self.Destroy();
 					return;
 				}

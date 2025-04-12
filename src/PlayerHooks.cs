@@ -491,10 +491,10 @@ namespace MagicasContentPack
 						self.DeactivateAscension();
 					}
 
-					if (isSaint && self.AI == null && self.room.game.session is StoryGameSession && !(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.KarmicBurstMessage)
+					if (isSaint && self.AI == null && self.room.game.session is StoryGameSession session2 && !session2.saveState.deathPersistentSaveData.KarmicBurstMessage)
 					{
 						(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.KarmicBurstMessage = true;
-						self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("Hold pickup and press left or right to change targets, hold throw to perform an ascension."), 80, 800, true, true);
+						self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("saintcustomtutorial0"), 80, 800, true, true);
 					}
 
 					self.gravity = 0f;
