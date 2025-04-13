@@ -57,7 +57,7 @@ namespace MagicasContentPack.IteratorHooks
 			orig(self, oracle);
 
 			MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.MoonOverWrotePearl), out SaveValues.MoonOverWrotePearl);
-			MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.lttmHasSeenMonkAscension), out SaveValues.lttmHasSeenMonkAscension);
+			MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.lttmSawAscensionCycle), out SaveValues.lttmSawAscensionCycle);
 		}
 
 		private static void SLOracleBehavior_Update(On.SLOracleBehavior.orig_Update orig, SLOracleBehavior self, bool eu)
@@ -111,7 +111,7 @@ namespace MagicasContentPack.IteratorHooks
 
 		private static void SLOracleBehaviorHasMark_InitateConversation(On.SLOracleBehaviorHasMark.orig_InitateConversation orig, SLOracleBehaviorHasMark self)
 		{
-			if (SaveValues.lttmHasSeenMonkAscension)
+			if (self.oracle.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && SaveValues.lttmSawAscensionCycle == self.oracle.room.game.GetStorySession.saveState.cycleNumber)
 			{
 				self.currentConversation?.Destroy();
 				self.currentConversation = new SLOracleBehaviorHasMark.MoonConversation(MagicaEnums.ConversationIDs.SaintLTTMMonkAscension, self, SLOracleBehaviorHasMark.MiscItemType.NA);
@@ -192,9 +192,9 @@ namespace MagicasContentPack.IteratorHooks
 					self.resumeConversationAfterCurrentDialoge = true;
 				}
 			}
-			if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && PlayerHooks.CheckForSaintAscension(self.player) && !SaveValues.lttmHasSeenMonkAscension)
+			if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && PlayerHooks.CheckForSaintAscension(self.player) && SaveValues.lttmSawAscensionCycle == -1)
 			{
-				SaveValues.lttmHasSeenMonkAscension = true;
+				SaveValues.lttmSawAscensionCycle = self.oracle.room.game.GetStorySession.saveState.cycleNumber;
 				self.InitateConversation();
 			}
 

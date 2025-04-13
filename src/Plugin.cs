@@ -180,6 +180,11 @@ public class Plugin : BaseUnityPlugin
 		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/artificer/scarlegs");
 
 		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/red/hunterscars");
+		for (int i = 0; i < 4; i++)
+		{
+			Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/red/facescar{i}");
+			Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/red/facescarleft{i}");
+		}
 
 		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/saint/saintscar");
 		Futile.atlasManager.LoadAtlas(modPath + "/atlases/slugcats/saint/saintscarfatique");
@@ -212,11 +217,6 @@ public class Plugin : BaseUnityPlugin
 				}
 			}
 			Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/artificer/faceleft");
-			for (int i = 0; i < 4; i++)
-			{
-				Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/red/facescar{i}");
-				Futile.atlasManager.LoadAtlas($"{modPath}/atlases/slugcats/red/facescarleft{i}");
-			}
 		}
 
 		ResourceLoad();

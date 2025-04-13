@@ -44,7 +44,7 @@ namespace MagicasContentPack
 				On.PlayerProgression.WipeSaveState += WipeSlugcatData;
 				On.PlayerProgression.WipeAll += WipeAllData;
 
-				On.PlayerProgression.LoadProgression += PlayerProgression_LoadProgression;
+				On.SaveState.LoadGame += SaveState_LoadGame;
 
 				Plugin.HookSucceed();
 			}
@@ -53,6 +53,7 @@ namespace MagicasContentPack
 				Plugin.HookFail(ex);
 			}
 		}
+
 
 		private static bool SaveSlugcatData(On.PlayerProgression.orig_SaveWorldStateAndProgression orig, PlayerProgression self, bool malnourished)
 		{
@@ -64,6 +65,9 @@ namespace MagicasContentPack
 		private static void WipeSlugcatData(On.PlayerProgression.orig_WipeSaveState orig, PlayerProgression self, SlugcatStats.Name saveStateNumber)
 		{
 			MagicaSaveState.WipeSave(saveStateNumber.value);
+
+			if (saveStateNumber == SlugcatStats.Name.Red)
+				HunterScarProgression = 3;
 
 			orig(self, saveStateNumber);
 		}
@@ -330,18 +334,20 @@ namespace MagicasContentPack
 			return orig(session);
 		}
 
-		private static void PlayerProgression_LoadProgression(On.PlayerProgression.orig_LoadProgression orig, PlayerProgression self)
+		private static void SaveState_LoadGame(On.SaveState.orig_LoadGame orig, SaveState self, string str, RainWorldGame game)
 		{
-			orig(self);
+			orig(self, str, game);
 
-			if (ModManager.MSC && self.PlayingAsSlugcat == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
-				ArtiKilledScavKing = self.miscProgressionData.artificerEndingID == 1 && self.miscProgressionData.beaten_Artificer;
+			if (ModManager.MSC && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+				ArtiKilledScavKing = self.progression.miscProgressionData.artificerEndingID == 1 && self.progression.miscProgressionData.beaten_Artificer;
 
-			if (ModManager.MSC && self.PlayingAsSlugcat == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-				SpearAchievedCommsEnd = self.miscProgressionData.beaten_SpearMaster_AltEnd;
+			if (ModManager.MSC && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+				SpearAchievedCommsEnd = self.progression.miscProgressionData.beaten_SpearMaster_AltEnd;
 
-			if (self.PlayingAsSlugcat == SlugcatStats.Name.Red && self.currentSaveState != null)
-				HunterScarProgression = Mathf.RoundToInt(Mathf.Lerp(0f, 3f, (float)(self.currentSaveState.cycleNumber) / (float)RedsIllness.RedsCycles(self.currentSaveState.redExtraCycles)));
+			if (game.StoryCharacter == SlugcatStats.Name.Red)
+				HunterScarProgression = Mathf.RoundToInt(Mathf.Lerp(3f, 0f, ((float)self.cycleNumber) / ((float)RedsIllness.RedsCycles(self.redExtraCycles))));
+
+			Plugin.DebugLog($"Hunter scar progression: {Mathf.RoundToInt(Mathf.Lerp(3f, 0f, ((float)self.cycleNumber) / ((float)RedsIllness.RedsCycles(self.redExtraCycles))))}");
 		}
 
 		internal static void BeatGameMode(RainWorldGame game)

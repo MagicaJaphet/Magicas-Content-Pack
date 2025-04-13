@@ -292,10 +292,13 @@ namespace MagicasContentPack
 						if (reset)
 						{
 							SaveValues.HunterOracleID = default;
+							SaveValues.fpSeenHunterPearl = default;
 						}
 
 						if (!string.IsNullOrEmpty(SaveValues.HunterOracleID))
 							values.Add(nameof(SaveValues.HunterOracleID), SaveValues.HunterOracleID);
+						if (SaveValues.fpSeenHunterPearl)
+							values.Add(nameof(SaveValues.fpSeenHunterPearl), SaveValues.fpSeenHunterPearl);
 						break;
 
 					case var _ when slugname == MoreSlugcatsEnums.SlugcatStatsName.Gourmand.value:
@@ -313,16 +316,16 @@ namespace MagicasContentPack
 					case var _ when slugname == MoreSlugcatsEnums.SlugcatStatsName.Saint.value:
 						if (reset)
 						{
-							SaveValues.fpHasSeenMonkAscension = default;
-							SaveValues.lttmHasSeenMonkAscension = default;
+							SaveValues.fpSawAscensionCycle = -1;
+							SaveValues.lttmSawAscensionCycle = -1;
 							SaveValues.CLSeenMoonPearl = default;
 							SaveValues.MoonOverWrotePearl = default;
 						}
 
-						if (SaveValues.fpHasSeenMonkAscension)
-							values.Add(nameof(SaveValues.fpHasSeenMonkAscension), SaveValues.fpHasSeenMonkAscension);
-						if (SaveValues.lttmHasSeenMonkAscension)
-							values.Add(nameof(SaveValues.lttmHasSeenMonkAscension), SaveValues.lttmHasSeenMonkAscension);
+						if (SaveValues.fpSawAscensionCycle != -1)
+							values.Add(nameof(SaveValues.fpSawAscensionCycle), SaveValues.fpSawAscensionCycle);
+						if (SaveValues.lttmSawAscensionCycle != -1)
+							values.Add(nameof(SaveValues.lttmSawAscensionCycle), SaveValues.lttmSawAscensionCycle);
 						if (SaveValues.CLSeenMoonPearl)
 							values.Add(nameof(SaveValues.CLSeenMoonPearl), SaveValues.CLSeenMoonPearl);
 						if (SaveValues.MoonOverWrotePearl)
@@ -350,11 +353,11 @@ namespace MagicasContentPack
 		internal static int scavsKilledThisCycle = 0;
 
 		public static string HunterOracleID;
+		public static bool fpSeenHunterPearl;
 
-		public static bool fpHasSeenMonkAscension;
+		public static int fpSawAscensionCycle = -1;
+		public static int lttmSawAscensionCycle = -1;
 		public static bool CLSeenMoonPearl;
 		public static bool MoonOverWrotePearl;
-		public static bool lttmHasSeenMonkAscension;
-		internal static bool fpSeenHunterPearl;
 	}
 }

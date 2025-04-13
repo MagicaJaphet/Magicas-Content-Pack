@@ -31,12 +31,12 @@ namespace MagicasContentPack.IteratorHooks
 		{
 			orig(self, oracle);
 			MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.CLSeenMoonPearl), out SaveValues.CLSeenMoonPearl);
-			MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.fpHasSeenMonkAscension), out SaveValues.fpHasSeenMonkAscension);
+			MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.fpSawAscensionCycle), out SaveValues.fpSawAscensionCycle);
 		}
 
 		private static void CLOracleBehavior_InitateConversation(On.MoreSlugcats.CLOracleBehavior.orig_InitateConversation orig, CLOracleBehavior self)
 		{
-			if (SaveValues.fpHasSeenMonkAscension)
+			if (SaveValues.fpSawAscensionCycle == self.oracle.room.game.GetStorySession.saveState.cycleNumber)
 			{
 				self.dialogBox.NewMessage(self.Translate("..."), 60);
 				self.dialogBox.NewMessage(self.Translate("cl_reactiontokarma0"), 60);
@@ -69,9 +69,9 @@ namespace MagicasContentPack.IteratorHooks
 
 		private static void CLOracleBehavior_Update(On.MoreSlugcats.CLOracleBehavior.orig_Update orig, CLOracleBehavior self, bool eu)
 		{
-			if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && PlayerHooks.CheckForSaintAscension(self.player) && !SaveValues.fpHasSeenMonkAscension)
+			if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && PlayerHooks.CheckForSaintAscension(self.player) && SaveValues.fpSawAscensionCycle == -1)
 			{
-				SaveValues.fpHasSeenMonkAscension = true;
+				SaveValues.fpSawAscensionCycle = self.oracle.room.game.GetStorySession.saveState.cycleNumber;
 				self.InitateConversation();
 			}
 

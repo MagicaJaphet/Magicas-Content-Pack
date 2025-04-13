@@ -380,7 +380,7 @@ namespace MagicasContentPack
 
 					if (self.player.SlugCatClass == SlugcatStats.Name.Red)
 					{
-						if (rCam.room != null && rCam.room.game != null && rCam.room.game.IsArenaSession)
+						if (rCam.room?.game != null && rCam.room.game.IsArenaSession)
 						{
 							WinOrSaveHooks.HunterScarProgression = 3;
 						}
@@ -390,12 +390,13 @@ namespace MagicasContentPack
 
 						Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 6);
 
-						sLeaser.sprites[magicaCWT.hunterStartSprite] = new($"Red{WinOrSaveHooks.HunterScarProgression.ToString()}RightFaceA0") { alpha = scarAlpha };
-						sLeaser.sprites[magicaCWT.hunterStartSprite + 1] = new("HunterHipScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-						sLeaser.sprites[magicaCWT.hunterStartSprite + 2] = new("HunterLegScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-						sLeaser.sprites[magicaCWT.hunterStartSprite + 3] = new("HunterBodyScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-						sLeaser.sprites[magicaCWT.hunterStartSprite + 4] = new("HunterTailScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
-						sLeaser.sprites[magicaCWT.hunterStartSprite + 5] = new("HunterTipScar" + WinOrSaveHooks.HunterScarProgression.ToString()) { alpha = scarAlpha };
+						int scarProg = WinOrSaveHooks.HunterScarProgression;
+						sLeaser.sprites[magicaCWT.hunterStartSprite] = new($"Red{scarProg}RightFaceA0") { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 1] = new($"HunterHipScar{scarProg}") { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 2] = new($"HunterLegScar{scarProg}") { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 3] = new($"HunterBodyScar{scarProg}") { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 4] = new($"HunterTailScar{scarProg}") { alpha = scarAlpha };
+						sLeaser.sprites[magicaCWT.hunterStartSprite + 5] = new($"HunterTipScar{scarProg}") { alpha = scarAlpha };
 
 						magicaCWT.hunterFaceSprite = sLeaser.sprites[magicaCWT.hunterStartSprite];
 						magicaCWT.hunterHipSprite = sLeaser.sprites[magicaCWT.hunterStartSprite + 1];

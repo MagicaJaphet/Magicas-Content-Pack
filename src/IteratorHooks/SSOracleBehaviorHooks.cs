@@ -1120,6 +1120,7 @@ namespace MagicasContentPack.IteratorHooks
 							owner.dialogBox.NewMessage(owner.Translate("..."), 60);
 							owner.dialogBox.NewMessage(owner.Translate("ss_reactiontoreddying_hunterpearl0"), 60);
 							owner.dialogBox.NewMessage(owner.Translate("ss_reactiontoreddying_hunterpearl1"), 60);
+							SaveValues.fpSeenHunterPearl = true;
 						}
 
 						if (greenNeuron != null && !oracle.room.game.GetStorySession.saveState.miscWorldSaveData.pebblesSeenGreenNeuron)
