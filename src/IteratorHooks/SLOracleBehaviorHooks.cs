@@ -138,7 +138,7 @@ namespace MagicasContentPack.IteratorHooks
 		{
 			orig(self);
 
-			if (self.oracle.room.world.game.GetStorySession != null && self.oracle.room.world.game.GetStorySession.saveState.miscWorldSaveData.moonRevived && !WinOrSaveHooks.redEndingProcedure && self.player != null && self.oracle.room.game.IsStorySession && self.oracle.room.game.GetStorySession.saveStateNumber == SlugcatStats.Name.Red && self.State.neuronsLeft == 5 && self.oracle.room.game.GetStorySession.RedIsOutOfCycles)
+			if (self.oracle.room.world.game.GetStorySession != null && !WinOrSaveHooks.redEndingProcedure && self.player != null && self.oracle.room.game.IsStorySession && self.oracle.room.game.GetStorySession.saveStateNumber == SlugcatStats.Name.Red && self.oracle.room.game.GetStorySession.RedIsOutOfCycles)
 			{
 				Plugin.DebugLog("Hunter ending with Moon started");
 				self.oracle.room.AddObject(new RedDyingEnding(self.oracle));
@@ -243,14 +243,14 @@ namespace MagicasContentPack.IteratorHooks
 
 				if (phase == RedPhases.WAIT && oracle.oracleBehavior.player.room == oracle.room)
 				{
-					if (oracle != null && oracle.ID == Oracle.OracleID.SL && oracle.Consious)
+					if (oracle != null && oracle.ID == Oracle.OracleID.SL)
 					{
 						if (foundPlayer.firstChunk.pos.x > 800f)
 						{
 							foundPlayer.controller = new RedEndingController(this);
 							timer = 0;
 						}
-						if (foundPlayer.firstChunk.pos.x > 1195 || timer > 600 && oracle.oracleBehavior is SLOracleBehaviorHasMark moon && moon.currentConversation != null)
+						if (foundPlayer.firstChunk.pos.x > 1195 || (timer > 600 && oracle.Consious && oracle.oracleBehavior is SLOracleBehaviorHasMark moon && moon.currentConversation != null))
 						{
 							phase = RedPhases.START;
 							timer = 0;
@@ -260,7 +260,7 @@ namespace MagicasContentPack.IteratorHooks
 
 				if (phase == RedPhases.START)
 				{
-					if (oracle != null && oracle.ID == Oracle.OracleID.SL && oracle.Consious)
+					if (oracle != null && oracle.ID == Oracle.OracleID.SL)
 					{
 						if (timer == 30)
 						{
@@ -280,7 +280,7 @@ namespace MagicasContentPack.IteratorHooks
 							foundPlayer.Stun(500);
 						}
 
-						if (timer > 1600)
+						if ((oracle.Consious && timer > 1600) || (!oracle.Consious && timer > 500))
 						{
 							if (fadeOut == null && oracle.room != null)
 							{
@@ -298,7 +298,7 @@ namespace MagicasContentPack.IteratorHooks
 
 				if (phase == RedPhases.END)
 				{
-					if (oracle.oracleBehavior is SLOracleBehaviorHasMark moon && moon.currentConversation == null)
+					if ((oracle.Consious && oracle.oracleBehavior is SLOracleBehaviorHasMark moon && moon.currentConversation == null) || !oracle.Consious)
 					{
 						foundPlayer.abstractCreature.world.game.GameOver(null);
 						fadeOut.Destroy();

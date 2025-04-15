@@ -1,5 +1,7 @@
-Grime: 0.6288044
-Palette: 48
-EffectColorA: 2
-EffectColorB: 2
-Effects: ReplaceEffectColorB-0.3015966-0-0-Color-0-0-0, Moth-0.09279865-0-0, Contrast-0.03093289-258.3386-0,
+DangerType: FloodAndRain
+Clouds: 0.04639966
+Grime: 0.358141
+Palette: 6969
+EffectColorA: 13
+EffectColorB: 18
+Effects: ModifyEffectColorB-0,0.530933,0.2757358-20-20, SkyBloom-0.3040082-12.21352-115.375, Moth-0.02319966-284.702-22.88541, RockFlea-0.05413254-284.7021-75.53333, FireFlies-0.02319933-281.8563-125.3354, 
