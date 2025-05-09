@@ -320,6 +320,7 @@ namespace MagicasContentPack
 							SaveValues.lttmSawAscensionCycle = -1;
 							SaveValues.CLSeenMoonPearl = default;
 							SaveValues.MoonOverWrotePearl = default;
+							SaveValues.SaintWarmthMechanicTutorial = default;
 						}
 
 						if (SaveValues.fpSawAscensionCycle != -1)
@@ -330,6 +331,8 @@ namespace MagicasContentPack
 							values.Add(nameof(SaveValues.CLSeenMoonPearl), SaveValues.CLSeenMoonPearl);
 						if (SaveValues.MoonOverWrotePearl)
 							values.Add(nameof(SaveValues.MoonOverWrotePearl), SaveValues.MoonOverWrotePearl);
+						if (SaveValues.SaintWarmthMechanicTutorial)
+							values.Add(nameof(SaveValues.SaintWarmthMechanicTutorial), SaveValues.SaintWarmthMechanicTutorial);
 						break;
 				}
 			}
@@ -359,5 +362,7 @@ namespace MagicasContentPack
 		public static int lttmSawAscensionCycle = -1;
 		public static bool CLSeenMoonPearl;
 		public static bool MoonOverWrotePearl;
+
+		public static bool SaintWarmthMechanicTutorial;
 	}
 }

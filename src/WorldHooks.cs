@@ -1,6 +1,8 @@
-﻿using MagicasContentPack.IteratorHooks;
+﻿using HUD;
+using MagicasContentPack.IteratorHooks;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 using MoreSlugcats;
 using RWCustom;
 using System;
@@ -8,21 +10,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using UnityEngine;
-using static MonoMod.InlineRT.MonoModRule;
 
 namespace MagicasContentPack
 {
-    internal class WorldHooks
+	internal class WorldHooks
 	{
 		private static AbstractCreature nshOverseer;
 		internal static bool shouldFadeGhostMode;
-		private static int lastCycle;
+
+		public static List<SnowSource> roomSnowSources = [];
+		private static MagicaEnums.SaintRainPhases[] warmRainPhase;
+		private static int blizzardClearingDuration;
+		private static int warmRainPhaseDuration;
+		private static float blizzardClearingStart;
+		private static object warmRainPhaseStart;
+		private static float lastLightAmount;
+		private static float lastHeavyAmount;
+		private static float lastClouds;
+		private static int lastRainCycleMinute;
+		private static EntityID warmRainPhaseSeed;
 
 		internal static void Init()
 		{
 			try
 			{
+				IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
+				On.RainWorldGame.AllowRainCounterToTick += RainWorldGame_AllowRainCounterToTick;
+				//On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
+				//On.RainCycle.ctor += RainCycle_ctor;
+				//_ = new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.BlizzardWorldActive), BindingFlags.Public | BindingFlags.Instance).GetGetMethod(), SaintBlizzardStatus);
+
 				// For Custom Arti mechanics
 				On.MoreSlugcats.CutsceneArtificerRobo.Update += CutsceneArtificerRobo_Update;
 
@@ -33,10 +53,15 @@ namespace MagicasContentPack
 
 				// Change the way echoes spawn for Artificer
 				On.GoldFlakes.GoldFlake.DrawSprites += GoldFlake_DrawSprites;
-				On.RoomCamera.Update += RoomCamera_Update;
+				//On.RoomCamera.ChangeRoom += RoomCamera_ChangeRoom;
+				//On.RoomCamera.Update += RoomCamera_Update;
+				On.RoomCamera.UpdateGhostMode += RoomCamera_UpdateGhostMode1;
 				IL.RoomCamera.UpdateGhostMode += RoomCamera_UpdateGhostMode;
 				On.GhostHunch.Update += GhostHunch_Update;
 				On.World.SpawnGhost += World_SpawnGhost;
+				//On.RoomRain.DrawSprites += RoomRain_DrawSprites;
+				//On.RoomRain.Update += RoomRain_Update;
+				//On.MoreSlugcats.ColdRoom.Update += ColdRoom_Update;
 
 				//On.WorldLoader.ctor_RainWorldGame_Name_bool_string_Region_SetupValues += WorldLoader_ctor_RainWorldGame_Name_bool_string_Region_SetupValues;
 
@@ -64,6 +89,152 @@ namespace MagicasContentPack
 			{
 				Plugin.HookFail(ex);
 			}
+		}
+
+		private static void RainWorldGame_RawUpdate(ILContext il)
+		{
+			try
+			{
+				ILCursor cursor = new(il);
+
+				bool sooc = cursor.TryGotoNext(
+					x => x.MatchStloc(2),
+					x => x.MatchLdarg(0),
+					x => x.MatchLdarg(0),
+					x => x.MatchCallOrCallvirt(typeof(RainWorldGame).GetProperty(nameof(RainWorldGame.GamePaused), BindingFlags.Instance | BindingFlags.Public).GetGetMethod()));
+
+				if (Plugin.ILMatchFail(sooc))
+					return;
+
+				cursor.Index++;
+
+				cursor.Emit(OpCodes.Ldarg_0);
+				cursor.Emit(OpCodes.Ldloc_2);
+				static float SetFramesForSaint(RainWorldGame game, float frames)
+				{
+					if (game.IsStorySession && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+					{
+						return game.framesPerSecond;
+					}
+					return frames;
+				}
+				cursor.EmitDelegate(SetFramesForSaint);
+				cursor.Emit(OpCodes.Stloc_2);
+
+				Plugin.ILSucceed();
+			}
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
+		}
+
+		private static bool RainWorldGame_AllowRainCounterToTick(On.RainWorldGame.orig_AllowRainCounterToTick orig, RainWorldGame self)
+		{
+			if (!orig(self) && self.IsStorySession && self.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && (self.setupValues.disableRain || (ModManager.MSC && !(self.world.game.rainWorld.safariMode && self.world.game.rainWorld.safariRainDisable)) && self.world.rainCycle.TimeUntilRain / 40 < 400 && self.world.rainCycle.timer > 500))
+			{
+				return true;
+			}
+
+			return orig(self);
+		}
+
+		private static void RoomCamera_UpdateGhostMode1(On.RoomCamera.orig_UpdateGhostMode orig, RoomCamera self, Room newRoom, int newCamPos)
+		{
+			if (self.game.IsStorySession && self.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && self.room != null && self.room.PlayersInRoom.Any(x => x != null && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(x, out var player) && player.magicaSaintAscension))
+			{
+				self.ghostMode = 1f;
+				return;
+			}
+
+			orig(self, newRoom, newCamPos);
+		}
+
+		private static void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
+		{
+			orig(self, cam);
+
+			if (self.owner is Player player && player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+			{
+				self.AddPart(new SaintWarmth(self, self.fContainers[1]));
+			}
+		}
+
+		private static void RainCycle_ctor(On.RainCycle.orig_ctor orig, RainCycle self, World world, float minutes)
+		{
+			orig(self, world, minutes);
+
+			if (world.game.IsStorySession && world.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+			{
+				lastRainCycleMinute = -1;
+				lastLightAmount = -1;
+				lastHeavyAmount = -1;
+				lastClouds = -1;
+
+				blizzardClearingDuration = Mathf.RoundToInt(self.cycleLength / Mathf.Lerp(1f, 1.4f, UnityEngine.Random.value));
+				warmRainPhaseDuration = Mathf.RoundToInt(self.cycleLength / Mathf.Lerp(1.2f, 3f, UnityEngine.Random.value));
+
+				blizzardClearingStart = 0;
+				warmRainPhaseStart = 0;
+
+				if (UnityEngine.Random.value < 0.15f)
+				{
+					blizzardClearingStart = Mathf.Min(UnityEngine.Random.Range(0.5f, self.cycleLength / 5f), self.cycleLength - blizzardClearingDuration);
+				}
+				if (UnityEngine.Random.value < 0.3f)
+				{
+					warmRainPhaseStart = Mathf.Min(UnityEngine.Random.Range(1f, self.cycleLength / 3f), self.cycleLength - warmRainPhaseDuration);
+				}
+
+				if (world.game.GetStorySession.saveState != null && world.game.GetStorySession.saveState.deathPersistentSaveData.karmaCap >= 4)
+				{
+					int minoots = Mathf.RoundToInt(minutes);
+					warmRainPhase = new MagicaEnums.SaintRainPhases[minoots];
+					for (int i = 0; i < minoots; i++)
+					{
+						
+						switch (world.game.SeededRandom(world.game.GetNewID().RandomSeed))
+						{
+							case < 0.35f:
+								warmRainPhase[i] = MagicaEnums.SaintRainPhases.Linear; break;
+
+							case < 0.7f:
+								warmRainPhase[i] = MagicaEnums.SaintRainPhases.Wavering; break;
+
+							case < 0.85f:
+								warmRainPhase[i] = MagicaEnums.SaintRainPhases.Constant;
+								break;
+
+							default:
+								warmRainPhase[i] = MagicaEnums.SaintRainPhases.None; break;
+						}
+					}
+				}
+			}
+		}
+
+		private static void ColdRoom_Update(On.MoreSlugcats.ColdRoom.orig_Update orig, ColdRoom self, bool eu)
+		{
+			if (PlayerHooks.warmMode)
+				return;
+
+			orig(self, eu);
+		}
+
+		private static void RoomRain_DrawSprites(On.RoomRain.orig_DrawSprites orig, RoomRain self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+		{
+			if (self.slatedForDeletetion)
+			{
+				sLeaser.CleanSpritesAndRemove();
+				self.Destroy();
+				return;
+			}
+			orig(self, sLeaser, rCam, timeStacker, camPos);
+		}
+
+		private static bool SaintBlizzardStatus(Func<RainCycle, bool> orig, RainCycle self)
+		{
+			return orig(self) && !PlayerHooks.warmMode;
 		}
 
 		private static void CutsceneArtificerRobo_Update(On.MoreSlugcats.CutsceneArtificerRobo.orig_Update orig, CutsceneArtificerRobo self, bool eu)
@@ -159,7 +330,7 @@ namespace MagicasContentPack
 				cursor.EmitDelegate(IsLC);
 
 				Plugin.ILSucceed();
-            }
+			}
 			catch (Exception ex)
 			{
 				Plugin.ILFail(ex);
@@ -197,6 +368,152 @@ namespace MagicasContentPack
 			{
 				sLeaser.sprites[0].alpha = Mathf.Lerp(0f, 1f, self.room.game.cameras[0].ghostMode);
 			}
+		}
+
+		private static void RoomRain_Update(On.RoomRain.orig_Update orig, RoomRain self, bool eu)
+		{
+			orig(self, eu);
+
+			if (PlayerHooks.warmMode && self.room != null && self.room.roomRain != null)
+			{
+				RoomSettings.RoomEffect lightRain = self.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.LightRain);
+				RoomSettings.RoomEffect heavyRain = self.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.HeavyRain);
+				if (lightRain != null && heavyRain != null)
+				{
+					float[] weather = GetWarmRainAmount(self.room);
+					float lightAmount = weather[0];
+					float heavyAmount = weather[1];
+					float clouds = weather[2];
+
+					if (warmRainPhaseSeed.RandomSeed > -1)
+					{
+						float lerpAmount = Mathf.Clamp(self.room.game.SeededRandom(warmRainPhaseSeed.RandomSeed) * 0.005f, 0.005f, 0.05f);
+						if (lightAmount > -1f)
+						{
+							lastLightAmount = Mathf.Lerp(lastLightAmount, lightAmount, lerpAmount);
+							lightRain.amount = lastLightAmount;
+						}
+						if (heavyAmount > -1f)
+						{
+							lastHeavyAmount = Mathf.Lerp(lastHeavyAmount, heavyAmount, lerpAmount);
+							heavyRain.amount = lastHeavyAmount;
+						}
+						if (clouds > -1f)
+						{
+							lastClouds = Mathf.Lerp(lastClouds, clouds, lerpAmount);
+							self.room.roomSettings.Clouds = lastClouds;
+						}
+					}
+				}
+				else if (self.room.roomSettings.DangerType == RoomRain.DangerType.Rain || self.room.roomSettings.DangerType == RoomRain.DangerType.FloodAndRain)
+				{
+					if (self.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.LightRain) == null)
+					{
+						self.room.roomSettings.effects.Add(new(RoomSettings.RoomEffect.Type.LightRain, GetWarmRainAmount(self.room)[0], false));
+					}
+					if (self.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.HeavyRain) == null)
+					{
+						self.room.roomSettings.effects.Add(new(RoomSettings.RoomEffect.Type.HeavyRain, GetWarmRainAmount(self.room)[1], false));
+					}
+				}
+			}
+		}
+
+		private static void RoomCamera_ChangeRoom(On.RoomCamera.orig_ChangeRoom orig, RoomCamera self, Room newRoom, int cameraPosition)
+		{
+			if (newRoom != null && self.game.IsStorySession && self.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+			{
+				RoomSettings settings = newRoom.roomSettings;
+				if (PlayerHooks.warmMode)
+				{
+					settings = new(newRoom.abstractRoom.name, self.game.world.region, false, false, SlugcatStats.Timeline.Rivulet, self.game);
+				}
+				else
+				{
+					settings = new(newRoom.abstractRoom.name, self.game.world.region, false, false, SlugcatStats.Timeline.Saint, self.game);
+				}
+				if (settings != null)
+				{
+					newRoom.roomSettings = settings;
+
+					if (PlayerHooks.warmMode && newRoom.roomRain == null && IsRainDanger(settings.DangerType))
+					{
+						newRoom.roomRain = new(newRoom.game.globalRain, newRoom);
+						newRoom.AddObject(newRoom.roomRain);
+					}
+					else if (newRoom.roomRain != null)
+					{
+						newRoom.RemoveObject(newRoom.roomRain);
+						newRoom.roomRain.slatedForDeletetion = true;
+						newRoom.roomRain = null;
+					}
+				}
+
+				foreach (var source in newRoom.updateList.Where(x => x != null && x is SnowSource).Select(x => x as SnowSource).ToList())
+				{
+					if (PlayerHooks.warmMode)
+					{
+						source.visibility = 0;
+					}
+					else
+					{
+						source.visibility = source.CheckVisibility(cameraPosition);
+					}
+				}
+			}
+
+			orig(self, newRoom, cameraPosition);
+		}
+
+		private static bool IsRainDanger(RoomRain.DangerType dangerType)
+		{
+			return dangerType == RoomRain.DangerType.Flood || dangerType == RoomRain.DangerType.FloodAndRain || dangerType == RoomRain.DangerType.Rain;
+		}
+
+		private static float[] GetWarmRainAmount(Room room)
+		{
+			float[] amounts = [-1f, -1f, -1f];
+			int currentMinute = Mathf.RoundToInt(Mathf.Floor(room.world.rainCycle.timer / 40f / 60f));
+			float minuteLerp = (float)(room.world.rainCycle.timer - ((float)currentMinute * 40f * 60f)) / ((float)((currentMinute + 1) * 40f * 60f) - (currentMinute * 40f * 60f));
+
+			if (lastRainCycleMinute != currentMinute)
+			{
+				Plugin.DebugLog($"New minute! {currentMinute} : {warmRainPhase[currentMinute]}");
+
+				lastRainCycleMinute = currentMinute;
+				warmRainPhaseSeed = room.game.GetNewID();
+			}
+
+			if (warmRainPhase.Length > currentMinute)
+			{
+				if (warmRainPhase[currentMinute] == MagicaEnums.SaintRainPhases.None)
+				{
+					amounts[0] = Mathf.Lerp(0.05f, 0.05f, Mathf.Sin(minuteLerp * 3.1415f));
+					amounts[1] = 0f;
+					amounts[2] = Mathf.Lerp(lastClouds, 0.05f, minuteLerp);
+				}
+				else if (warmRainPhase[currentMinute] == MagicaEnums.SaintRainPhases.Linear)
+				{
+					// Add min and max intensity based on rain cycle
+					amounts[0] = Mathf.Lerp(0.05f, 0.05f, Mathf.Sin(minuteLerp * 3.1415f));
+					amounts[1] = Mathf.Lerp(0.0f, 0.3f, Mathf.Sin(minuteLerp * 3.1415f));
+					amounts[2] = 1f;
+				}
+				else if (warmRainPhase[currentMinute] == MagicaEnums.SaintRainPhases.Wavering)
+				{
+					amounts[0] = Custom.LerpBackEaseOutIn(0.1f, 1f, minuteLerp);
+					amounts[1] = Custom.LerpBackEaseOutIn(0.1f, 0.1f, minuteLerp);
+					amounts[2] = 1f;
+				}
+				else if (warmRainPhase[currentMinute] == MagicaEnums.SaintRainPhases.Constant)
+				{
+					amounts[0] = Custom.LerpBackEaseOutIn(0.1f, 1f, minuteLerp);
+					amounts[1] = Custom.LerpBackEaseOutIn(0.1f, 0.7f, minuteLerp);
+					amounts[2] = 1f;
+				}
+			}
+
+			return amounts;
 		}
 
 		private static void RoomCamera_Update(On.RoomCamera.orig_Update orig, RoomCamera self)
@@ -340,10 +657,10 @@ namespace MagicasContentPack
 			orig(self, game, playerCharacter, singleRoomWorld, worldName, region, setupValues);
 
 			// It's as easy as that.
-			if (playerCharacter != null && playerCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear && worldName == "LM")
-			{
-				self.playerCharacter = MoreSlugcatsEnums.SlugcatStatsName.Artificer;
-			}
+			//if (playerCharacter != null && playerCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear && worldName == "LM")
+			//{
+			//	self.playerCharacter = MoreSlugcatsEnums.SlugcatStatsName.Artificer;
+			//}
 		}
 
 		private static void DirectionFinder_ctor(On.VoidSpawnWorldAI.DirectionFinder.orig_ctor orig, VoidSpawnWorldAI.DirectionFinder self, World world)
@@ -678,6 +995,104 @@ namespace MagicasContentPack
 			"SB_C09",
 			"SB_L01",
 		};
+	}
+
+	internal class SaintWarmth : HudPart
+	{
+		private HUD.HUD self;
+		private FContainer fContainer;
+		private FSprite bigRingSprite;
+		private float fade;
+		private FSprite blizzardIndicator;
+		private float goToBlizzard;
+		private float lastBlizzard;
+		private int tickCounter;
+
+		public Player Player
+		{
+			get
+			{
+				return hud.owner as Player;
+			}
+		}
+
+		public bool Unlocked
+		{
+			get
+			{
+				return Player.KarmaCap >= 4;
+			}
+		}
+
+		public bool ForceShow
+		{
+			get
+			{
+				return Unlocked && (PlayerHooks.warmthActivationTimer > 0 || (PlayerHooks.warmMode && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(Player, out var player) && player.warmthLimit < Player.GetWarmthLimit() / 3 && player.warmthLimit > 0));
+			}
+		}
+
+		public float Visibility
+		{
+			get
+			{ 
+				return ((float)Player.Karma * 1f) / (float)Player.KarmaCap;
+			}
+		}
+
+		public SaintWarmth(HUD.HUD self, FContainer fContainer) : base(self)
+		{
+			this.self = self;
+			this.fContainer = fContainer;
+
+			bigRingSprite = new FSprite("SaintGuardianRing", true);
+			fContainer.AddChild(bigRingSprite);
+
+			blizzardIndicator = new FSprite("SaintGuardianCircleBig");
+			fContainer.AddChild(blizzardIndicator);
+		}
+
+		public override void ClearSprites()
+		{
+			base.ClearSprites();
+			bigRingSprite?.RemoveFromContainer();
+			blizzardIndicator?.RemoveFromContainer();
+		}
+
+		public override void Draw(float timeStacker)
+		{
+			bigRingSprite.SetPosition(hud.karmaMeter.karmaSprite.GetPosition());
+			bigRingSprite.scale = hud.karmaMeter.karmaSprite.scale;
+			bigRingSprite.alpha = hud.karmaMeter.karmaSprite.alpha * Visibility;
+			bigRingSprite.color = Color.Lerp(RainWorld.GoldRGB, RainWorld.SaturatedGold, Visibility);
+			
+			if (Player.room != null)
+			{
+				blizzardIndicator.isVisible = true;
+				if (tickCounter % 240 == 0)
+				{
+					goToBlizzard = Player.room.world.rainCycle.AmountLeft;
+				}
+				lastBlizzard = Mathf.Lerp(lastBlizzard, goToBlizzard, 0.3f);
+				blizzardIndicator.SetPosition(Custom.RotateAroundVector(bigRingSprite.GetPosition() + new Vector2(0, hud.karmaMeter.rad + (blizzardIndicator.height / 3.14f)), bigRingSprite.GetPosition(), Mathf.Lerp(0, -360, Mathf.Clamp01(lastBlizzard))));
+				blizzardIndicator.alpha = bigRingSprite.alpha;
+				blizzardIndicator.scale = bigRingSprite.scale;
+				blizzardIndicator.color = bigRingSprite.color;
+			}
+			else
+			{
+				blizzardIndicator.isVisible = false;
+			}
+		}
+
+		public override void Update()
+		{
+			if (ForceShow)
+			{
+				hud.karmaMeter.forceVisibleCounter = Mathf.Max(hud.karmaMeter.forceVisibleCounter, 60);
+			}
+			tickCounter++;
+		}
 	}
 
 	internal class SevenRedSunsMuralRoom : UpdatableAndDeletable

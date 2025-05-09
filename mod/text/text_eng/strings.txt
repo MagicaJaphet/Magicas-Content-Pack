@@ -42,6 +42,8 @@ cl_reactiontopearl6|...It is... warm... sad...
 cl_reactiontopearl7|...No longer... lonely...
 cl_reactiontopearl8|...Feel... loved...
 cl_reactiontopearl9|...Thank you.
-saintcustomtutorial0|Hold pickup and press left or right to change targets, hold throw to perform an ascension.
 Helped Big Sis Moon|Helped Big Sis Moon
 articustomtutorial|Hold pickup on combustable objects to craft explosives, some items can be swallowed at the cost of food to transform them.
+saint_warmth_tutorial|Hold the SPECIAL button to shift to a warmer reality for a limited time.
+saint_flight_tutorial0|Hold SPECIAL to achieve enlightenment.
+saint_flight_tutorial1|Hold PICKUP and press LEFT or RIGHT to change targets, hold THROW to align the target's karma.

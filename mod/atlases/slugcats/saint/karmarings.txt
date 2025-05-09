@@ -1,8 +1,32 @@
 {"frames": {
 
+"SaintGuardianCircleBig.png":
+{
+	"frame": {"x":10,"y":0,"w":21,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":21,"h":20},
+	"sourceSize": {"w":21,"h":20}
+},
+"SaintGuardianCircleSmall.png":
+{
+	"frame": {"x":0,"y":0,"w":10,"h":10},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
+	"sourceSize": {"w":10,"h":10}
+},
+"SaintGuardianRing.png":
+{
+	"frame": {"x":45,"y":225,"w":79,"h":79},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":79,"h":79},
+	"sourceSize": {"w":79,"h":79}
+},
 "SaintKarmaRing.png":
 {
-	"frame": {"x":0,"y":0,"w":45,"h":45},
+	"frame": {"x":31,"y":0,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -10,7 +34,7 @@
 },
 "SaintKarmaRing0.png":
 {
-	"frame": {"x":45,"y":0,"w":45,"h":45},
+	"frame": {"x":76,"y":0,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -18,7 +42,7 @@
 },
 "SaintKarmaRing1.png":
 {
-	"frame": {"x":90,"y":0,"w":45,"h":45},
+	"frame": {"x":0,"y":45,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -26,7 +50,7 @@
 },
 "SaintKarmaRing2.png":
 {
-	"frame": {"x":135,"y":0,"w":45,"h":45},
+	"frame": {"x":45,"y":45,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -34,7 +58,7 @@
 },
 "SaintKarmaRing3.png":
 {
-	"frame": {"x":180,"y":0,"w":45,"h":45},
+	"frame": {"x":0,"y":90,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -42,7 +66,7 @@
 },
 "SaintKarmaRing4.png":
 {
-	"frame": {"x":225,"y":0,"w":45,"h":45},
+	"frame": {"x":45,"y":90,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -50,7 +74,7 @@
 },
 "SaintKarmaRing5.png":
 {
-	"frame": {"x":270,"y":0,"w":45,"h":45},
+	"frame": {"x":0,"y":135,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -58,7 +82,7 @@
 },
 "SaintKarmaRing6.png":
 {
-	"frame": {"x":315,"y":0,"w":45,"h":45},
+	"frame": {"x":45,"y":135,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -66,7 +90,7 @@
 },
 "SaintKarmaRing7.png":
 {
-	"frame": {"x":360,"y":0,"w":45,"h":45},
+	"frame": {"x":0,"y":180,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -74,7 +98,7 @@
 },
 "SaintKarmaRing8.png":
 {
-	"frame": {"x":405,"y":0,"w":45,"h":45},
+	"frame": {"x":45,"y":180,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -82,7 +106,7 @@
 },
 "SaintKarmaRing9.png":
 {
-	"frame": {"x":450,"y":0,"w":45,"h":45},
+	"frame": {"x":0,"y":225,"w":45,"h":45},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":45},
@@ -91,10 +115,10 @@
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
-	"image": "karmarings.txt.png",
+	"image": "karmarings.png",
 	"format": "RGBA8888",
-	"size": {"w":495,"h":45},
+	"size": {"w":124,"h":304},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:f5c1838ac5c0794a042d092bc5cf09ca:9a16626fcdb7a5b71e3b8e9ea2ccba2f:c18cdbcb92684415a6bb23ffdb30ac98$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a549817b5762e3b22ee839685ca32766:e36557837b854feb7b4706c28f282001:fd4d15c412faf12a8580a4bc9b28b801$"
 }
 }

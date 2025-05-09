@@ -11,6 +11,7 @@ using MonoMod.RuntimeDetour;
 using DressMySlugcat;
 using System.Reflection;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 
 namespace MagicasContentPack
 {
@@ -26,6 +27,10 @@ namespace MagicasContentPack
 		{
 			try
 			{
+				// For Saint mechanic
+				On.MoreSlugcats.SnowSource.Update += SnowSource_Update;
+				On.MoreSlugcats.GhostPing.DrawSprites += GhostPing_DrawSprites;
+
 				On.Room.PlaySound_SoundID_Vector2_float_float += Room_PlaySound_SoundID_Vector2_float_float;
 
 				// Add custom pearls manually
@@ -34,6 +39,7 @@ namespace MagicasContentPack
 				On.DataPearl.UniquePearlMainColor += DataPearl_UniquePearlMainColor;
 
 				// Change whitetoken behavior for saint
+				IL.MoreSlugcats.CollectiblesTracker.ctor += CollectiblesTracker_ctor;
 				On.Music.MusicPlayer.Update += MusicPlayer_Update;
 				On.MoreSlugcats.ChatLogDisplay.NewMessage_string_int += ChatLogDisplay_NewMessage_string_int;
 				On.HUD.DialogBox.Update += DialogBox_Update;
@@ -58,6 +64,89 @@ namespace MagicasContentPack
 			catch (Exception ex)
 			{
 				Plugin.HookFail(ex);
+			}
+		}
+
+		private static void SnowSource_Update(On.MoreSlugcats.SnowSource.orig_Update orig, SnowSource self, bool eu)
+		{
+			if (PlayerHooks.warmMode)
+			{
+				return;
+			}
+			orig(self, eu);	
+		}
+
+		private static void GhostPing_DrawSprites(On.MoreSlugcats.GhostPing.orig_DrawSprites orig, GhostPing self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+		{
+			if (self.slatedForDeletetion)
+			{
+				if (rCam.room != null && rCam.room.world.worldGhost != null)
+				{
+					rCam.ghostMode = rCam.room.world.worldGhost.GhostMode(rCam.room, rCam.currentCameraPosition);
+				}
+				else
+				{
+					rCam.ghostMode = 0f;
+				}
+
+				sLeaser.CleanSpritesAndRemove();
+				self.RemoveFromRoom();
+				return;
+			}
+			if (self is SaintWarmthTransistion transistion && !transistion.go)
+			{
+				float num = ((float)PlayerHooks.warmthActivationTimer / (float)PlayerHooks.MaxWarmthActivationTimer) - 0.6f;
+				if (num == 0f)
+				{
+					sLeaser.sprites[0].isVisible = false;
+					return;
+				}
+				sLeaser.sprites[0].isVisible = true;
+				sLeaser.sprites[0].alpha = 0.8f * num * self.alpha;
+				rCam.ghostMode = num * self.alpha;
+				return;
+			}
+
+			orig(self, sLeaser, rCam, timeStacker, camPos); 
+		}
+
+		private static void CollectiblesTracker_ctor(ILContext il)
+		{
+			try
+			{
+				ILCursor cursor = new(il);
+
+				bool succeed = cursor.TryGotoNext(MoveType.After,
+					x => x.MatchLdsfld<MoreSlugcatsEnums.SlugcatStatsName>(nameof(MoreSlugcatsEnums.SlugcatStatsName.Spear)),
+					x => x.MatchCall(out _));
+
+				if (Plugin.ILMatchFail(succeed))
+					return;
+
+				ILCursor label = cursor;
+				ILLabel jump = (ILLabel)cursor.Next.Operand;
+
+				succeed = cursor.TryGotoNext(MoveType.After, 
+					x => x.MatchBrfalse(out _));
+
+				if (Plugin.ILMatchFail(succeed))
+					return;
+
+				ILLabel next = cursor.MarkLabel();
+				label.Next.Operand = next;
+				cursor.Emit(OpCodes.Ldarg, 5);
+				static bool IsSaint(SlugcatStats.Name saveSlot)
+				{
+					return saveSlot == MoreSlugcatsEnums.SlugcatStatsName.Saint;
+				}
+				cursor.EmitDelegate(IsSaint);
+				cursor.Emit(OpCodes.Brfalse, jump);
+
+				Plugin.ILSucceed();
+			}
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
 			}
 		}
 
@@ -352,11 +441,11 @@ namespace MagicasContentPack
 
 		private static void DialogBox_Update(On.HUD.DialogBox.orig_Update orig, HUD.DialogBox self)
 		{
-            if (self.CurrentMessage != null && self.CurrentMessage.text.Contains("FP:") && self.hud?.rainWorld.inGameSlugCat == MoreSlugcatsEnums.SlugcatStatsName.Saint && saintBroadcastNum > 11)
-            {
+			if (self.CurrentMessage != null && self.CurrentMessage.text.Contains("FP:") && self.hud?.rainWorld.inGameSlugCat == MoreSlugcatsEnums.SlugcatStatsName.Saint && saintBroadcastNum > 11)
+			{
 				self.showDelay += UnityEngine.Random.Range(0, 3);
-            }
-            orig(self);
+			}
+			orig(self);
 		}
 
 		private static int DialogBox_GetDelay(On.HUD.DialogBox.orig_GetDelay orig)
@@ -574,10 +663,45 @@ namespace MagicasContentPack
 		}
 	}
 
+	public class SaintWarmthTransistion : GhostPing
+	{
+		public float? ghostMode;
+
+		public SaintWarmthTransistion(Room room) : base(room)
+		{
+			ghostMode = room?.world.worldGhost?.GhostMode(room, room.game.cameras[0].currentCameraPosition);
+			goAt = PlayerHooks.MaxWarmthActivationTimer - (PlayerHooks.MaxWarmthActivationTimer / 5);
+			alpha = 1;
+		}
+
+		public override void Update(bool eu)
+		{
+			counter++;
+			if (!go && counter >= goAt)
+			{
+				go = true;
+				room.PlaySound(PlayerHooks.warmMode ? SoundID.Slugcat_Ghost_Dissappear : SoundID.Slugcat_Ghost_Appear, 0f, 2f, 1f);
+			}
+			lastProg = prog;
+			if (go)
+			{
+				prog = Mathf.Min(1f, prog + speed);
+				if (prog >= 1f && lastProg >= 1f)
+				{
+					room?.game.cameras[0].ChangeRoom(room, room.game.cameras[0].currentCameraPosition);
+					Destroy();
+				}
+			}
+			if (!go && PlayerHooks.warmthActivationTimer <= 0f)
+			{
+				Destroy();
+			}
+		}
+	}
+
 	public class SaintBroadcastEffect : UpdatableAndDeletable
 	{
 		internal bool broadcastEnded;
-		private Room room;
 		private RoomCamera roomCamera;
 		private float originalGhostMode;
 		private int timer;

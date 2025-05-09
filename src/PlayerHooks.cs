@@ -8,20 +8,37 @@ using System;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using VoidSea;
+using static MonoMod.InlineRT.MonoModRule;
+using MonoMod.RuntimeDetour;
 
 namespace MagicasContentPack
 {
 	internal class PlayerHooks
 	{
 		private static VoidSpawnKeeper keeper;
-		private static readonly float maxTargetTimer = 20f;
-		public static readonly float maxAscensionBuffer = 50f;
-		public static readonly float maxActivationTimer = 1000f;
-		public static readonly float ascensionFatique = 50f;
-		public static readonly float saintRadius = 500f;
 
 		public static Dictionary<AbstractPhysicalObject.AbstractObjectType, int> artiCraftables = [];
 		public static AbstractPhysicalObject.AbstractObjectType[,] artiResults;
+
+		public static int MaxWarmthActivationTimer 
+		{ 
+			get
+			{
+				return 150;
+			}
+		}
+
+		public static int MaxWarmthCooldown 
+		{ 
+			get
+			{
+				return 150;
+			}	
+		}
+
+		public static bool warmMode;
+		public static SaintWarmthTransistion transistionWave;
+		public static int warmthActivationTimer;
 
 		internal static void Init()
 		{
@@ -35,6 +52,8 @@ namespace MagicasContentPack
 				On.PlayerSessionRecord.AddKill += PlayerSessionRecord_AddKill;
 
 				// Custom saint mechanics
+				On.Player.UpdateAnimation += Player_UpdateAnimation;
+				On.Player.UpdateBodyMode += Player_UpdateBodyMode;
 				On.Player.InitVoidWormCutscene += Player_InitVoidWormCutscene;
 				IL.Player.MovementUpdate += AnotherGrabCustomMechanicFix;
 				IL.Player.UpdateBodyMode += BodyModeCustomMechanicFix;
@@ -50,6 +69,33 @@ namespace MagicasContentPack
 			{
 				Plugin.Log(Plugin.LogStates.HookFail);
 			}
+		}
+
+		private static void Player_UpdateAnimation(On.Player.orig_UpdateAnimation orig, Player self)
+		{
+			if (ModOptions.CustomMechanics.Value && self.room != null && self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+			{
+				if ((self.input[0].x == 0 && self.input[0].y == 0) || self.input[0].pckp)
+				{
+					self.animation = Player.AnimationIndex.None;
+				}
+				else
+				{
+					self.animation = Player.AnimationIndex.DeepSwim;
+				}
+				return;
+			}
+			orig(self);
+		}
+
+		private static void Player_UpdateBodyMode(On.Player.orig_UpdateBodyMode orig, Player self)
+		{
+			if (ModOptions.CustomMechanics.Value && self.room != null && self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+			{
+				self.bodyMode = MagicaEnums.BodyModes.SaintAscension;
+				return;
+			}
+			orig(self);
 		}
 
 		private static void Player_SwallowObject(ILContext il)
@@ -390,6 +436,14 @@ namespace MagicasContentPack
 			orig(self, abstractCreature, world);
 
 			var magicaCWT = MagicaPlayer.magicaCWT.GetOrCreateValue(self);
+
+			if (self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+			{
+				magicaCWT.warmthLimit = self.GetWarmthLimit();
+			}
+
+			// Set player save values, for tutorials and such
+			//MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.SaintWarmthMechanicTutorial), out SaveValues.SaintWarmthMechanicTutorial);
 		}
 
 		private static void Player_InitVoidWormCutscene(On.Player.orig_InitVoidWormCutscene orig, Player self)
@@ -408,7 +462,85 @@ namespace MagicasContentPack
 		{
 			if (ModOptions.CustomMechanics.Value && MagicaPlayer.magicaCWT.TryGetValue(self, out var player))
 			{
+				//bool storySaint = self.abstractCreature.world.game.IsStorySession && self.abstractCreature.world.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint;
+
+				//if (storySaint && self.KarmaCap >= 4)
+				//{
+				//	if (self.room != null && self.room != player.lastRoom)
+				//	{
+				//		player.lastRoom = self.room;
+						
+				//	}
+
+				//	if (self.AI == null && self.Hypothermia > 0.6f && !SaveValues.SaintWarmthMechanicTutorial)
+				//	{
+				//		SaveValues.SaintWarmthMechanicTutorial = true;
+				//		self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("saint_warmth_tutorial"), 240, 400, true, true);
+				//		return;
+				//	}
+
+				//	if (player.warmthCooldown > 0)
+				//	{
+				//		player.warmthCooldown = Math.Max(0, player.warmthCooldown - 1);
+				//	}
+
+				//	if (self.room != null && self.room.game != null && warmthActivationTimer == MaxWarmthActivationTimer / 5)
+				//	{
+				//		self.room.AddObject(new SaintWarmthTransistion(self.room));
+				//	}
+
+				//	if (self.ValidSaintWarmthInput() && player.warmthCooldown <= 0 && warmthActivationTimer < MaxWarmthActivationTimer / 4)
+				//	{
+				//		warmthActivationTimer++;
+				//	}
+				//	else if (warmthActivationTimer >= MaxWarmthActivationTimer / 4 && warmthActivationTimer < MaxWarmthActivationTimer)
+				//	{
+				//		warmthActivationTimer++;
+				//	}
+				//	else if (warmthActivationTimer >= MaxWarmthActivationTimer)
+				//	{
+				//		warmthActivationTimer = 0;
+				//		player.warmthCooldown = MaxWarmthCooldown;
+				//		warmMode = !warmMode;
+				//	}
+				//	else if (warmthActivationTimer > 0)
+				//	{
+				//		warmthActivationTimer = Math.Max(0, warmthActivationTimer - 2);
+				//	}
+				//}
+
 				bool isSaint = self.abstractCreature.world.game.IsStorySession && self.abstractCreature.world.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint;
+				if (isSaint && self.room.world.region != null)
+				{
+					if (self.lastPingRegion == "")
+					{
+						self.lastPingRegion = self.room.world.region.name;
+					}
+					if (self.lastPingRegion != self.room.world.region.name && !self.room.abstractRoom.gate)
+					{
+						self.lastPingRegion = self.room.world.region.name;
+						if (self.room != null && World.CheckForRegionGhost(MoreSlugcatsEnums.SlugcatStatsName.Saint, self.room.world.region.name))
+						{
+							GhostWorldPresence.GhostID ghostID = GhostWorldPresence.GetGhostID(self.room.world.region.name);
+							if (!(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo.ContainsKey(ghostID) || (self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.ghostsTalkedTo[ghostID] < 2)
+							{
+								self.room.AddObject(new GhostPing(self.room));
+							}
+						}
+					}
+				}
+				if (!MMF.cfgOldTongue.Value && self.input[0].jmp && !self.input[1].jmp && !self.input[0].pckp && self.canJump <= 0 && self.bodyMode != Player.BodyModeIndex.Crawl && self.animation != Player.AnimationIndex.ClimbOnBeam && self.animation != Player.AnimationIndex.AntlerClimb && self.animation != Player.AnimationIndex.HangFromBeam && self.SaintTongueCheck())
+				{
+					Vector2 vector = new Vector2((float)self.flipDirection, 0.7f);
+					Vector2 normalized = vector.normalized;
+					if (self.input[0].y > 0)
+					{
+						normalized = new Vector2(0f, 1f);
+					}
+					normalized = (normalized + self.mainBodyChunk.vel.normalized * 0.2f).normalized;
+					self.tongue.Shoot(normalized);
+				}
+
 				if (self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && (self.KarmaCap >= 9 || (self.room.game.session is ArenaGameSession && self.room.game.GetArenaGameSession.arenaSitting.gameTypeSetup.gameType == MoreSlugcatsEnums.GameTypeID.Challenge && self.room.game.GetArenaGameSession.arenaSitting.gameTypeSetup.challengeMeta.ascended)))
 				{
 					if (keeper != null && keeper.room != self.room)
@@ -428,7 +560,7 @@ namespace MagicasContentPack
 					if (isSaint && self.AI == null && self.room.game.session is StoryGameSession && !(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.SaintEnlightMessage)
 					{
 						(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.SaintEnlightMessage = true;
-						self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("While in the air, tap jump and pick-up together to take flight."), 240, 640, true, true);
+						self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("saint_flight_tutorial0"), 240, 640, true, true);
 						return;
 					}
 
@@ -437,7 +569,7 @@ namespace MagicasContentPack
 						self.voidSceneTimer++;
 						if (!player.magicaSaintAscension)
 						{
-							player.activationTimer = 9999f;
+							player.ascensionTimer = 9999f;
 							self.ActivateAscension();
 						}
 						if (self.voidSceneTimer > 60)
@@ -455,46 +587,96 @@ namespace MagicasContentPack
 							}
 						}
 					}
-					if (player.ascensionFatique > 0f && !player.magicaSaintAscension)
+					if (player.ascensionFatique > 0f)
 					{
-						player.ascensionFatique = Mathf.Max(player.ascensionFatique - 1f, 0f);
-						return;
+						player.ascensionFatique = Math.Max(player.ascensionFatique - 1, 0);
 					}
-					if ((self.wantToJump > 0 && player.magicaSaintAscension) || (player.magicaSaintAscension && (player.activationTimer <= 0f || player.ascendedSinceActivation > 4)))
+
+					if (player.ascensionCooldown > 0f)
 					{
-						Plugin.DebugLog(player.ascensionFatique.ToString());
-						player.ascensionFatique += Mathf.Min(ascensionFatique * ((float)player.ascendedSinceActivation + 1f) * Mathf.Lerp(1f, 5f, (maxActivationTimer - player.activationTimer) / maxActivationTimer), 800f);
-						Plugin.DebugLog(player.ascensionFatique.ToString());
+						player.ascensionCooldown = Math.Max(player.ascensionCooldown - 1, 0);
+					}
+
+					if (player.ascensionCooldown <= 0 && player.ascensionFatique <= 0f && player.ascensionActivationTimer < self.MaxAscensionActivationTimer() && self.ValidSaintWarmthInput())
+					{
+						player.ascensionActivationTimer++;
+					}
+					else if (player.magicaSaintAscension && player.ascensionTimer <= 0f)
+					{
+						player.ascensionActivationTimer = self.MaxAscensionActivationTimer() / 2;
+						player.ascensionFatique = 50;
 						self.DeactivateAscension();
 						self.wantToJump = 0;
 						return;
 					}
-					else if (player.ascensionFatique <= 0f && self.wantToJump > 0 && self.input[0].pckp && self.canJump <= 0 && !player.magicaSaintAscension && !self.tongue.Attached && self.bodyMode != Player.BodyModeIndex.Crawl && self.bodyMode != Player.BodyModeIndex.CorridorClimb && self.bodyMode != Player.BodyModeIndex.ClimbIntoShortCut && self.animation != Player.AnimationIndex.HangFromBeam && self.animation != Player.AnimationIndex.ClimbOnBeam && self.bodyMode != Player.BodyModeIndex.WallClimb && self.bodyMode != Player.BodyModeIndex.Swimming && self.Consious && !self.Stunned && self.animation != Player.AnimationIndex.AntlerClimb && self.animation != Player.AnimationIndex.VineGrab && self.animation != Player.AnimationIndex.ZeroGPoleGrab)
+					else if (player.ascensionActivationTimer >= self.MaxAscensionActivationTimer())
 					{
-						player.activationTimer = maxActivationTimer + (isSaint && self.KarmaIsReinforced ? 400f : 0f);
-						self.ActivateAscension();
+						if (!player.magicaSaintAscension)
+						{
+							player.ascensionActivationTimer = 0;
+							self.ActivateAscension();
+						}
+						else
+						{
+							player.ascensionActivationTimer = self.MaxAscensionActivationTimer() / 2;
+							self.DeactivateAscension();
+						}
 						return;
 					}
+					else if (player.ascensionActivationTimer > 0)
+					{
+						player.ascensionActivationTimer = Mathf.Max(0, player.ascensionActivationTimer - 2);
+					}
+
+					if (player.ascensionActivationTimer > 0)
+					{
+						if (self.room != null && !ModManager.CoopAvailable && self.voidSceneTimer == 0 && !player.magicaSaintAscension)
+						{
+							player.roomNeedsRefresh = true;
+
+							float defaultGhostMode = self.room == null || self.room.world.worldGhost == null ? 0f : self.room.world.worldGhost.GhostMode(self.room, self.room.game.cameras[0].currentCameraPosition);
+							self.room.game.cameras[0].ghostMode = Mathf.Lerp(defaultGhostMode, 1f, (float)(player.ascensionActivationTimer) / (float)self.MaxAscensionActivationTimer());
+						}
+
+						self.canJump = 0;
+						self.wantToJump = 0;
+						self.gravity = 0f;
+						foreach (var chunk in self.bodyChunks)
+						{
+							chunk.vel.y = Mathf.Lerp(0.8f, 3f, (float)player.ascensionActivationTimer / (float)self.MaxAscensionActivationTimer());
+							chunk.vel.x /= 1.2f;
+							if (chunk == self.firstChunk)
+							{
+								chunk.vel += Custom.DegToVec(0) * 2f;
+							}
+						}
+					}
+					else if (player.roomNeedsRefresh && self.room != null)
+					{
+						player.roomNeedsRefresh = false;
+						self.room.game.cameras[0].UpdateGhostMode(self.room, self.room.game.cameras[0].currentCameraPosition);
+					}
+
 				}
 
 				if (player.magicaSaintAscension)
 				{
 					self.buoyancy = 0f;
-					self.animation = Player.AnimationIndex.None;
-					self.bodyMode = Player.BodyModeIndex.Default;
+
 					if (self.tongue != null && self.tongue.Attached)
 					{
 						self.tongue.Release();
 					}
 					if (self.dead || self.stun >= 20)
 					{
+						player.ascensionActivationTimer = self.MaxAscensionActivationTimer() / 2;
 						self.DeactivateAscension();
 					}
 
-					if (isSaint && self.AI == null && self.room.game.session is StoryGameSession session2 && !session2.saveState.deathPersistentSaveData.KarmicBurstMessage)
+					if (isSaint && self.AI == null && player.saintTarget != null && self.room.game.session is StoryGameSession session2 && !session2.saveState.deathPersistentSaveData.KarmicBurstMessage)
 					{
 						(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.KarmicBurstMessage = true;
-						self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("saintcustomtutorial0"), 80, 800, true, true);
+						self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("saint_flight_tutorial1"), 80, 800, true, true);
 					}
 
 					self.gravity = 0f;
@@ -513,7 +695,9 @@ namespace MagicasContentPack
 						{
 							player.storedTargetPos[i] = player.storedTargetPos[i - 1];
 						}
-						player.storedTargetPos[0] = player.saintTarget == null ? player.wormTarget.HeadPos(self.room.game.myTimeStacker) : player.saintTarget.firstChunk.pos;
+						player.storedTargetPos[0] = player.saintTarget == null ?
+							player.wormTarget == null ? default : player.wormTarget.HeadPos(self.room.game.myTimeStacker) 
+							: player.saintTarget.firstChunk.pos;
 					}
 					else
 					{
@@ -526,123 +710,129 @@ namespace MagicasContentPack
 						player.saintTargetPos = playerPos;
 					}
 
-					if (!self.input[0].pckp)
+					if (player.ascensionActivationTimer <= 0)
 					{
-						if (player.wormTarget == null)
+						if (!self.input[0].pckp)
 						{
-							player.activationTimer = Mathf.Max(player.activationTimer - 1f, 0f);
-						}
-
-						player.saintTargetMode = false;
-						player.scannedForTargets = false;
-						if (self.input[0].y > 0)
-						{
-							self.bodyChunks[0].vel.y = swimSpeed;
-							self.bodyChunks[1].vel.y = (swimSpeed - 1f);
-						}
-						else if (self.input[0].y < 0)
-						{
-							self.bodyChunks[0].vel.y = -swimSpeed;
-							self.bodyChunks[1].vel.y = -(swimSpeed - 1.75f);
-						}
-						else
-						{
-							self.bodyChunks[0].vel.y = 0.75f;
-							self.bodyChunks[1].vel.y = 0.75f;
-						}
-						if (self.input[0].x > 0)
-						{
-							self.bodyChunks[0].vel.x = swimSpeed;
-							self.bodyChunks[1].vel.x = (swimSpeed - 1.75f);
-						}
-						else if (self.input[0].x < 0)
-						{
-							self.bodyChunks[0].vel.x = -swimSpeed;
-							self.bodyChunks[1].vel.x = -(swimSpeed - 1.75f);
-						}
-						else
-						{
-							self.bodyChunks[0].vel.x = 0f;
-							self.bodyChunks[1].vel.x = 0f;
-						}
-					}
-					else
-					{
-						player.saintTargetMode = true;
-						self.bodyChunks[0].vel = new(0f, 0.8f);
-						self.bodyChunks[1].vel = new(0f, 0.8f);
-
-						if (!player.scannedForTargets)
-						{
-							player.scannedForTargets = true;
-
-							player.validTargets.Clear();
-
-							for (int i = 0; i < self.room.physicalObjects.Length; i++)
+							if (player.wormTarget == null)
 							{
-								for (int j = 0; j < self.room.physicalObjects[i].Count; j++)
+								player.ascensionTimer = Mathf.Max(player.ascensionTimer - 1f, 0f);
+							}
+
+							player.saintTargetMode = false;
+							player.scannedForTargets = false;
+							if (self.input[0].y > 0)
+							{
+								self.bodyChunks[0].vel.y = swimSpeed;
+								self.bodyChunks[1].vel.y = (swimSpeed - 1f);
+							}
+							else if (self.input[0].y < 0)
+							{
+								self.bodyChunks[0].vel.y = -swimSpeed;
+								self.bodyChunks[1].vel.y = -(swimSpeed - 1.75f);
+							}
+							if (self.input[0].x > 0)
+							{
+								self.bodyChunks[0].vel.x = swimSpeed;
+								self.bodyChunks[1].vel.x = (swimSpeed - 1.75f);
+							}
+							else if (self.input[0].x < 0)
+							{
+								self.bodyChunks[0].vel.x = -swimSpeed;
+								self.bodyChunks[1].vel.x = -(swimSpeed - 1.75f);
+							}
+
+							if (self.input[0].x == 0 && self.input[0].y == 0)
+							{
+								foreach (var chunk in self.bodyChunks)
 								{
-									player.validTargets.AddRange(from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && !player.validTargets.Contains(x) select x);
+									chunk.vel.y = Mathf.Lerp(-0.2f, 0.06f, (Mathf.Sin(player.ascensionTimer / 50f) + 1f) / 2f);
+									chunk.vel.x /= 1.2f;
+									if (chunk == self.firstChunk)
+									{
+										chunk.vel += Custom.DegToVec(0) * 2f;
+									}
 								}
 							}
 						}
 						else
 						{
-							player.sortedTargets = (from x in player.validTargets where x.room == self.room && Custom.DistLess(self.firstChunk.pos, x.firstChunk.pos, saintRadius) select x).ToList();
-							player.sortedTargets.Sort((x, y) => x.firstChunk.pos.x.CompareTo(y.firstChunk.pos.x));
+							player.saintTargetMode = true;
+							self.bodyChunks[0].vel = new(0f, 0.8f);
+							self.bodyChunks[1].vel = new(0f, 0.8f);
 
-							if (self.input[0].x > 0f && !player.cycledTarget)
+							if (!player.scannedForTargets)
 							{
-								player.cycledTarget = true;
-								if (player.saintTarget != null && player.sortedTargets.Count > 0)
+								player.scannedForTargets = true;
+
+								player.validTargets.Clear();
+
+								for (int i = 0; i < self.room.physicalObjects.Length; i++)
 								{
-									int nextIndex = player.sortedTargets.IndexOf(player.saintTarget) + 1 >= player.sortedTargets.Count ? 0 : player.sortedTargets.IndexOf(player.saintTarget) + 1;
-									if (player.sortedTargets[nextIndex].room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].firstChunk.pos, saintRadius))
+									for (int j = 0; j < self.room.physicalObjects[i].Count; j++)
 									{
-										player.saintTarget = player.sortedTargets[nextIndex];
+										player.validTargets.AddRange(from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && !player.validTargets.Contains(x) select x);
 									}
-									else
+								}
+							}
+							else
+							{
+								player.sortedTargets = (from x in player.validTargets where x.room == self.room && Custom.DistLess(self.firstChunk.pos, x.firstChunk.pos, self.SaintAscensionRadius()) select x).ToList();
+								player.sortedTargets.Sort((x, y) => x.firstChunk.pos.x.CompareTo(y.firstChunk.pos.x));
+
+								if (self.input[0].x > 0f && !player.cycledTarget)
+								{
+									player.cycledTarget = true;
+									if (player.saintTarget != null && player.sortedTargets.Count > 0)
+									{
+										int nextIndex = player.sortedTargets.IndexOf(player.saintTarget) + 1 >= player.sortedTargets.Count ? 0 : player.sortedTargets.IndexOf(player.saintTarget) + 1;
+										if (player.sortedTargets[nextIndex].room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].firstChunk.pos, self.SaintAscensionRadius()))
+										{
+											player.saintTarget = player.sortedTargets[nextIndex];
+										}
+										else
+										{
+											player.saintTarget = player.sortedTargets[0];
+										}
+									}
+									else if (player.sortedTargets.Count > 0 && player.sortedTargets[0].room == self.room)
 									{
 										player.saintTarget = player.sortedTargets[0];
+										player.scannedForTargets = false;
 									}
 								}
-								else if (player.sortedTargets.Count > 0 && player.sortedTargets[0].room == self.room)
+								else if (self.input[0].x < 0f && !player.cycledTarget)
 								{
-									player.saintTarget = player.sortedTargets[0];
-									player.scannedForTargets = false;
-								}
-							}
-							else if (self.input[0].x < 0f && !player.cycledTarget)
-							{
-								player.cycledTarget = true;
-								if (player.saintTarget != null && player.sortedTargets.Count > 0)
-								{
-									Plugin.DebugLog((player.sortedTargets.IndexOf(player.saintTarget) - 1).ToString());
-									int nextIndex = player.sortedTargets.IndexOf(player.saintTarget) - 1 <= -1 ? player.sortedTargets.Count - 1 : player.sortedTargets.IndexOf(player.saintTarget) - 1;
-									if (player.sortedTargets[nextIndex].room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].firstChunk.pos, saintRadius))
+									player.cycledTarget = true;
+									if (player.saintTarget != null && player.sortedTargets.Count > 0)
 									{
-										player.saintTarget = player.sortedTargets[nextIndex];
+										Plugin.DebugLog((player.sortedTargets.IndexOf(player.saintTarget) - 1).ToString());
+										int nextIndex = player.sortedTargets.IndexOf(player.saintTarget) - 1 <= -1 ? player.sortedTargets.Count - 1 : player.sortedTargets.IndexOf(player.saintTarget) - 1;
+										if (player.sortedTargets[nextIndex].room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].firstChunk.pos, self.SaintAscensionRadius()))
+										{
+											player.saintTarget = player.sortedTargets[nextIndex];
+										}
+										else
+										{
+											player.saintTarget = player.sortedTargets[player.sortedTargets.Count - 1];
+										}
 									}
-									else
+									else if (player.sortedTargets.Count > 0 && player.sortedTargets[player.sortedTargets.Count - 1].room == self.room)
 									{
 										player.saintTarget = player.sortedTargets[player.sortedTargets.Count - 1];
+										player.scannedForTargets = false;
 									}
+									Plugin.DebugLog(player.sortedTargets.IndexOf(player.saintTarget).ToString() + " / " + player.sortedTargets.Count);
 								}
-								else if (player.sortedTargets.Count > 0 && player.sortedTargets[player.sortedTargets.Count - 1].room == self.room)
+								else if (self.input[0].x == 0f)
 								{
-									player.saintTarget = player.sortedTargets[player.sortedTargets.Count - 1];
-									player.scannedForTargets = false;
+									player.cycledTarget = false;
 								}
-								Plugin.DebugLog(player.sortedTargets.IndexOf(player.saintTarget).ToString() + " / " + player.sortedTargets.Count);
-							}
-							else if (self.input[0].x == 0f)
-							{
-								player.cycledTarget = false;
 							}
 						}
 					}
 
-					if ((player.saintTarget == null || (player.saintTarget.room != self.room && !player.saintTargetMode || !Custom.DistLess(self.firstChunk.pos, player.saintTarget.firstChunk.pos, saintRadius))) && player.wormTarget == null)
+					if ((player.saintTarget == null || (player.saintTarget.room != self.room && !player.saintTargetMode || !Custom.DistLess(self.firstChunk.pos, player.saintTarget.firstChunk.pos, self.SaintAscensionRadius()))) && player.wormTarget == null)
 					{
 						player.changingTarget = 20f;
 						player.saintTarget = null;
@@ -660,7 +850,7 @@ namespace MagicasContentPack
 							{
 								for (int j = 0; j < self.room.physicalObjects[i].Count; j++)
 								{
-									canidates.AddRange((from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && Custom.DistLess(self.firstChunk.pos, x.firstChunk.pos, saintRadius) select x).ToList());
+									canidates.AddRange((from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && Custom.DistLess(self.firstChunk.pos, x.firstChunk.pos, self.SaintAscensionRadius()) select x).ToList());
 								}
 								if (canidates.Count > 0)
 								{
@@ -681,8 +871,8 @@ namespace MagicasContentPack
 					if (self.input[0].thrw && (player.saintTarget != null || player.wormTarget != null) && player.ascensionBuffer <= 0f)
 					{
 						float karmaLocked = player.saintTargetIsKarmaLocked ? 0.2f : 1f;
-						player.ascendTimer = Mathf.Min(Custom.LerpBackEaseOut(player.ascendTimer + (0.15f * karmaLocked), player.ascendTimer + (0.01f * karmaLocked), Custom.Dist(self.firstChunk.pos, (player.saintTarget == null && player.wormTarget != null ? player.wormTarget.HeadPos(self.room.game.myTimeStacker) : player.saintTarget.firstChunk.pos)) / (saintRadius * 1.5f)), 1f);
-						
+						player.ascendTimer = Mathf.Min(Custom.LerpBackEaseOut(player.ascendTimer + (0.15f * karmaLocked), player.ascendTimer + (0.01f * karmaLocked), Custom.Dist(self.firstChunk.pos, (player.saintTarget == null && player.wormTarget != null ? player.wormTarget.HeadPos(self.room.game.myTimeStacker) : player.saintTarget.firstChunk.pos)) / (self.SaintAscensionRadius() * 1.5f)), 1f);
+
 						if (player.saintTarget != null && player.saintTarget is Creature creature)
 						{
 							if (creature is DaddyLongLegs dLL)
@@ -772,14 +962,15 @@ namespace MagicasContentPack
 							}
 						}
 
+						player.ascensionBuffer = self.MaxAscensionBuffer(player.saintTarget);
+						player.ascensionTimer = Mathf.Max(player.ascensionTimer - (self.MaxAscensionBuffer(player.saintTarget) * 5f), 0f);
+						player.maxBuffer = player.ascensionBuffer;
 						player.saintTarget = null;
 						player.ascendTimer = 0f;
-						player.ascensionBuffer = maxAscensionBuffer;
 						player.ascendedSinceActivation++;
-						player.activationTimer = Mathf.Max(player.activationTimer - 200f, 0f);
 
-                        if (ascended || self.voidSceneTimer > 0)
-                        {
+						if (ascended || self.voidSceneTimer > 0)
+						{
 							self.room.PlaySound(SoundID.Firecracker_Bang, self.mainBodyChunk, false, 1f, 0.75f + UnityEngine.Random.value);
 							self.room.PlaySound(SoundID.SS_AI_Give_The_Mark_Boom, self.mainBodyChunk, false, 1f, 0.5f + UnityEngine.Random.value * 0.5f);
 						}
@@ -798,12 +989,10 @@ namespace MagicasContentPack
 							self.DeactivateAscension();
 							self.controller = null;
 							player.wormTarget = null;
-							return;
 						}
 					}
-
-					return;
 				}
+				return;
 			}
 			orig(self);
 		}
@@ -831,7 +1020,7 @@ namespace MagicasContentPack
 
 		private static bool IsValidEntity(PhysicalObject entity)
 		{
-			return entity != null && ((entity is Creature creature && !creature.dead && entity is not Fly) || (entity is SeedCob cob && !cob.AbstractCob.opened && !cob.AbstractCob.dead) || (entity is Oracle oracle && oracle.Consious));
+			return entity != null && ((entity is Creature creature && (creature is not Player || !ModManager.CoopAvailable || Custom.rainWorld.options.friendlyFire) && !creature.dead && entity is not Fly) || (entity is SeedCob cob && !cob.AbstractCob.opened && !cob.AbstractCob.dead) || (entity is Oracle oracle && oracle.Consious));
 		}
 
 		private static void Player_DeactivateAscension(On.Player.orig_DeactivateAscension orig, Player self)
@@ -839,18 +1028,15 @@ namespace MagicasContentPack
 			if (ModOptions.CustomMechanics.Value && MagicaPlayer.magicaCWT.TryGetValue(self, out var player))
 			{
 				self.room.PlaySound(SoundID.HUD_Pause_Game, self.mainBodyChunk, false, 1f, 0.5f);
+				self.room.PlaySound(SoundID.Slugcat_Ghost_Dissappear, self.mainBodyChunk, false, 1f, 0.5f);
 				player.magicaSaintAscension = false;
 				player.saintTarget = null;
+				player.ascensionCooldown = 60;
 
-				float timeRatio = (maxActivationTimer - player.activationTimer) / maxActivationTimer;
-				if (player.ascendedSinceActivation > 0 || player.activationTimer < maxActivationTimer / 2f)
+				if (self.voidSceneTimer == 0)
 				{
-					self.airInLungs = Mathf.Lerp(0.2f, 0f, ((float)player.ascendedSinceActivation / 4f) - (timeRatio / 1.5f));
-					self.Stun((player.ascendedSinceActivation * 10) + Mathf.RoundToInt(timeRatio * 10));
-					self.drown = Mathf.Lerp(0.3f, 0.8f, ((float)player.ascendedSinceActivation / 4f) + (timeRatio / 1.5f));
+					//player.ascensionFatique = 50;
 				}
-				self.saintWeakness += (player.ascendedSinceActivation * 150) + (Mathf.RoundToInt(timeRatio * 20f));
-				self.exhausted = true;
 
 				player.ascendedSinceActivation = 0;
 			}
@@ -864,9 +1050,16 @@ namespace MagicasContentPack
 		{
 			if (ModOptions.CustomMechanics.Value && MagicaPlayer.magicaCWT.TryGetValue(self, out var player))
 			{
-				self.wantToJump = 0;
-				player.magicaSaintAscension = true;
+				self.room.PlaySound(SoundID.Slugcat_Ghost_Appear, self.mainBodyChunk, false, 1f, 0.5f);
 				self.room.PlaySound(SoundID.SS_AI_Give_The_Mark_Boom, self.mainBodyChunk, false, 1f, 1f);
+				player.ascensionTimer = self.MaxAscensionTimer();
+				player.ascensionCooldown = 60;
+				player.magicaSaintAscension = true;
+
+				if (!ModManager.CoopAvailable && self.room != null)
+				{
+					self.room.game.cameras[0].ghostMode = 1f;
+				}
 			}
 			else
 			{
@@ -894,8 +1087,8 @@ namespace MagicasContentPack
 			internal float ascendTimer;
 			internal int ascendedSinceActivation;
 			internal float ascensionBuffer;
-			internal float activationTimer;
-			internal float ascensionFatique;
+			internal float ascensionTimer;
+			internal int ascensionFatique;
 			internal Vector2 saintTargetPos;
 			internal Vector2[] storedTargetPos;
 			internal bool saintTargetIsKarmaLocked;
@@ -903,6 +1096,15 @@ namespace MagicasContentPack
 			internal float karmaCycleTimer;
 			internal float changingTarget;
 			internal VoidWorm.Head wormTarget;
+
+			// For new warmth mechanic
+			internal int warmthLimit;
+			internal int warmthCooldown;
+			internal Room lastRoom;
+			internal int ascensionActivationTimer;
+			internal float maxBuffer;
+			internal bool roomNeedsRefresh;
+			internal int ascensionCooldown;
 		}
 	}
 

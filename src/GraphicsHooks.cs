@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using Watcher;
 
 namespace MagicasContentPack
 {
@@ -211,7 +212,7 @@ namespace MagicasContentPack
 		{
 			if (ModOptions.CustomMechanics.Value)
 			{
-				return self.player.room != null && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(self.player, out var player) && !player.magicaSaintAscension;
+				return self.player.room != null && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(self.player, out var player) && !player.magicaSaintAscension && !PlayerHooks.warmMode;
 			}
 			return orig(self);
 		}
@@ -369,12 +370,14 @@ namespace MagicasContentPack
 						{
 							magicaCWT.saintStartSprite = sLeaser.sprites.Length;
 
-							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 2);
+							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 3);
 							sLeaser.sprites[magicaCWT.saintStartSprite] = new("SaintScarFaceB0");
 							sLeaser.sprites[magicaCWT.saintStartSprite + 1] = new("FatiqueSaintScarFaceB0");
+							sLeaser.sprites[magicaCWT.saintStartSprite + 2] = new("Futile_White") { scale = 5f, shader = rCam.game.rainWorld.Shaders["GoldenGlow"], isVisible = false };
 
 							magicaCWT.saintScarSprite = sLeaser.sprites[magicaCWT.saintStartSprite];
 							magicaCWT.saintFatiqueSprite = sLeaser.sprites[magicaCWT.saintStartSprite + 1];
+							magicaCWT.saintHalo = sLeaser.sprites[magicaCWT.saintStartSprite + 2];
 						}
 					}
 
@@ -505,6 +508,11 @@ namespace MagicasContentPack
 								newContatiner.AddChild(magicaCWT.saintFatiqueSprite);
 								magicaCWT.saintFatiqueSprite.MoveBehindOtherNode(sLeaser.sprites[9]);
 							}
+							if (magicaCWT.saintHalo != null)
+							{
+								magicaCWT.saintHalo.RemoveFromContainer();
+								rCam.ReturnFContainer("Bloom").AddChild(magicaCWT.saintHalo);
+							}
 						}
 					}
 
@@ -611,9 +619,30 @@ namespace MagicasContentPack
 
 			if (ModOptions.CustomMechanics.Value && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(self.player, out var player))
 			{
-				if (player.magicaSaintAscension && player.saintTargetMode)
+				if (player.magicaSaintAscension && self.player.bodyMode == MagicaEnums.BodyModes.SaintAscension)
 				{
-					if (player.saintTarget != null)
+					for (int hand = 0; hand < 2; hand++)
+					{
+						self.hands[hand].reachingForObject = true;
+						self.hands[hand].mode = Limb.Mode.HuntAbsolutePosition;
+					}
+
+					if (self.player.animation == Player.AnimationIndex.None)
+					{
+						for (int hand = 0; hand < 2; hand++)
+						{
+							self.hands[hand].absoluteHuntPos = Vector2.Lerp(self.hands[hand].absoluteHuntPos, self.player.firstChunk.pos + new Vector2(hand == 0 ? -20f : 20f, -10f), 0.2f);
+						}
+
+						for (int tail = 0; tail < self.tail.Length; tail++)
+						{
+							TailSegment seg = self.tail[tail];
+							float dividens = 100f;
+							seg.vel.x = Mathf.Sin((player.ascensionTimer * 3.1415f + ((float)tail * (dividens / (float)self.tail.Length))) / dividens) * (0.4f + ((float)tail / 10f));
+						}
+					}
+
+					if (player.saintTargetMode && player.saintTarget != null)
 					{
 						int hand = player.saintTarget.firstChunk.pos.x > self.player.firstChunk.pos.x ? 1 : 0;
 						self.hands[hand].reachingForObject = true;
@@ -851,7 +880,7 @@ namespace MagicasContentPack
 							Color ascensionColor = new(1f, 1f, 1f);
 							if (ModOptions.CustomMechanics.Value && player.ascensionBuffer > 0f)
 							{
-								ascensionColor = Color.Lerp(RainWorld.SaturatedGold, RainWorld.RippleGold, player.ascensionBuffer / PlayerHooks.maxAscensionBuffer);
+								ascensionColor = Color.Lerp(RainWorld.SaturatedGold, RainWorld.RippleGold, player.ascensionBuffer / player.maxBuffer);
 							}
 							else
 							{
@@ -904,7 +933,7 @@ namespace MagicasContentPack
 										}
 									}
 
-									float alphaLerp = Custom.LerpExpEaseInOut(0f, 1f, (PlayerHooks.saintRadius - Custom.Dist(self.player.firstChunk.pos, player.saintTargetPos)) / PlayerHooks.saintRadius);
+									float alphaLerp = Custom.LerpExpEaseInOut(0f, 1f, (self.player.SaintAscensionRadius() - Custom.Dist(self.player.firstChunk.pos, player.saintTargetPos)) / self.player.SaintAscensionRadius());
 									magicaCWT.saintCreatureCircle.alpha = (magicaCWT.saintGlowTimer < saintGlowTimerMax) ? alphaLerp * Custom.LerpBackEaseIn(0f, 1f, magicaCWT.saintGlowTimer / saintGlowTimerMax) : player.changingTarget > 0f ? alphaLerp * Custom.LerpBackEaseIn(0f, 1f, player.changingTarget / 20f) : alphaLerp;
 									magicaCWT.saintCreatureKarma.alpha = magicaCWT.saintCreatureCircle.alpha;
 									magicaCWT.saintCreatureCircle.SetPosition(player.saintTargetPos - rCam.pos);
@@ -912,7 +941,7 @@ namespace MagicasContentPack
 								}
 
 								magicaCWT.saintCreatureCircle.color = ascensionColor;
-								magicaCWT.saintCreatureKarma.color = player.saintTargetIsKarmaLocked ? Color.Lerp(Color.white, Color.red, Mathf.Sin(player.activationTimer / 5f) - (player.ascendTimer / 1f)) : Color.white;
+								magicaCWT.saintCreatureKarma.color = player.saintTargetIsKarmaLocked ? Color.Lerp(Color.white, Color.red, Mathf.Sin(player.ascensionTimer / 5f) - (player.ascendTimer / 1f)) : Color.white;
 								for (int i = 0; i < magicaCWT.saintAcensionLines.Length; i++)
 								{
 									FSprite line = magicaCWT.saintAcensionLines[i];
@@ -948,9 +977,9 @@ namespace MagicasContentPack
 							}
 							else if (player.ascensionFatique > 0f)
 							{
-								magicaCWT.saintScarSprite.color = Color.Lerp(magicaCWT.scarColor, Color.red, player.ascensionFatique / PlayerHooks.ascensionFatique);
+								magicaCWT.saintScarSprite.color = Color.Lerp(magicaCWT.scarColor, Color.red, player.ascensionFatique / self.player.AscensionFatique());
 								magicaCWT.saintFatiqueSprite.color = magicaCWT.saintScarSprite.color;
-								magicaCWT.saintFatiqueSprite.alpha = Mathf.Lerp(0f, 1f, player.ascensionFatique / PlayerHooks.ascensionFatique);
+								magicaCWT.saintFatiqueSprite.alpha = Mathf.Lerp(0f, 1f, player.ascensionFatique / self.player.AscensionFatique());
 							}
 							else
 							{
@@ -1069,6 +1098,55 @@ namespace MagicasContentPack
 							if (magicaCWT.saintScarSprite != null)
 							{
 								magicaCWT.saintScarSprite.isVisible = true;
+							}
+
+							magicaCWT.saintHalo.isVisible = ModOptions.CustomGraphics.Value && (rCam.ghostMode > 0f || (ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension);
+
+							if (magicaCWT.saintHalo.isVisible && magicaCWT.headSprite != null)
+							{
+								magicaCWT.saintHalo.alpha = rCam.ghostMode * ((float)self.player.KarmaCap / 9f);
+								magicaCWT.saintHalo.scale = 12.5f * (((ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension) ? 1.5f : 1f);
+								magicaCWT.saintHalo.SetPosition(magicaCWT.headSprite.GetPosition());
+
+								if (magicaCWT.faceSprite != null && magicaCWT.saintScarSprite != null && magicaCWT.saintHalo.alpha > 0.5f && magicaCWT.faceSprite._container != rCam.ReturnFContainer("Bloom"))
+								{
+									magicaCWT.faceSprite.RemoveFromContainer();
+									magicaCWT.saintScarSprite.RemoveFromContainer();
+
+									FContainer container = rCam.ReturnFContainer("Bloom");
+									container.AddChild(magicaCWT.faceSprite);
+									container.AddChild(magicaCWT.saintScarSprite);
+								}
+							}
+							else if (self.player.room != null && ModOptions.CustomGraphics.Value && magicaCWT.saintHalo.alpha <= 0.5f && magicaCWT.faceSprite._container != null && magicaCWT.faceSprite._container != rCam.ReturnFContainer("Midground"))
+							{
+								magicaCWT.faceSprite.RemoveFromContainer();
+								magicaCWT.saintScarSprite.RemoveFromContainer();
+
+								FContainer container = rCam.ReturnFContainer("Midground");
+								container.AddChild(magicaCWT.faceSprite);
+								container.AddChild(magicaCWT.saintScarSprite);
+							}
+
+							if (self.player.inShortcut)
+							{
+								magicaCWT.faceSprite.RemoveFromContainer();
+								magicaCWT.saintScarSprite.RemoveFromContainer();
+							}
+
+							if (self.player.bodyMode == MagicaEnums.BodyModes.SaintAscension)
+							{
+								if (self.player.animation == Player.AnimationIndex.None)
+								{
+									if (timeStacker % 240 == 0)
+									{
+										magicaCWT.legSprite?.SetElementByName("LegsAOnPole1");
+									}
+									else
+									{
+										magicaCWT.legSprite?.SetElementByName("LegsAOnPole0");
+									}
+								}
 							}
 						}
 					}
@@ -1345,14 +1423,14 @@ namespace MagicasContentPack
 			return type == CreatureTemplate.Type.RedLizard || type == CreatureTemplate.Type.KingVulture || type == CreatureTemplate.Type.RedCentipede || type == DLCSharedEnums.CreatureTemplateType.MirosVulture;
 		}
 
-		private static int GetKarmaOfSpecificCreature(Creature creature, CreatureTemplate.Type type)
+		public static int GetKarmaOfSpecificCreature(Creature creature, CreatureTemplate.Type type)
 		{
 			if (creatureKarma.ContainsKey(type))
 			{
 				return creatureKarma[type];
 			}
 
-			if (type == CreatureTemplate.Type.Scavenger || type == DLCSharedEnums.CreatureTemplateType.ScavengerElite || type == MoreSlugcatsEnums.CreatureTemplateType.ScavengerKing)
+			if (type == CreatureTemplate.Type.Scavenger || type == DLCSharedEnums.CreatureTemplateType.ScavengerElite || type == MoreSlugcatsEnums.CreatureTemplateType.ScavengerKing || type == WatcherEnums.CreatureTemplateType.ScavengerDisciple || type == WatcherEnums.CreatureTemplateType.ScavengerTemplar)
 			{
 				return creature.abstractCreature.karmicPotential;
 			}
@@ -1410,28 +1488,45 @@ namespace MagicasContentPack
 			{ CreatureTemplate.Type.DropBug, 3 },
 			{ CreatureTemplate.Type.KingVulture, 0 },
 			{ CreatureTemplate.Type.Hazer, 4 },
-			{ DLCSharedEnums.CreatureTemplateType.MirosVulture, 0 },
-			{ DLCSharedEnums.CreatureTemplateType.SpitLizard, 3 },
-			{ DLCSharedEnums.CreatureTemplateType.EelLizard, 0 },
-			{ DLCSharedEnums.CreatureTemplateType.MotherSpider, 1 },
 			{ DLCSharedEnums.CreatureTemplateType.AquaCenti, 0 },
-			{ DLCSharedEnums.CreatureTemplateType.StowawayBug, 3 },
-			{ DLCSharedEnums.CreatureTemplateType.Inspector, 4 },
-			{ DLCSharedEnums.CreatureTemplateType.Yeek, 4 },
 			{ DLCSharedEnums.CreatureTemplateType.BigJelly, 3 },
+			{ DLCSharedEnums.CreatureTemplateType.EelLizard, 0 },
+			{ DLCSharedEnums.CreatureTemplateType.Inspector, 4 },
 			{ DLCSharedEnums.CreatureTemplateType.JungleLeech, 1 },
+			{ DLCSharedEnums.CreatureTemplateType.MirosVulture, 0 },
+			{ DLCSharedEnums.CreatureTemplateType.MotherSpider, 1 },
+			{ DLCSharedEnums.CreatureTemplateType.SpitLizard, 3 },
+			{ DLCSharedEnums.CreatureTemplateType.StowawayBug, 3 },
+			{ DLCSharedEnums.CreatureTemplateType.Yeek, 4 },
 			{ DLCSharedEnums.CreatureTemplateType.ZoopLizard, 4 },
 			{ MoreSlugcatsEnums.CreatureTemplateType.FireBug, 8 },
 			{ MoreSlugcatsEnums.CreatureTemplateType.TrainLizard, 0 },
+			{ WatcherEnums.CreatureTemplateType.Barnacle, 4 },
+			{ WatcherEnums.CreatureTemplateType.BasiliskLizard, 0 },
+			{ WatcherEnums.CreatureTemplateType.BigMoth, 5 },
+			{ WatcherEnums.CreatureTemplateType.BigSandGrub, 0 },
+			{ WatcherEnums.CreatureTemplateType.BoxWorm, 8 },
+			{ WatcherEnums.CreatureTemplateType.DrillCrab, 4 },
+			{ WatcherEnums.CreatureTemplateType.FireSprite, 8 },
+			{ WatcherEnums.CreatureTemplateType.Frog, 1 },
+			{ WatcherEnums.CreatureTemplateType.IndigoLizard, 1 },
+			{ WatcherEnums.CreatureTemplateType.Loach, 6 },
+			{ WatcherEnums.CreatureTemplateType.Rat, 2 },
+			{ WatcherEnums.CreatureTemplateType.Rattler, 8 },
+			{ WatcherEnums.CreatureTemplateType.RotLoach, 6 },
+			{ WatcherEnums.CreatureTemplateType.SandGrub, 2 },
+			{ WatcherEnums.CreatureTemplateType.SkyWhale, 6 },
+			{ WatcherEnums.CreatureTemplateType.SmallMoth, 2 },
+			{ WatcherEnums.CreatureTemplateType.Tardigrade, 4 },
 		};
 
 		private static void ChangeSaintBodyColors(FSprite[] sprites, Color[] originalColors, PlayerGraphics graphics, MagicaSprites magicaCWT)
 		{
 			Color blackColor = new(0.21f, 0.2f, 0.2f);
 			float lerp = Mathf.Min((magicaCWT.saintGlowTimer / saintGlowTimerMax) - 0.3f, 1f);
-			if (graphics.player != null && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(graphics.player, out var player) && player.activationTimer > 0f && magicaCWT.saintGlowTimer >= saintGlowTimerMax)
+			if (graphics.player != null && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(graphics.player, out var player) && player.ascensionTimer > 0f && magicaCWT.saintGlowTimer >= saintGlowTimerMax)
 			{
-				lerp = Mathf.Min((player.activationTimer / PlayerHooks.maxActivationTimer) - 0.3f, 1f);
+				lerp = Mathf.Min((player.ascensionTimer / graphics.player.MaxAscensionTimer()) - 0.3f, 1f);
 			}
 
 			sprites[0].color = Color.Lerp(originalColors[0], blackColor, lerp);
@@ -1700,6 +1795,7 @@ namespace MagicasContentPack
 		internal FSprite saintCreatureKarma;
 		internal Vector2[] lastBraidPos;
 		internal int ascensionStartSprite;
+		internal FSprite saintHalo;
 	}
 
 	public class Braids : BodyPart

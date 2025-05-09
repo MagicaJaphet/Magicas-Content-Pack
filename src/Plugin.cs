@@ -6,7 +6,6 @@ using static MagicasContentPack.MagicaEnums;
 using BepInEx.Logging;
 using System.Security.Permissions;
 using System.Collections.Generic;
-using Menu;
 using System.IO;
 using UnityEngine;
 using System.Runtime.CompilerServices;
@@ -103,7 +102,7 @@ public class Plugin : BaseUnityPlugin
 			ModOptions.RegisterOI();
 			LoadAtlasResources();
 
-			_ = SlidesShowIDs.ArtificerDreamE;
+			MagicaEnums.RegisterEnums();
 
 			HookSucceed();
 		}
@@ -389,44 +388,5 @@ public class Plugin : BaseUnityPlugin
 		Logger.LogError(exception);
 
 		initalizedMethods.Add($"{type}.{method} IL FAILED");
-	}
-}
-public static class Extensions
-{
-	public static void AddOneSpawnForSaint(this VoidSpawnKeeper keeper, PhysicalObject kill)
-	{
-		if (keeper.toRoom == -1)
-		{
-			return;
-		}
-		VoidSpawn voidSpawn = new(new AbstractPhysicalObject(keeper.room.world, AbstractPhysicalObject.AbstractObjectType.VoidSpawn, null, keeper.room.GetWorldCoordinate(kill.firstChunk.pos), keeper.room.game.GetNewID()), keeper.voidMeltInRoom + 0.2f, false);
-		voidSpawn.PlaceInRoom(keeper.room);
-		voidSpawn.abstractPhysicalObject.Move(keeper.room.GetWorldCoordinate(kill.firstChunk.pos));
-		if (keeper.room.abstractRoom.name == "SB_L01")
-		{
-			voidSpawn.behavior = new VoidSpawn.VoidSeaDive(voidSpawn, keeper.room);
-		}
-		else if (ModManager.MSC && keeper.room.abstractRoom.name == "SB_E05SAINT")
-		{
-			voidSpawn.behavior = new VoidSpawn.SwimDown(voidSpawn, keeper.room);
-		}
-		else if (keeper.room.abstractRoom.name == "SH_D02" || keeper.room.abstractRoom.name == "SH_E02")
-		{
-			voidSpawn.behavior = new VoidSpawn.MillAround(voidSpawn, keeper.room);
-		}
-		else
-		{
-			voidSpawn.behavior = new VoidSpawn.PassThrough(voidSpawn, keeper.toRoom, keeper.room);
-		}
-		keeper.spawn.Add(voidSpawn);
-		Plugin.DebugLog("Spawned voidspawn at: " + voidSpawn.abstractPhysicalObject.pos);
-	}
-
-	public static void AddNewScene(this SlideShow self, MenuScene.SceneID sceneID, float fadeIn, float fadeInDone, float fadeOutStart)
-	{
-		if (self.playList != null)
-		{
-			self.playList.Add(new(sceneID, fadeIn, fadeInDone, fadeOutStart));
-		}
 	}
 }
