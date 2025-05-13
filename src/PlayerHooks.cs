@@ -52,6 +52,14 @@ namespace MagicasContentPack
 				On.PlayerSessionRecord.AddKill += PlayerSessionRecord_AddKill;
 
 				// Custom saint mechanics
+				IL.Water.Update += Water_Update;
+				IL.Creature.Update += Creature_Update;
+				IL.Player.UpdateAnimation += Player_UpdateAnimation1;
+				On.Player.LungUpdate += Player_LungUpdate;
+				_ = new Hook(typeof(BodyChunk).GetProperty(nameof(BodyChunk.submersion), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public).GetGetMethod(), SaintSubmersion);
+				On.Room.PointSubmerged_Vector2_float += Room_PointSubmerged_Vector2_float;
+				On.Room.FloatWaterLevel += Room_FloatWaterLevel;
+				IL.BodyChunk.Update += BodyChunk_Update;
 				On.Player.UpdateAnimation += Player_UpdateAnimation;
 				On.Player.UpdateBodyMode += Player_UpdateBodyMode;
 				On.Player.InitVoidWormCutscene += Player_InitVoidWormCutscene;
@@ -71,31 +79,122 @@ namespace MagicasContentPack
 			}
 		}
 
-		private static void Player_UpdateAnimation(On.Player.orig_UpdateAnimation orig, Player self)
+		private static void Water_Update(ILContext il)
 		{
-			if (ModOptions.CustomMechanics.Value && self.room != null && self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+			try
 			{
-				if ((self.input[0].x == 0 && self.input[0].y == 0) || self.input[0].pckp)
+				ILCursor cursor = new(il);
+				if (!Plugin.ILMatchFail(cursor.TryGotoNext(MoveType.After,
+					x => x.MatchLdfld<Water>(nameof(Water.viscosity)),
+					x => x.MatchLdcR4(0))))
 				{
-					self.animation = Player.AnimationIndex.None;
+					ILLabel label = cursor.Next.Operand as ILLabel;
+
+					if (!Plugin.ILMatchFail(cursor.TryGotoPrev(x => x.MatchLdfld<Water>(nameof(Water.viscosity)))))
+					{
+						cursor.Emit(OpCodes.Ldloc, 8);
+						static bool IsSaintAscension(Water self, BodyChunk bodyChunk)
+						{
+							return bodyChunk.owner != null && bodyChunk.owner is Player player && player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(player, out var saint) && saint.magicaSaintAscension;
+						}
+						cursor.EmitDelegate(IsSaintAscension);
+						cursor.Emit(OpCodes.Brtrue, label);
+						cursor.Emit(OpCodes.Ldarg_0);
+
+						Plugin.ILSucceed();
+					}
 				}
-				else
-				{
-					self.animation = Player.AnimationIndex.DeepSwim;
-				}
-				return;
 			}
-			orig(self);
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
 		}
 
-		private static void Player_UpdateBodyMode(On.Player.orig_UpdateBodyMode orig, Player self)
+		private static void Creature_Update(ILContext il)
 		{
-			if (ModOptions.CustomMechanics.Value && self.room != null && self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+			try
 			{
-				self.bodyMode = MagicaEnums.BodyModes.SaintAscension;
-				return;
+				ILCursor cursor = new(il);
+				if (!Plugin.ILMatchFail(cursor.TryGotoNext(x => x.MatchLdarg(0),
+					x => x.MatchLdcI4(0),
+					x => x.MatchStfld<Creature>(nameof(Creature.lavaContact)))))
+				{
+					ILLabel jumpLabel = cursor.MarkLabel();
+
+					if (!Plugin.ILMatchFail(cursor.TryGotoPrev(x => x.MatchIsinst<Player>(),
+						x => x.MatchCallOrCallvirt<Creature>(nameof(Creature.Die)))))
+					{
+						static void IsSaintAndActuallySubmerged(Creature creature)
+						{
+							if (creature is Player self)
+							{
+								if (self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && self.room != null)
+								{
+									float waterLevel = 0f;
+									if (self.room.waterObject != null)
+									{
+										waterLevel = self.room.waterObject.DetailedWaterLevel(self.firstChunk.pos);
+									}
+									else
+									{
+										waterLevel = self.room.floatWaterLevel;
+									}
+
+									if ((self.room.waterInverted && self.firstChunk.pos.y > waterLevel) || (!self.room.waterInverted && self.firstChunk.pos.y < waterLevel))
+									{
+										self.Die();
+									}
+								}
+								else
+								{
+									self.Die();
+								}
+							}
+						}
+						cursor.EmitDelegate(IsSaintAndActuallySubmerged);
+						cursor.Emit(OpCodes.Br, jumpLabel);
+						cursor.Emit(OpCodes.Ldarg_0);
+
+						Plugin.ILSucceed();
+					}
+				}
 			}
-			orig(self);
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
+		}
+
+		private static void Player_UpdateAnimation1(ILContext il)
+		{
+			try
+			{
+				ILCursor cursor = new(il);
+				if (!Plugin.ILMatchFail(cursor.TryGotoNext(MoveType.After,
+					x => x.MatchNewobj<Bubble>(),
+					x => x.MatchCallOrCallvirt(out _))))
+				{
+					cursor.Emit(OpCodes.Ldarg_0);
+					static void IsSaintAscension(Player self)
+					{
+						if (self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+						{
+							self.airInLungs = 1f;
+							player.ascensionTimer -= 10f;
+
+							Plugin.DebugLog($"{player.ascensionTimer}");
+						}
+					}
+					cursor.EmitDelegate(IsSaintAscension);
+
+					Plugin.ILSucceed();
+				}
+			}
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
 		}
 
 		private static void Player_SwallowObject(ILContext il)
@@ -293,6 +392,70 @@ namespace MagicasContentPack
 			}
 		}
 
+		private static void Player_LungUpdate(On.Player.orig_LungUpdate orig, Player self)
+		{
+			if (self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+				return;
+
+			orig(self);
+		}
+
+		private static float SaintSubmersion(Func<BodyChunk, float> orig, BodyChunk self)
+		{
+			if (self.owner != null && self.owner is Player player && player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(player, out var saint) && saint.magicaSaintAscension && player.bodyMode != MagicaEnums.BodyModes.SaintAscension)
+			{
+				return 1f;
+			}
+
+			return orig(self);
+		}
+
+		private static bool Room_PointSubmerged_Vector2_float(On.Room.orig_PointSubmerged_Vector2_float orig, Room self, Vector2 pos, float yDisplacement)
+		{
+			if (pos != null && self.PlayersInRoom != null && self.PlayersInRoom.Any(x => x != null && pos == x.firstChunk.pos && x is Player player && player.bodyMode != MagicaEnums.BodyModes.SaintAscension && MagicaPlayer.magicaCWT.TryGetValue(player, out var saint) && saint.magicaSaintAscension))
+			{
+				return true;
+			}
+			return orig(self, pos, yDisplacement);
+		}
+
+		private static float Room_FloatWaterLevel(On.Room.orig_FloatWaterLevel orig, Room self, Vector2 pos)
+		{
+			if (pos != null && self.PlayersInRoom != null && self.PlayersInRoom.Any(x => x != null && pos == x.firstChunk.pos && x is Player player && player.bodyMode != MagicaEnums.BodyModes.SaintAscension && MagicaPlayer.magicaCWT.TryGetValue(player, out var saint) && saint.magicaSaintAscension))
+			{
+				return 100000f;
+			}
+
+			return orig(self, pos);
+		}
+
+		private static void BodyChunk_Update(ILContext il)
+		{
+			try
+			{
+				ILCursor cursor = new(il);
+
+				if (!Plugin.ILMatchFail(cursor.TryGotoNext(MoveType.After,
+					x => x.MatchLdfld<Room>(nameof(Room.water)),
+					x => x.MatchLdloc(0),
+					x => x.MatchAnd())))
+				{
+					cursor.Emit(OpCodes.Ldarg_0);
+					static bool IsSaintAscension(bool isWater, BodyChunk chunk)
+					{
+						return isWater || (ModOptions.CustomMechanics.Value && chunk.owner != null && chunk.owner is Player player && player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(player, out var saint) && saint.magicaSaintAscension);
+					}
+					cursor.EmitDelegate(IsSaintAscension);
+
+					Plugin.ILSucceed();
+				}
+			}
+			catch (Exception ex)
+			{
+				Plugin.ILFail(ex);
+			}
+		}
+
 		private static void AnotherGrabCustomMechanicFix(ILContext il)
 		{
 			try
@@ -446,6 +609,37 @@ namespace MagicasContentPack
 			//MagicaSaveState.GetKey(MoreSlugcatsEnums.SlugcatStatsName.Saint.value, nameof(SaveValues.SaintWarmthMechanicTutorial), out SaveValues.SaintWarmthMechanicTutorial);
 		}
 
+		private static void Player_UpdateAnimation(On.Player.orig_UpdateAnimation orig, Player self)
+		{
+			if (ModOptions.CustomMechanics.Value && self.room != null && self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+			{
+				if ((self.input[0].x == 0 && self.input[0].y == 0) || self.input[0].pckp)
+				{
+					self.buoyancy = 0f;
+					self.gravity = 0f;
+					self.airFriction = 0.7f;
+					self.animation = Player.AnimationIndex.None;
+					return;
+				}
+			}
+
+			orig(self);
+		}
+
+		private static void Player_UpdateBodyMode(On.Player.orig_UpdateBodyMode orig, Player self)
+		{
+			if (ModOptions.CustomMechanics.Value && self.room != null && self.room.game.IsStorySession && self.room.game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Saint && MagicaPlayer.magicaCWT.TryGetValue(self, out var player) && player.magicaSaintAscension)
+			{
+				if ((self.input[0].x == 0 && self.input[0].y == 0) || self.input[0].pckp)
+				{
+					self.bodyMode = MagicaEnums.BodyModes.SaintAscension;
+					return;
+				}
+			}
+
+			orig(self);
+		}
+
 		private static void Player_InitVoidWormCutscene(On.Player.orig_InitVoidWormCutscene orig, Player self)
 		{
 			if (ModOptions.CustomMechanics.Value)
@@ -543,20 +737,22 @@ namespace MagicasContentPack
 
 				if (self.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && (self.KarmaCap >= 9 || (self.room.game.session is ArenaGameSession && self.room.game.GetArenaGameSession.arenaSitting.gameTypeSetup.gameType == MoreSlugcatsEnums.GameTypeID.Challenge && self.room.game.GetArenaGameSession.arenaSitting.gameTypeSetup.challengeMeta.ascended)))
 				{
-					if (keeper != null && keeper.room != self.room)
+					if (self.room.game.IsStorySession)
 					{
-						if (keeper.room != null && keeper.room.updateList.Count > 0 && keeper.room.updateList.Contains(keeper))
+						if (keeper != null && keeper.room != self.room)
 						{
-							self.room.updateList.Remove(keeper);
+							if (keeper.room != null && keeper.room.updateList.Count > 0 && keeper.room.updateList.Contains(keeper))
+							{
+								self.room.updateList.Remove(keeper);
+							}
+							keeper.Destroy();
+							AddVoidSpawnKeeper(self);
 						}
-						keeper.Destroy();
-						AddVoidSpawnKeeper(self);
+						else if (keeper == null)
+						{
+							AddVoidSpawnKeeper(self);
+						}
 					}
-					else if (keeper == null)
-					{
-						AddVoidSpawnKeeper(self);
-					}
-
 					if (isSaint && self.AI == null && self.room.game.session is StoryGameSession && !(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.SaintEnlightMessage)
 					{
 						(self.room.game.session as StoryGameSession).saveState.deathPersistentSaveData.SaintEnlightMessage = true;
@@ -661,7 +857,26 @@ namespace MagicasContentPack
 
 				if (player.magicaSaintAscension)
 				{
-					self.buoyancy = 0f;
+					if (player.ascensionTimer < self.MaxAscensionTimer() / 6)
+					{
+						if (self.room != null && !ModManager.CoopAvailable && self.voidSceneTimer == 0)
+						{
+							player.roomNeedsRefresh = true;
+
+							float defaultGhostMode = self.room == null || self.room.world.worldGhost == null ? 0f : self.room.world.worldGhost.GhostMode(self.room, self.room.game.cameras[0].currentCameraPosition);
+							self.room.game.cameras[0].ghostMode = Mathf.Lerp(defaultGhostMode, 1f, (player.ascensionTimer / ((float)self.MaxAscensionTimer() / 6f)) + 0.5f);
+						}
+					}
+
+					if (!self.inShortcut && self.karmaCharging == 0)
+					{
+						player.ascensionTimer--;
+					}
+					else if (self.karmaCharging > 0)
+					{
+						player.ascensionTimer = Mathf.Min(player.ascensionTimer + 1f, self.MaxAscensionTimer());
+						self.karmaCharging--;
+					}
 
 					if (self.tongue != null && self.tongue.Attached)
 					{
@@ -679,12 +894,7 @@ namespace MagicasContentPack
 						self.room.game.cameras[0].hud.textPrompt.AddMessage(self.room.game.rainWorld.inGameTranslator.Translate("saint_flight_tutorial1"), 80, 800, true, true);
 					}
 
-					self.gravity = 0f;
-					self.airFriction = 0.7f;
-
-					float swimSpeed = 5.75f;
-
-					if ((player.saintTarget != null && player.saintTarget.room == self.room) || player.wormTarget != null)
+					if ((player.saintTarget != null && player.saintTarget.owner.room == self.room) || player.wormTarget != null)
 					{
 						if (player.storedTargetPos.Length == 10 && player.storedTargetPos[9] != null)
 						{
@@ -696,8 +906,8 @@ namespace MagicasContentPack
 							player.storedTargetPos[i] = player.storedTargetPos[i - 1];
 						}
 						player.storedTargetPos[0] = player.saintTarget == null ?
-							player.wormTarget == null ? default : player.wormTarget.HeadPos(self.room.game.myTimeStacker) 
-							: player.saintTarget.firstChunk.pos;
+							player.wormTarget == null ? default : player.wormTarget.HeadPos(self.room.game.myTimeStacker)
+							: player.saintTarget.owner is Centipede pede && player.switchPedeTarget ? pede.bodyChunks[pede.bodyChunks.Length - 1].pos : player.saintTarget.pos;
 					}
 					else
 					{
@@ -721,26 +931,6 @@ namespace MagicasContentPack
 
 							player.saintTargetMode = false;
 							player.scannedForTargets = false;
-							if (self.input[0].y > 0)
-							{
-								self.bodyChunks[0].vel.y = swimSpeed;
-								self.bodyChunks[1].vel.y = (swimSpeed - 1f);
-							}
-							else if (self.input[0].y < 0)
-							{
-								self.bodyChunks[0].vel.y = -swimSpeed;
-								self.bodyChunks[1].vel.y = -(swimSpeed - 1.75f);
-							}
-							if (self.input[0].x > 0)
-							{
-								self.bodyChunks[0].vel.x = swimSpeed;
-								self.bodyChunks[1].vel.x = (swimSpeed - 1.75f);
-							}
-							else if (self.input[0].x < 0)
-							{
-								self.bodyChunks[0].vel.x = -swimSpeed;
-								self.bodyChunks[1].vel.x = -(swimSpeed - 1.75f);
-							}
 
 							if (self.input[0].x == 0 && self.input[0].y == 0)
 							{
@@ -771,14 +961,14 @@ namespace MagicasContentPack
 								{
 									for (int j = 0; j < self.room.physicalObjects[i].Count; j++)
 									{
-										player.validTargets.AddRange(from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && !player.validTargets.Contains(x) select x);
+										player.validTargets.AddRange(from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && !player.validTargets.Contains(FindClosestBodyChunk(self, x)) select FindClosestBodyChunk(self, x));
 									}
 								}
 							}
 							else
 							{
-								player.sortedTargets = (from x in player.validTargets where x.room == self.room && Custom.DistLess(self.firstChunk.pos, x.firstChunk.pos, self.SaintAscensionRadius()) select x).ToList();
-								player.sortedTargets.Sort((x, y) => x.firstChunk.pos.x.CompareTo(y.firstChunk.pos.x));
+								player.sortedTargets = (from x in player.validTargets where x.owner.room == self.room && (x.owner is not Centipede && Custom.DistLess(self.firstChunk.pos, x.pos, self.SaintAscensionRadius()) || x.owner is Centipede pede && pede.bodyChunks.Any(x => Custom.DistLess(self.firstChunk.pos, x.pos, self.SaintAscensionRadius()))) select x).ToList();
+								player.sortedTargets.Sort((x, y) => x.pos.x.CompareTo(y.pos.x));
 
 								if (self.input[0].x > 0f && !player.cycledTarget)
 								{
@@ -786,7 +976,11 @@ namespace MagicasContentPack
 									if (player.saintTarget != null && player.sortedTargets.Count > 0)
 									{
 										int nextIndex = player.sortedTargets.IndexOf(player.saintTarget) + 1 >= player.sortedTargets.Count ? 0 : player.sortedTargets.IndexOf(player.saintTarget) + 1;
-										if (player.sortedTargets[nextIndex].room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].firstChunk.pos, self.SaintAscensionRadius()))
+										if (player.saintTarget.owner is Centipede pede && Custom.DistLess(self.firstChunk.pos, player.switchPedeTarget ? pede.firstChunk.pos : pede.bodyChunks[1].pos, self.SaintAscensionRadius()) && Custom.Dist(self.firstChunk.pos, player.switchPedeTarget ? pede.firstChunk.pos : pede.bodyChunks[1].pos) < Custom.Dist(self.firstChunk.pos, player.sortedTargets[nextIndex].pos))
+										{
+											player.switchPedeTarget = !player.switchPedeTarget;
+										}
+										else if (player.sortedTargets[nextIndex].owner.room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].pos, self.SaintAscensionRadius()))
 										{
 											player.saintTarget = player.sortedTargets[nextIndex];
 										}
@@ -795,7 +989,7 @@ namespace MagicasContentPack
 											player.saintTarget = player.sortedTargets[0];
 										}
 									}
-									else if (player.sortedTargets.Count > 0 && player.sortedTargets[0].room == self.room)
+									else if (player.sortedTargets.Count > 0 && player.sortedTargets[0].owner.room == self.room)
 									{
 										player.saintTarget = player.sortedTargets[0];
 										player.scannedForTargets = false;
@@ -808,7 +1002,11 @@ namespace MagicasContentPack
 									{
 										Plugin.DebugLog((player.sortedTargets.IndexOf(player.saintTarget) - 1).ToString());
 										int nextIndex = player.sortedTargets.IndexOf(player.saintTarget) - 1 <= -1 ? player.sortedTargets.Count - 1 : player.sortedTargets.IndexOf(player.saintTarget) - 1;
-										if (player.sortedTargets[nextIndex].room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].firstChunk.pos, self.SaintAscensionRadius()))
+										if (player.saintTarget.owner is Centipede pede && Custom.DistLess(self.firstChunk.pos, player.switchPedeTarget ? pede.firstChunk.pos : pede.bodyChunks[1].pos, self.SaintAscensionRadius()) && Custom.Dist(self.firstChunk.pos, player.switchPedeTarget ? pede.firstChunk.pos : pede.bodyChunks[1].pos) < Custom.Dist(self.firstChunk.pos, player.sortedTargets[nextIndex].pos))
+										{
+											player.switchPedeTarget = !player.switchPedeTarget;
+										}
+										else if (player.sortedTargets[nextIndex].owner.room == self.room && Custom.DistLess(self.firstChunk.pos, player.sortedTargets[nextIndex].pos, self.SaintAscensionRadius()))
 										{
 											player.saintTarget = player.sortedTargets[nextIndex];
 										}
@@ -817,7 +1015,7 @@ namespace MagicasContentPack
 											player.saintTarget = player.sortedTargets[player.sortedTargets.Count - 1];
 										}
 									}
-									else if (player.sortedTargets.Count > 0 && player.sortedTargets[player.sortedTargets.Count - 1].room == self.room)
+									else if (player.sortedTargets.Count > 0 && player.sortedTargets[player.sortedTargets.Count - 1].owner.room == self.room)
 									{
 										player.saintTarget = player.sortedTargets[player.sortedTargets.Count - 1];
 										player.scannedForTargets = false;
@@ -832,7 +1030,7 @@ namespace MagicasContentPack
 						}
 					}
 
-					if ((player.saintTarget == null || (player.saintTarget.room != self.room && !player.saintTargetMode || !Custom.DistLess(self.firstChunk.pos, player.saintTarget.firstChunk.pos, self.SaintAscensionRadius()))) && player.wormTarget == null)
+					if ((player.saintTarget == null || (player.saintTarget.owner.room != self.room && !player.saintTargetMode || !Custom.DistLess(self.firstChunk.pos, player.saintTarget.pos, self.SaintAscensionRadius()))) && player.wormTarget == null)
 					{
 						player.changingTarget = 20f;
 						player.saintTarget = null;
@@ -841,16 +1039,16 @@ namespace MagicasContentPack
 
 						if (self.graphicsModule is PlayerGraphics graphics && graphics.objectLooker.currentMostInteresting != null && IsValidEntity(graphics.objectLooker.currentMostInteresting))
 						{
-							player.saintTarget = graphics.objectLooker.currentMostInteresting;
+							player.saintTarget = FindClosestBodyChunk(self, graphics.objectLooker.currentMostInteresting);
 						}
 						else
 						{
-							List<PhysicalObject> canidates = [];
+							List<BodyChunk> canidates = [];
 							for (int i = 0; i < self.room.physicalObjects.Length; i++)
 							{
 								for (int j = 0; j < self.room.physicalObjects[i].Count; j++)
 								{
-									canidates.AddRange((from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && Custom.DistLess(self.firstChunk.pos, x.firstChunk.pos, self.SaintAscensionRadius()) select x).ToList());
+									canidates.AddRange((from x in self.room.physicalObjects[i] where x != self && IsValidEntity(x) && Custom.DistLess(self.firstChunk.pos, FindClosestBodyChunk(self, x).pos, self.SaintAscensionRadius()) select FindClosestBodyChunk(self, x)).ToList());
 								}
 								if (canidates.Count > 0)
 								{
@@ -858,7 +1056,7 @@ namespace MagicasContentPack
 								}
 							}
 
-							canidates.Sort((x, y) => Custom.Dist(x.firstChunk.pos, self.firstChunk.pos).CompareTo(Custom.Dist(y.firstChunk.pos, self.firstChunk.pos)));
+							canidates.Sort((x, y) => Custom.Dist(x.pos, self.firstChunk.pos).CompareTo(Custom.Dist(y.pos, self.firstChunk.pos)));
 							player.saintTarget = canidates.FirstOrDefault();
 						}
 					}
@@ -870,12 +1068,13 @@ namespace MagicasContentPack
 					}
 					if (self.input[0].thrw && (player.saintTarget != null || player.wormTarget != null) && player.ascensionBuffer <= 0f)
 					{
-						float karmaLocked = player.saintTargetIsKarmaLocked ? 0.2f : 1f;
-						player.ascendTimer = Mathf.Min(Custom.LerpBackEaseOut(player.ascendTimer + (0.15f * karmaLocked), player.ascendTimer + (0.01f * karmaLocked), Custom.Dist(self.firstChunk.pos, (player.saintTarget == null && player.wormTarget != null ? player.wormTarget.HeadPos(self.room.game.myTimeStacker) : player.saintTarget.firstChunk.pos)) / (self.SaintAscensionRadius() * 1.5f)), 1f);
+						float karmaLocked = player.saintTarget.owner is TempleGuard guard || player.saintTargetIsKarmaLocked ? 0.4f : 1f;
+						karmaLocked = player.saintTarget.owner is Creature creature ? karmaLocked * Mathf.Max(0.15f, ((float)GraphicsHooks.GetKarmaOfSpecificCreature(creature, creature.Template.type) / 9f)) : karmaLocked;
+						player.ascendTimer = Mathf.Min(Custom.LerpBackEaseOut(player.ascendTimer + (0.15f * karmaLocked), player.ascendTimer + (0.01f * karmaLocked), Custom.Dist(self.firstChunk.pos, (player.saintTarget == null && player.wormTarget != null ? player.wormTarget.HeadPos(self.room.game.myTimeStacker) : player.saintTarget.pos)) / (self.SaintAscensionRadius() * 1.5f)), 1f);
 
-						if (player.saintTarget != null && player.saintTarget is Creature creature)
+						if (player.saintTarget != null && player.saintTarget.owner is Creature creature2)
 						{
-							if (creature is DaddyLongLegs dLL)
+							if (creature2 is DaddyLongLegs dLL)
 							{
 								dLL.firstChunk.vel = Custom.RNV() * Mathf.Lerp(0f, 20f, player.ascendTimer / 1f);
 							}
@@ -890,7 +1089,7 @@ namespace MagicasContentPack
 						List<PhysicalObject> killable = [];
 						for (int i = 0; i < self.room.physicalObjects.Length; i++)
 						{
-							killable.AddRange((from x in self.room.physicalObjects[i] where x != self && !killable.Contains(x) && x.room == self.room && IsValidEntity(x) && Custom.DistLess(x.firstChunk.pos, player.saintTargetPos, 50f) select x).ToList());
+							killable.AddRange((from x in self.room.physicalObjects[i] where x != self && !killable.Contains(x) && x.room == self.room && IsValidEntity(x) && x.bodyChunks.Any(y => (y == x.firstChunk || (x is Centipede && y == x.bodyChunks[x.bodyChunks.Length - 1])) && Custom.DistLess(y.pos, player.saintTargetPos, 50f)) select x).ToList());
 						}
 						bool ascended = false;
 
@@ -997,6 +1196,11 @@ namespace MagicasContentPack
 			orig(self);
 		}
 
+		private static BodyChunk FindClosestBodyChunk(Player self, PhysicalObject target)
+		{
+			return target is Centipede pede ? target.bodyChunks.Where(x => x == pede.firstChunk || x == pede.bodyChunks[pede.bodyChunks.Length - 1]).OrderBy(x => Custom.Dist(self.firstChunk.pos, x.pos)).First() : target.firstChunk;
+		}
+
 		private static void AddVoidSpawnKeeper(Player self)
 		{
 			RoomSettings.RoomEffect effect = null;
@@ -1078,10 +1282,10 @@ namespace MagicasContentPack
 			internal bool magicaSaintAscension;
 			internal bool zoneInToAscend;
 			internal bool saintTargetMode;
-			internal PhysicalObject saintTarget;
+			internal BodyChunk saintTarget;
 			internal bool scannedForTargets;
-			internal List<PhysicalObject> validTargets = [];
-			internal List<PhysicalObject> sortedTargets = [];
+			internal List<BodyChunk> validTargets = [];
+			internal List<BodyChunk> sortedTargets = [];
 			internal bool sortedThroughTargets;
 			internal bool cycledTarget;
 			internal float ascendTimer;
@@ -1105,6 +1309,7 @@ namespace MagicasContentPack
 			internal float maxBuffer;
 			internal bool roomNeedsRefresh;
 			internal int ascensionCooldown;
+			internal bool switchPedeTarget;
 		}
 	}
 

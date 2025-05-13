@@ -55,7 +55,7 @@ public static class Extensions
 	public static int MaxAscensionTimer(this Player player)
 	{
 		int extra = 0;
-		if (player.room != null && player.room.world.region.name == "HR")
+		if (player.room != null && player.room.world != null && player.room.world.region.name == "HR")
 		{
 			extra = 2000;
 		}
@@ -67,12 +67,12 @@ public static class Extensions
 		return 500f;
 	}
 
-	public static float MaxAscensionBuffer(this Player player, PhysicalObject obj)
+	public static float MaxAscensionBuffer(this Player player, BodyChunk obj)
 	{
 		float extraBuffer = 0f;
-		if (obj != null && obj is Creature creature)
+		if (obj != null && obj.owner is Creature creature)
 		{
-			extraBuffer = (9 - GraphicsHooks.GetKarmaOfSpecificCreature(creature, creature.Template.type)) * 5f;
+			extraBuffer = (GraphicsHooks.GetKarmaOfSpecificCreature(creature, creature.Template.type) + 1) * 15f;
 		}
 		return 20f + extraBuffer;
 	}

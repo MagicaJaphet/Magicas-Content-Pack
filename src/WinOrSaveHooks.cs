@@ -338,16 +338,19 @@ namespace MagicasContentPack
 		{
 			orig(self, str, game);
 
-			if (ModManager.MSC && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
-				ArtiKilledScavKing = self.progression.miscProgressionData.artificerEndingID == 1 && self.progression.miscProgressionData.beaten_Artificer;
+			if (game != null && game.StoryCharacter != null)
+			{
+				if (ModManager.MSC && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+					ArtiKilledScavKing = self.progression.miscProgressionData.artificerEndingID == 1 && self.progression.miscProgressionData.beaten_Artificer;
 
-			if (ModManager.MSC && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-				SpearAchievedCommsEnd = self.progression.miscProgressionData.beaten_SpearMaster_AltEnd;
+				if (ModManager.MSC && game.StoryCharacter == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+					SpearAchievedCommsEnd = self.progression.miscProgressionData.beaten_SpearMaster_AltEnd;
 
-			if (game.StoryCharacter == SlugcatStats.Name.Red)
-				HunterScarProgression = Mathf.RoundToInt(Mathf.Lerp(3f, 0f, ((float)self.cycleNumber) / ((float)RedsIllness.RedsCycles(self.redExtraCycles))));
+				if (game.StoryCharacter == SlugcatStats.Name.Red)
+					HunterScarProgression = Mathf.RoundToInt(Mathf.Lerp(3f, 0f, ((float)self.cycleNumber) / ((float)RedsIllness.RedsCycles(self.redExtraCycles))));
 
-			Plugin.DebugLog($"Hunter scar progression: {Mathf.RoundToInt(Mathf.Lerp(3f, 0f, ((float)self.cycleNumber) / ((float)RedsIllness.RedsCycles(self.redExtraCycles))))}");
+				Plugin.DebugLog($"Hunter scar progression: {Mathf.RoundToInt(Mathf.Lerp(3f, 0f, ((float)self.cycleNumber) / ((float)RedsIllness.RedsCycles(self.redExtraCycles))))}");
+			}
 		}
 
 		internal static void BeatGameMode(RainWorldGame game)

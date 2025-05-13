@@ -11,6 +11,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using Watcher;
+using static ExtraExtentions;
+using static MagicasContentPack.PlayerHooks;
 
 namespace MagicasContentPack
 {
@@ -46,6 +48,7 @@ namespace MagicasContentPack
 				// Fix vulture mask positions for when using custom graphics
 				IL.VultureMask.DrawSprites += VultureMask_DrawSprites;
 				On.MoreSlugcats.VultureMaskGraphics.DrawSprites += UpdatePostArtiKingMask;
+				On.Lantern.DrawSprites += Lantern_DrawSprites;
 
 				// Adds custom body parts and colors
 				On.PlayerGraphics.SaintFaceCondition += PlayerGraphics_SaintFaceCondition;
@@ -85,6 +88,20 @@ namespace MagicasContentPack
 				Plugin.HookFail(ex);
 			}
 		}
+		private static void Lantern_DrawSprites(On.Lantern.orig_DrawSprites orig, Lantern self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+		{
+			orig(self, sLeaser, rCam, timeStacker, camPos);
+
+			if (rCam.ghostMode > 0f)
+			{
+				self.ApplyPalette(sLeaser, rCam, rCam.currentPalette);
+				sLeaser.sprites[0].color = Color.Lerp(sLeaser.sprites[0].color, RainWorld.SaturatedGold, rCam.ghostMode);
+				sLeaser.sprites[1].color = Color.Lerp(sLeaser.sprites[1].color, Color.white, rCam.ghostMode);
+				sLeaser.sprites[2].color = Color.Lerp(sLeaser.sprites[2].color, Color.Lerp(RainWorld.SaturatedGold, Color.white, 0.3f), rCam.ghostMode);
+				sLeaser.sprites[3].color = Color.Lerp(sLeaser.sprites[0].color, RainWorld.GoldRGB, rCam.ghostMode);
+			}
+		}
+
 		private static void PlayerGraphics_ColoredBodyPartList(ILContext il)
 		{
 			try
@@ -222,6 +239,15 @@ namespace MagicasContentPack
 			orig(self, ow);
 
 			var magicaCWT = MagicaSprites.magicaCWT.GetOrCreateValue(self);
+
+			if (ModOptions.CustomMechanics.Value)
+			{
+				if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && self.player.KarmaCap >= 9)
+				{
+					magicaCWT.saintGiantHalo = new SaintHalo(self);
+				}
+			}
+
 			if (ModOptions.CustomGraphics.Value)
 			{
 				if (magicaCWT != null)
@@ -320,6 +346,8 @@ namespace MagicasContentPack
 							magicaCWT.saintCreatureCircle = sLeaser.sprites[magicaCWT.ascensionStartSprite + 4];
 							magicaCWT.saintCreatureKarma = sLeaser.sprites[magicaCWT.ascensionStartSprite + 5];
 
+							magicaCWT.saintGiantHalo?.InitateSprites(sLeaser, rCam);
+
 							Plugin.DebugLog("Saint mechanic sprites initated");
 						}
 					}
@@ -370,14 +398,16 @@ namespace MagicasContentPack
 						{
 							magicaCWT.saintStartSprite = sLeaser.sprites.Length;
 
-							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 3);
+							Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + 4);
 							sLeaser.sprites[magicaCWT.saintStartSprite] = new("SaintScarFaceB0");
 							sLeaser.sprites[magicaCWT.saintStartSprite + 1] = new("FatiqueSaintScarFaceB0");
 							sLeaser.sprites[magicaCWT.saintStartSprite + 2] = new("Futile_White") { scale = 5f, shader = rCam.game.rainWorld.Shaders["GoldenGlow"], isVisible = false };
+							sLeaser.sprites[magicaCWT.saintStartSprite + 3] = new("Futile_White") { scale = 5f, shader = rCam.game.rainWorld.Shaders["FlatLightBehindTerrain"], color = RainWorld.GoldRGB, isVisible = false };
 
 							magicaCWT.saintScarSprite = sLeaser.sprites[magicaCWT.saintStartSprite];
 							magicaCWT.saintFatiqueSprite = sLeaser.sprites[magicaCWT.saintStartSprite + 1];
 							magicaCWT.saintHalo = sLeaser.sprites[magicaCWT.saintStartSprite + 2];
+							magicaCWT.saintBackingHalo = sLeaser.sprites[magicaCWT.saintStartSprite + 3];
 						}
 					}
 
@@ -451,6 +481,11 @@ namespace MagicasContentPack
 								rCam.ReturnFContainer("HUD2").AddChild(magicaCWT.saintCreatureKarma);
 								magicaCWT.saintCreatureKarma.MoveBehindOtherNode(magicaCWT.saintCreatureCircle);
 							}
+
+							if (magicaCWT.saintGiantHalo != null)
+							{
+								magicaCWT.saintGiantHalo.AddToContainer(sLeaser, rCam, rCam.ReturnFContainer("Midground"));
+							}
 						}
 					}
 				}
@@ -512,6 +547,11 @@ namespace MagicasContentPack
 							{
 								magicaCWT.saintHalo.RemoveFromContainer();
 								rCam.ReturnFContainer("Bloom").AddChild(magicaCWT.saintHalo);
+							}
+							if (magicaCWT.saintBackingHalo != null)
+							{
+								magicaCWT.saintBackingHalo.RemoveFromContainer();
+								rCam.ReturnFContainer("Foreground").AddChild(magicaCWT.saintBackingHalo);
 							}
 						}
 					}
@@ -617,37 +657,48 @@ namespace MagicasContentPack
 			//	handTimer++;
 			//}
 
-			if (ModOptions.CustomMechanics.Value && PlayerHooks.MagicaPlayer.magicaCWT.TryGetValue(self.player, out var player))
+			if (ModOptions.CustomMechanics.Value && MagicaPlayer.magicaCWT.TryGetValue(self.player, out var player))
 			{
-				if (player.magicaSaintAscension && self.player.bodyMode == MagicaEnums.BodyModes.SaintAscension)
+				if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
 				{
-					for (int hand = 0; hand < 2; hand++)
+					if (player.magicaSaintAscension)
 					{
-						self.hands[hand].reachingForObject = true;
-						self.hands[hand].mode = Limb.Mode.HuntAbsolutePosition;
+						if (self.player.bodyMode == MagicaEnums.BodyModes.SaintAscension)
+						{
+							for (int hand = 0; hand < 2; hand++)
+							{
+								self.hands[hand].reachingForObject = true;
+								self.hands[hand].mode = Limb.Mode.HuntAbsolutePosition;
+							}
+
+							if (self.player.animation == Player.AnimationIndex.None)
+							{
+								for (int hand = 0; hand < 2; hand++)
+								{
+									self.hands[hand].absoluteHuntPos = Vector2.Lerp(self.hands[hand].absoluteHuntPos, self.player.firstChunk.pos + new Vector2(hand == 0 ? -20f : 20f, -10f), 0.2f);
+								}
+
+								for (int tail = 0; tail < self.tail.Length; tail++)
+								{
+									TailSegment seg = self.tail[tail];
+									float dividens = 100f;
+									seg.vel.x = Mathf.Sin((player.ascensionTimer * 3.1415f + ((float)tail * (dividens / (float)self.tail.Length))) / dividens) * (0.4f + ((float)tail / 10f));
+								}
+							}
+
+							if (player.saintTargetMode && player.saintTarget != null)
+							{
+								int hand = player.saintTarget.pos.x > self.player.firstChunk.pos.x ? 1 : 0;
+								self.hands[hand].reachingForObject = true;
+								self.hands[hand].mode = Limb.Mode.HuntAbsolutePosition;
+								self.hands[hand].absoluteHuntPos = player.saintTarget.pos;
+							}
+						}
 					}
 
-					if (self.player.animation == Player.AnimationIndex.None)
+					if (MagicaSprites.magicaCWT.TryGetValue(self, out var graphicsCWT) && graphicsCWT.saintGiantHalo != null)
 					{
-						for (int hand = 0; hand < 2; hand++)
-						{
-							self.hands[hand].absoluteHuntPos = Vector2.Lerp(self.hands[hand].absoluteHuntPos, self.player.firstChunk.pos + new Vector2(hand == 0 ? -20f : 20f, -10f), 0.2f);
-						}
-
-						for (int tail = 0; tail < self.tail.Length; tail++)
-						{
-							TailSegment seg = self.tail[tail];
-							float dividens = 100f;
-							seg.vel.x = Mathf.Sin((player.ascensionTimer * 3.1415f + ((float)tail * (dividens / (float)self.tail.Length))) / dividens) * (0.4f + ((float)tail / 10f));
-						}
-					}
-
-					if (player.saintTargetMode && player.saintTarget != null)
-					{
-						int hand = player.saintTarget.firstChunk.pos.x > self.player.firstChunk.pos.x ? 1 : 0;
-						self.hands[hand].reachingForObject = true;
-						self.hands[hand].mode = Limb.Mode.HuntAbsolutePosition;
-						self.hands[hand].absoluteHuntPos = player.saintTarget.firstChunk.pos;
+						graphicsCWT.saintGiantHalo.Update(self.player, player);
 					}
 				}
 			}
@@ -845,6 +896,11 @@ namespace MagicasContentPack
 				// For altering custom mechanics or vanilla sprites
 				if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT.ascensionStartSprite)
 				{
+					if (magicaCWT.saintGiantHalo != null)
+					{
+						magicaCWT.saintGiantHalo.DrawSprites(self, sLeaser, rCam, player, magicaCWT, camPos, timeStacker);
+					}
+
 					magicaCWT.saintCreatureCircle.isVisible = ModOptions.CustomMechanics.Value && player.magicaSaintAscension && (player.saintTarget != null || player.wormTarget != null);
 					magicaCWT.saintCreatureKarma.isVisible = magicaCWT.saintCreatureCircle.isVisible;
 					foreach (var line in magicaCWT.saintAcensionLines)
@@ -880,11 +936,11 @@ namespace MagicasContentPack
 							Color ascensionColor = new(1f, 1f, 1f);
 							if (ModOptions.CustomMechanics.Value && player.ascensionBuffer > 0f)
 							{
-								ascensionColor = Color.Lerp(RainWorld.SaturatedGold, RainWorld.RippleGold, player.ascensionBuffer / player.maxBuffer);
+								ascensionColor = Color.Lerp(RainWorld.GoldRGB, RainWorld.RippleGold, player.ascensionBuffer / player.maxBuffer);
 							}
 							else
 							{
-								ascensionColor = Color.Lerp(RainWorld.SaturatedGold, Color.cyan, ModOptions.CustomMechanics.Value ? player.ascendTimer / 1f : self.player.killFac / 1f);
+								ascensionColor = Color.Lerp(RainWorld.GoldRGB, RainWorld.SaturatedGold, ModOptions.CustomMechanics.Value ? player.ascendTimer / 1f : self.player.killFac / 1f);
 							}
 
 							if (magicaCWT.saintScarSprite != null)
@@ -926,7 +982,7 @@ namespace MagicasContentPack
 									}
 									if (!player.karmaCycling || (player.karmaCycling && player.karmaCycleTimer <= 0f) || player.ascendTimer > 0f)
 									{
-										magicaCWT.saintCreatureKarma.SetElementByName(GetCreatureKarma(player.saintTarget, player, self.player.room != null && self.player.room.game.IsStorySession && self.player.room.world.name == "HR"));
+										magicaCWT.saintCreatureKarma.SetElementByName(GetCreatureKarma(player.saintTarget.owner, player, self.player.room != null && self.player.room.game.IsStorySession && self.player.room.world.name == "HR"));
 										if (player.wormTarget != null)
 										{
 											magicaCWT.saintCreatureKarma.SetElementByName("SaintKarmaRing9");
@@ -949,10 +1005,9 @@ namespace MagicasContentPack
 									line.color = ascensionColor;
 									line.alpha = magicaCWT.saintCreatureCircle.alpha;
 
-									//float numOfRotations = 5f;
 									float rotationLerp = (timeStacker % 50f) / 50f;
-									Vector2 facePos = GetFacePos(magicaCWT.saintScarSprite == null? magicaCWT.faceSprite : magicaCWT.saintScarSprite, i);
-									Vector2 circlePos = Custom.RotateAroundVector(magicaCWT.saintCreatureCircle.GetPosition() + (new Vector2(magicaCWT.saintCreatureCircle.width, 0f) / 2f), magicaCWT.saintCreatureCircle.GetPosition(), Mathf.Lerp(0, 360f, (float)(i + 1) / 4f) + Mathf.Lerp(-45f, 315f, rotationLerp));
+									Vector2 facePos = GetFacePos(magicaCWT.saintScarSprite ?? magicaCWT.faceSprite, i);
+									Vector2 circlePos = Custom.RotateAroundVector(magicaCWT.saintCreatureCircle.GetPosition() + (new Vector2(magicaCWT.saintCreatureCircle.width, 0f) / 2f), magicaCWT.saintCreatureCircle.GetPosition(), Mathf.Lerp(0, 360f, (float)(i * 1) / 4f) + Mathf.Lerp(-45f, 315f, rotationLerp));
 
 									line.SetPosition(facePos);
 									line.scaleY = Custom.Dist(facePos, circlePos);
@@ -1101,12 +1156,15 @@ namespace MagicasContentPack
 							}
 
 							magicaCWT.saintHalo.isVisible = ModOptions.CustomGraphics.Value && (rCam.ghostMode > 0f || (ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension);
+							magicaCWT.saintBackingHalo.isVisible = self.player.KarmaCap >= 9 && magicaCWT.saintHalo.isVisible;
 
 							if (magicaCWT.saintHalo.isVisible && magicaCWT.headSprite != null)
 							{
-								magicaCWT.saintHalo.alpha = rCam.ghostMode * ((float)self.player.KarmaCap / 9f);
-								magicaCWT.saintHalo.scale = 12.5f * (((ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension) ? 1.5f : 1f);
+								magicaCWT.saintHalo.alpha = (rCam.ghostMode * ((float)self.player.KarmaCap / 9f)) * ((ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension ? Custom.LerpExpEaseOut(0f, 1f, player.ascensionTimer / (float)self.player.MaxAscensionTimer()) : 1f);
+								magicaCWT.saintHalo.scale = 7f * (((ModOptions.CustomMechanics.Value && player.magicaSaintAscension) || self.player.monkAscension) ? 1.5f : Mathf.Lerp(1f, 1.5f, (float)player.ascensionActivationTimer / (float)self.player.MaxAscensionActivationTimer()));
 								magicaCWT.saintHalo.SetPosition(magicaCWT.headSprite.GetPosition());
+								magicaCWT.saintBackingHalo.SetPosition(magicaCWT.headSprite.GetPosition());
+								magicaCWT.saintBackingHalo.alpha = rCam.ghostMode * 0.4f;
 
 								if (magicaCWT.faceSprite != null && magicaCWT.saintScarSprite != null && magicaCWT.saintHalo.alpha > 0.5f && magicaCWT.faceSprite._container != rCam.ReturnFContainer("Bloom"))
 								{
@@ -1138,7 +1196,8 @@ namespace MagicasContentPack
 							{
 								if (self.player.animation == Player.AnimationIndex.None)
 								{
-									if (timeStacker % 240 == 0)
+									int phase = Mathf.RoundToInt(Mathf.Sin(timeStacker) + 0.5f);
+									if (phase == 0)
 									{
 										magicaCWT.legSprite?.SetElementByName("LegsAOnPole1");
 									}
@@ -1557,6 +1616,17 @@ namespace MagicasContentPack
 		{
 			orig(self, sLeaser, rCam, palette);
 
+			if (ModOptions.CustomMechanics.Value && MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT2))
+			{
+				if (ModManager.MSC)
+				{
+					if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint && sLeaser.sprites.Length > magicaCWT2.ascensionStartSprite && magicaCWT2.saintGiantHalo != null)
+					{
+						magicaCWT2.saintGiantHalo.ApplyPalette(sLeaser, rCam);
+					}
+				}
+			}
+
 			if (ModOptions.CustomGraphics.Value && MagicaSprites.magicaCWT.TryGetValue(self, out var magicaCWT))
 			{
 				if (magicaCWT.braids != null && magicaCWT.braids.Length > 0 && sLeaser.sprites.Length > magicaCWT.braidStartSprite)
@@ -1622,6 +1692,11 @@ namespace MagicasContentPack
 								sprite.color = RainWorld.SaturatedGold;
 							}
 							magicaCWT.saintCreatureCircle.color = RainWorld.SaturatedGold;
+						}
+
+						if (magicaCWT.saintBackingHalo != null)
+						{
+							magicaCWT.saintBackingHalo.color = RainWorld.GoldRGB;
 						}
 
 						if (sLeaser.sprites[12] is TriangleMesh tongueMesh)
@@ -1752,6 +1827,225 @@ namespace MagicasContentPack
 
 	}
 
+	internal class SaintHalo
+	{
+		private PlayerGraphics pGraphics;
+		private int maxRings;
+		private int minRings;
+		private FSprite[] rings;
+		private FSprite[][] glyphs;
+		private int[][] glyphNum;
+		private int[] blinkRings;
+		public int startSprite;
+		private int showRings;
+		private float maxDiameter;
+		private int lastShowRings;
+		private float[] ringRotation;
+		private float ringRotate;
+		private readonly float pi = 3.1415f;
+
+		public SaintHalo(PlayerGraphics pGraphics)
+		{
+			this.pGraphics = pGraphics;
+			maxRings = 5;
+			minRings = 1;
+			glyphNum = new int[maxRings][];
+			ringRotation = new float[maxRings];
+			maxDiameter = Mathf.Lerp(maxDiameter, (12f * (((float)showRings / (float)maxRings) + 0.4f)), pi / 10f);
+			float glyphSizeX = 15f / Futile.atlasManager.GetElementWithName("glyphs").sourcePixelSize.x;
+			for (int i = 0; i < maxRings; i++)
+			{
+				glyphNum[i] = GlyphLabel.RandomString(Mathf.RoundToInt((GetCircleScale(i) * pi) / glyphSizeX / pi), 1001, false);
+
+				for (int j = 0; j < glyphNum[i].Length; j++)
+				{
+					if (UnityEngine.Random.Range(0f, 10f) < 2f && j != 0 && glyphNum[i][j - 1] != -1)
+					{
+						glyphNum[i][j] = -1;
+					}
+				}
+			}
+		}
+
+		public void InitateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+		{
+			rings = new FSprite[maxRings];
+			glyphs = new FSprite[glyphNum.GetLength(0)][];
+			blinkRings = new int[maxRings];
+
+			startSprite = sLeaser.sprites.Length;
+			Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + maxRings);
+			for (int i = 0; i < maxRings; i++)
+			{
+				sLeaser.sprites[startSprite + i] = new("Futile_White")
+				{
+					color = RainWorld.SaturatedGold,
+					shader = rCam.room.game.rainWorld.Shaders["VectorCircle"]
+				};
+				rings[i] = sLeaser.sprites[startSprite + i];
+
+				if (glyphNum.GetLength(0) > i)
+				{
+					glyphs[i] = new FSprite[glyphNum[i].Length];
+					int glyphStartSprite = sLeaser.sprites.Length;
+					Array.Resize(ref sLeaser.sprites, sLeaser.sprites.Length + glyphNum[i].Length);
+					for (int j = 0; j < glyphNum[i].Length; j++)
+					{
+						if (glyphNum[i][j] != -1)
+						{
+							sLeaser.sprites[glyphStartSprite + j] = new("glyphs", true)
+							{
+								shader = rCam.game.rainWorld.Shaders["SingleGlyph"]
+							};
+						}
+						else
+						{
+							sLeaser.sprites[glyphStartSprite + j] = new("pixel", true)
+							{
+								isVisible = false
+							};
+						}
+						glyphs[i][j] = sLeaser.sprites[glyphStartSprite + j];
+					}
+				}
+			}
+		}
+
+		internal void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer fContainer)
+		{
+			if (sLeaser.sprites.Length > startSprite)
+			{
+				if (rings != null)
+				{
+					for (int i = 0; i < rings.Length; i++)
+					{
+						if (rings != null)
+						{
+							rings[i].RemoveFromContainer();
+							fContainer.AddChild(rings[i]);
+							rings[i].MoveBehindOtherNode(sLeaser.sprites[0]);
+						}
+
+						if (glyphNum.GetLength(0) > i)
+						{
+							for (int j = 0; j < glyphNum[i].Length; j++)
+							{
+								glyphs[i][j].RemoveFromContainer();
+								fContainer.AddChild(glyphs[i][j]);
+								glyphs[i][j].MoveBehindOtherNode(sLeaser.sprites[0]);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		internal void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+		{
+			if (rings != null)
+			{
+				for (int i = 0; i < rings.Length; i++)
+				{
+					rings[i].color = RainWorld.SaturatedGold;
+
+					if (glyphNum.GetLength(0) > i)
+					{
+						for (int j = 0; j < glyphNum[i].Length; j++)
+						{
+							glyphs[i][j].color = RainWorld.SaturatedGold;
+						}
+					}
+				}
+			}
+		}
+
+		internal void Update(Player player, MagicaPlayer magicaPlayer)
+		{
+			if (magicaPlayer.magicaSaintAscension)
+			{
+				ringRotate++;
+				if (magicaPlayer.saintTarget != null && magicaPlayer.saintTarget.owner is Creature creature)
+				{
+					int maxCreatureRings = Math.Max(1, Mathf.RoundToInt(maxRings * ((float)GraphicsHooks.GetKarmaOfSpecificCreature(creature, creature.Template.type) / 9f)));
+					showRings = Mathf.RoundToInt((float)maxCreatureRings * (magicaPlayer.ascendTimer / 1f));
+					maxDiameter = Mathf.Lerp(maxDiameter, (12f * (((float)showRings / (float)maxCreatureRings) + 0.4f)) + (10f * (magicaPlayer.ascendTimer / 1f)), pi / 10f);
+
+					if (lastShowRings != showRings && showRings < maxRings)
+					{
+						lastShowRings = showRings;
+						blinkRings[showRings] = magicaPlayer.ascendTimer > 0f ? Mathf.RoundToInt(25f * (magicaPlayer.ascendTimer / 1f)) : 25;
+					}
+					for (int i = 0; i < maxRings; i++)
+					{
+						ringRotation[i] = 100f + (200f * (1.3f - ((float)i / (float)showRings)));
+					}
+				}
+				else
+				{
+					showRings = 0;
+				}
+			}
+		}
+
+		internal void DrawSprites(PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, MagicaPlayer player, MagicaSprites magicaCWT, Vector2 camPos, float timeStacker)
+		{
+			if (magicaCWT.saintCreatureCircle != null)
+			{
+				if (rings != null)
+				{
+					Color color = magicaCWT.saintCreatureCircle != null ? magicaCWT.saintCreatureCircle.color : RainWorld.SaturatedGold;
+					for (int i = 0; i < rings.Length; i++)
+					{
+						if (blinkRings != null && blinkRings[i] > 0)
+						{
+							blinkRings[i]--;
+							rings[i].isVisible = player.magicaSaintAscension && showRings >= i && blinkRings[i] % 5 < 1;
+						}
+						else
+						{
+							rings[i].isVisible = player.magicaSaintAscension && showRings >= i;
+						}
+						rings[i].SetPosition(magicaCWT.saintCreatureCircle.GetPosition());
+						rings[i].scale = GetCircleScale(i);
+						rings[i].alpha = GetCircleAlpha(rings[i], i);
+						if (magicaCWT.saintCreatureCircle != null)
+						{
+							rings[i].color = color;
+							float length = ringRotation[i];
+							float add = (ringRotate - (Mathf.Round(ringRotate / length) * length) + (length / 2f)) / (length);
+
+							if (glyphNum.GetLength(0) > i)
+							{
+								for (int j = 0; j < glyphNum[i].Length; j++)
+								{
+									glyphs[i][j].isVisible = rings[i].isVisible && glyphNum[i][j] != -1;
+									glyphs[i][j].color = color;
+
+									float rotation = Mathf.Lerp(0, 360f, (float)(j * 1) / glyphs[i].Length) + Mathf.Lerp(0, 360f, add);
+									Vector2 glyphStartPos = magicaCWT.saintCreatureCircle.GetPosition() + new Vector2(0f, ((Mathf.Lerp(GetCircleScale(i), GetCircleScale(i + 1), 0.5f) * 2.5f) + (5f / Futile.atlasManager.GetElementWithName("glyphs").sourcePixelSize.y)) * pi);
+									glyphs[i][j].SetPosition(Custom.RotateAroundVector(glyphStartPos, magicaCWT.saintCreatureCircle.GetPosition(), i % 2 == 0 ? -rotation : rotation));
+									glyphs[i][j].rotation = Custom.AimFromOneVectorToAnother(magicaCWT.saintCreatureCircle.GetPosition(), glyphs[i][j].GetPosition());
+									glyphs[i][j].alpha = (float)glyphNum[i][j] / 50f;
+									glyphs[i][j].scaleX = 15f / Futile.atlasManager.GetElementWithName("glyphs").sourcePixelSize.x;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private float GetCircleAlpha(FSprite ring, int i)
+		{
+			return ((ring.scale - 2f) / ring.scale) * (1f - ((float)(i * 1) / (float)maxRings)) / 46f;
+		}
+
+		private float GetCircleScale(int i)
+		{
+			return maxDiameter * ((float)(i * 1) / (float)maxRings);
+		}
+	}
+
 	public class MagicaSprites
 	{
 		public static readonly ConditionalWeakTable<PlayerGraphics, MagicaSprites> magicaCWT = new();
@@ -1796,6 +2090,8 @@ namespace MagicasContentPack
 		internal Vector2[] lastBraidPos;
 		internal int ascensionStartSprite;
 		internal FSprite saintHalo;
+		internal FSprite saintBackingHalo;
+		internal SaintHalo saintGiantHalo;
 	}
 
 	public class Braids : BodyPart

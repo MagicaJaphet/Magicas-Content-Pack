@@ -99,7 +99,7 @@ namespace MagicasContentPack.IteratorHooks
 		{
 			orig(self);
 
-			if (self.ID == Oracle.OracleID.SS && self.room.world.name != "RM")
+			if (self.ID == Oracle.OracleID.SS && self.room.world.name == "SS")
 			{
 				MagicaSaveState.GetKey(MagicaSaveState.anySave, nameof(SaveValues.WhoShowedFPThePearl), out SaveValues.WhoShowedFPThePearl);
 				SSOracleBehaviorHooks.halcyonPearl = null;

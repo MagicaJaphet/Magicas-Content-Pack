@@ -38,7 +38,7 @@ namespace MagicasContentPack
 			try
 			{
 				IL.RainWorldGame.RawUpdate += RainWorldGame_RawUpdate;
-				On.RainWorldGame.AllowRainCounterToTick += RainWorldGame_AllowRainCounterToTick;
+				//On.RainWorldGame.AllowRainCounterToTick += RainWorldGame_AllowRainCounterToTick;
 				//On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
 				//On.RainCycle.ctor += RainCycle_ctor;
 				//_ = new Hook(typeof(RainCycle).GetProperty(nameof(RainCycle.BlizzardWorldActive), BindingFlags.Public | BindingFlags.Instance).GetGetMethod(), SaintBlizzardStatus);
